@@ -1,0 +1,70 @@
+/* Add custom styles for slick slider dots */
+.slick-dots {
+  bottom: 20px; /* Adjust position as needed */
+}
+
+.slick-dots li button {
+  font-size: 0; /* Hide dot label */
+  width: 10px; /* Set dot size */
+  height: 10px; /* Set dot size */
+  border-radius: 50%; /* Make dots circular */
+  background-color: white; /* Set dot color */
+  margin: 0 5px; /* Adjust spacing between dots */
+}
+
+.slick-dots li.slick-active button {
+  background-color: gray; /* Set active dot color */
+}
+
+.slick-list {
+  margin: 0 -8px; /* Adjust as needed */
+}
+
+.card-flex-none {
+  flex: none;
+  padding: 0;
+}
+
+.image-container {
+  text-align: center;
+  border-radius: 10px; /* Adjust the border radius as per your preference */
+  overflow: hidden;
+}
+.image-container img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.3s ease; /* Add a smooth transition for the arc effect */
+}
+.image-container img:hover {
+  transform: scale(1.05); /* Increase the scale on hover for a slight arc effect */
+}
+
+
+/* Add custom styles for zoom effect */
+.serviceCard {
+  transition: transform 0.3s ease; /* Smooth transition */
+}
+
+.serviceCard:hover {
+  transform: scale(0.95); /* Scale up on hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  background-color: #fb923c;
+}
+
+/* serviceLists.module.css */
+
+.zoomEffect {
+  transition: transform 0.3s ease-in-out;
+}
+
+.zoomEffect:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+  .zoomEffect {
+    margin-bottom: 20px;
+  }
+}
