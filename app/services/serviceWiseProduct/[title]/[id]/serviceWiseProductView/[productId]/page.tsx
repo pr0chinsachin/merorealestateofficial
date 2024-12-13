@@ -9,6 +9,7 @@ import {
   HiAdjustments,
   HiClipboardList,
 } from "react-icons/hi";
+import { FaCarAlt, FaBath } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import Image from "next/image";
 import BASE_URL from "../../../../../../urlConfig/urlConfig";
@@ -16,6 +17,8 @@ import SERVER_URL from "../../../../../../urlConfig/serverUrl";
 import Style from "./serviceWiseProduct.module.css";
 import ContactAgentForm from "../../../../../../contactAgentForm/page";
 import { PhotoProvider, PhotoView } from "react-photo-view";
+import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
+import Bedroom from "@/public/bed-bedroom-alt.svg";
 
 interface ProductById {
   id: string;
@@ -32,6 +35,7 @@ interface ProductById {
   description: string;
   details: string;
   propertyStatusValue: string;
+  parkingCount: number;
   roomCount: number;
   bathRoomCount: number;
   area: number;
@@ -64,6 +68,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
     description: "",
     details: "",
     propertyStatusValue: "",
+    parkingCount: 0,
     roomCount: 0,
     bathRoomCount: 0,
     area: 0,
@@ -185,24 +190,53 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
 
           <hr />
           <div className="grid grid-cols-1 sm:flex justify-between gap-4">
-            <span className="inline-flex items-baseline text-l text-white sm:text-sm font-bold">
-              <HiEye style={{ paddingTop: "2px" }} /> &nbsp;
-              <span>{productData.roomCount} Room/s</span>
-            </span>
-            <span className="inline-flex items-baseline text-l text-white sm:text-sm font-bold">
-              <HiCalendar style={{ paddingTop: "2px" }} /> &nbsp;
-              <span>{productData.bathRoomCount} Bathroom/s</span>
-            </span>
-            <span className="inline-flex items-baseline text-l text-white sm:text-sm font-bold">
-              <HiPencilAlt />
-              &nbsp;
-              <span>{productData.area} meter Sq</span>
-            </span>
+            {productData.parkingCount < 1 ? (
+              ""
+            ) : (
+              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
+                <FaCarAlt /> &nbsp;
+                <span>{productData.parkingCount} Parking Space</span>
+              </span>
+            )}
+
+            {productData.roomCount < 1 ? (
+              ""
+            ) : (
+              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
+                <Image
+                  src={Bedroom}
+                  alt="Bedroom Icon"
+                  width={20}
+                  height={20}
+                  className="invert"
+                />
+                &nbsp;
+                <span>{productData.roomCount} Room</span>
+              </span>
+            )}
+
+            {productData.bathRoomCount < 1 ? (
+              ""
+            ) : (
+              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
+                <FaBath /> &nbsp;
+                <span>{productData.bathRoomCount} Bathroom</span>
+              </span>
+            )}
+
+            {productData.area < 1 ? (
+              ""
+            ) : (
+              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
+                <HiCalendar /> &nbsp;
+                <span>{productData.area} m.sq </span>
+              </span>
+            )}
           </div>
         </Card>
       </div>
       <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
-        <Card>
+        <Card style={{ backgroundColor: "#14222d" }}>
           <div className="flex flex-col items-center">
             <div>
               <PhotoProvider
@@ -400,7 +434,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
               <Accordion.Title>Video</Accordion.Title>
               <Accordion.Content>
                 <div
-                  className="Container overflow-hidden  grid place-items-center"
+                  className="Container overflow-hidden  grid place-items-center "
                   dangerouslySetInnerHTML={{ __html: productData.videoLink }}
                 ></div>
               </Accordion.Content>
@@ -422,8 +456,8 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             </Accordion.Panel>
           </Accordion>
         ) : (
-          <Card>
-            <div className="overflow-x-auto">
+          <Card style={{ backgroundColor: "#14222d" }}>
+            <div className="overflow-x-auto text-white">
               <Tabs aria-label="Full width tabs">
                 <Tabs.Item active title="Description" icon={HiUserCircle}>
                   <div
@@ -465,8 +499,11 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                 <ContactAgentForm />
               </div>
               <div className="hidden sm:block w-full">
-                <Card className="max-w-full">
-                  <ContactAgentForm />
+                <Card
+                  className="max-w-full "
+                  style={{ backgroundColor: "#14222d" }}
+                >
+                  <ContactAgentFormDark />
                 </Card>
               </div>
             </div>
