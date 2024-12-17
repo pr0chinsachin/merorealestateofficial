@@ -55,12 +55,12 @@ const LatestProductView: React.FC = () => {
       const response = await fetch(`${BASE_URL}/Product/ProductList`);
       if (response.ok) {
         const data: LatestProduct[] = await response.json();
-        console.log("check all data", data);
+
         const processedData = data.map((latestProduct) => ({
           ...latestProduct,
           thumbnailImgPath: latestProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
-        console.log("Check Latest buy and sale", processedData);
+
         setlatestProducts(processedData);
         setIsLoading(false);
       } else {

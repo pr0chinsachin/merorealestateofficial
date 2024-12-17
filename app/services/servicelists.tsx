@@ -46,14 +46,14 @@ const ServiceLists: React.FC = () => {
       const response = await fetch(`${BASE_URL}/MenuCategory/CategoryList`);
       if (response.ok) {
         const data: ServiceData[] = await response.json();
-        console.log("Fetched data:", data);
+
         const processedData = data.map((service) => ({
           ...service,
           thumbnailImagePath: service.thumbnailImagePath
             ? service.thumbnailImagePath.replace(/~/g, "")
             : null,
         }));
-        console.log("Processed data:", processedData);
+
         setServiceLists(processedData);
         setIsLoading(false);
       } else {
