@@ -240,6 +240,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
           <div className="flex flex-col items-center">
             <div>
               <PhotoProvider
+                maskOpacity={0.8}
                 toolbarRender={({ onScale, scale, rotate, onRotate }) => {
                   return (
                     <div className="flex justify-center items-center gap-5">

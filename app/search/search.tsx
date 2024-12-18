@@ -238,6 +238,22 @@ const Search = () => {
                   <input
                     type="number"
                     id="car-park"
+                    className="w-24 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Bedroom"
+                    required
+                    value={filtersFromSearch.RoomCount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        RoomCount: value,
+                      }));
+                      updateFilters("RoomCount", value);
+                    }}
+                  />
+                  <input
+                    type="number"
+                    id="car-park"
                     className="w-24 py-2 px-1 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Bathroom"
                     required
@@ -251,22 +267,7 @@ const Search = () => {
                       updateFilters("BathRoomCount", value);
                     }}
                   />
-                  <input
-                    type="number"
-                    id="car-park"
-                    className="w-20 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Bedroom"
-                    required
-                    value={filtersFromSearch.RoomCount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFiltersFromSearch((prevFilters) => ({
-                        ...prevFilters,
-                        RoomCount: value,
-                      }));
-                      updateFilters("RoomCount", value);
-                    }}
-                  />
+
                   <input
                     type="number"
                     id="car-park"
@@ -391,61 +392,208 @@ const Search = () => {
           <form className="mx-auto px-4 py-6 bg-white shadow-md rounded-lg">
             <div className="space-y-4">
               <div>
+                <div className="font-semibold">Category</div>
                 <select
                   id="propertyType"
-                  value={selected}
-                  onChange={handleChange}
+                  value={filtersFromSearch.CategoryId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      CategoryId: value,
+                    }));
+                    updateFilters("CategoryId", value);
+                    setSelectedCategory(value);
+                  }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Choose Property</option>
-                  <option value="R">Rent</option>
-                  <option value="P">Property</option>
-                  <option value="H">House Buy</option>
+                  {category.map((data) =>
+                    data.status === true ? (
+                      <option key={data.id} value={data.id}>
+                        {data.categoryTitle}
+                      </option>
+                    ) : null
+                  )}
                 </select>
               </div>
+
               <div>
-                <input
-                  type="number"
-                  id="bathroom"
-                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Bathroom"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  id="bed"
-                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Bed"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  id="car-park"
-                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Car Park"
-                  required
-                />
-              </div>
-              <div>
+                <div className="font-semibold">Property</div>
                 <select
-                  id="range"
-                  value={selected}
-                  onChange={handleChange}
+                  id="propertyType"
+                  value={filtersFromSearch.SubCategoryId} // Set value from filtersFromSearch
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      SubCategoryId: value,
+                    })); // Update filtersFromSearch state
+                    updateFilters("SubCategoryId", value);
+                    setSelectedSubCategory(value); // Optional: Update selectedSubCategory state
+                  }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Choose Price Range</option>
-                  <option value="US">$1000 - $2000</option>
-                  <option value="CA">$2001 - $10000</option>
-                  <option value="FR">$10001 - $100000</option>
-                  <option value="DE">$100001 - $100000</option>
+                  {subCategory.map(
+                    (data) =>
+                      data.status && (
+                        <option key={data.id} value={data.id}>
+                          {data.subCategoryTitle}
+                        </option>
+                      )
+                  )}
                 </select>
               </div>
+
+              <div>
+                <div className="font-semibold">Number</div>
+                <div className="flex gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      id="bed"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Bedroom"
+                      required
+                      value={filtersFromSearch.RoomCount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          RoomCount: value,
+                        }));
+                        updateFilters("RoomCount", value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      id="bathroom"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Bathroom"
+                      required
+                      value={filtersFromSearch.BathRoomCount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          BathRoomCount: value,
+                        }));
+                        updateFilters("BathRoomCount", value);
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Car Park"
+                      required
+                      value={filtersFromSearch.ParkingCount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          ParkingCount: value,
+                        }));
+                        updateFilters("ParkingCount", value);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="font-semibold">Price</div>
+                <div className="flex gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Min Price"
+                      required
+                      value={filtersFromSearch.MinPrice}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MinPrice: value,
+                        }));
+                        updateFilters("MinPrice", value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Max Price"
+                      required
+                      value={filtersFromSearch.MaxPrice}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MaxPrice: value,
+                        }));
+                        updateFilters("MaxPrice", value);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="font-semibold">Area</div>
+                <div className="flex gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Min Area"
+                      required
+                      value={filtersFromSearch.MinArea}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MinArea: value,
+                        }));
+                        updateFilters("MinArea", value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Max Area"
+                      required
+                      value={filtersFromSearch.MaxArea}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MaxArea: value,
+                        }));
+                        updateFilters("MaxArea", value);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-center">
-                <Button className="bg-cyan-950 w-full md:w-auto flex items-center">
+                <Button
+                  className="bg-cyan-950 w-full md:w-auto flex items-center"
+                  onClick={handleApplyFilters}
+                >
                   <BiSearchAlt className="mr-2" />
                   Filter
                 </Button>
