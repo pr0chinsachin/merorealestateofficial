@@ -55,12 +55,12 @@ const LatestProductView: React.FC = () => {
       const response = await fetch(`${BASE_URL}/Product/ProductList`);
       if (response.ok) {
         const data: LatestProduct[] = await response.json();
-        console.log("check all data", data);
+
         const processedData = data.map((latestProduct) => ({
           ...latestProduct,
           thumbnailImgPath: latestProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
-        console.log("Check Latest buy and sale", processedData);
+
         setlatestProducts(processedData);
         setIsLoading(false);
       } else {
@@ -130,7 +130,7 @@ const LatestProductView: React.FC = () => {
           <div className="mt-6 -mx-2 md:px-5 lg:px-0">
             {latestProducts.length === 0 ? (
               <div className="text-center text-gray-500">
-                No products found.
+                Oops! No properties found at the moment.
               </div>
             ) : (
               <Slider {...settings}>

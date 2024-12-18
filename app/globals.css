@@ -5,11 +5,9 @@
 html,
 body {
   overflow-x: hidden;
-
+  /* background-color: #14222d; */
 }
 
 #noBorder {
   --tw-ring-color: none !important;
 }
-
-
