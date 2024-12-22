@@ -185,19 +185,7 @@ const LatestProductView: React.FC = () => {
                                   </div>
                                 </div>
                               </div> */}
-
                               <div className="flex justify-between  ">
-                                <div className="flex items-center">
-                                  <Image
-                                    src={carIcon}
-                                    alt="Car Icon"
-                                    width={20}
-                                    height={20}
-                                  />
-                                  <span className="pl-2">
-                                    {product.parkingCount}
-                                  </span>
-                                </div>
                                 <div className="flex items-center">
                                   <Image
                                     src={Bedroom}
@@ -218,6 +206,17 @@ const LatestProductView: React.FC = () => {
                                   />
                                   <span className="pl-2">
                                     {product.bathRoomCount}
+                                  </span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Image
+                                    src={carIcon}
+                                    alt="Car Icon"
+                                    width={20}
+                                    height={20}
+                                  />
+                                  <span className="pl-2">
+                                    {product.parkingCount}
                                   </span>
                                 </div>
                               </div>

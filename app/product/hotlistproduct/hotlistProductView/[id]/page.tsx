@@ -205,15 +205,6 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
 
           <hr />
           <div className="grid grid-cols-1 sm:flex justify-between gap-4">
-            {productData.parkingCount < 1 ? (
-              ""
-            ) : (
-              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
-                <FaCarAlt /> &nbsp;
-                <span>{productData.parkingCount} Parking Space</span>
-              </span>
-            )}
-
             {productData.roomCount < 1 ? (
               ""
             ) : (
@@ -245,6 +236,14 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
                 <HiCalendar /> &nbsp;
                 <span>{productData.area} m.sq </span>
+              </span>
+            )}
+               {productData.parkingCount < 1 ? (
+              ""
+            ) : (
+              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
+                <FaCarAlt /> &nbsp;
+                <span>{productData.parkingCount} Parking Space</span>
               </span>
             )}
           </div>

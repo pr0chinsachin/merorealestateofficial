@@ -155,23 +155,6 @@ const ProductByPrice: React.FC = () => {
                               <tr>
                                 <td>
                                   <Image
-                                    src={carIcon}
-                                    alt="Car Icon"
-                                    width={20}
-                                    height={20}
-                                  />
-                                </td>
-                                <td className="pl-2">{product.parking}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <div>
-                          <table>
-                            <tbody>
-                              <tr>
-                                <td>
-                                  <Image
                                     src={Bedroom}
                                     alt="Bedroom Icon"
                                     width={20}
@@ -196,6 +179,23 @@ const ProductByPrice: React.FC = () => {
                                   />
                                 </td>
                                 <td className="pl-2">{product.bathRoomCount}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div>
+                          <table>
+                            <tbody>
+                              <tr>
+                                <td>
+                                  <Image
+                                    src={carIcon}
+                                    alt="Car Icon"
+                                    width={20}
+                                    height={20}
+                                  />
+                                </td>
+                                <td className="pl-2">{product.parking}</td>
                               </tr>
                             </tbody>
                           </table>
