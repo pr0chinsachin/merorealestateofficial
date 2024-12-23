@@ -102,12 +102,12 @@ const Search = () => {
   }, [searchParams]);
 
   const handleApplyFilters = () => {
-    // Serialize the filters object into a JSON string
+    // Serialize the filters object into a JSON string//
     const query = new URLSearchParams({
       filters: JSON.stringify(filters),
     }).toString();
 
-    // Use router.push to navigate to the search results page
+    // Use router.push to navigate to the search results page//
     router.push(`/search/results?${query}`);
   };
 
