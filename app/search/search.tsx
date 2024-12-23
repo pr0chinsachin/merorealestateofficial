@@ -1,6 +1,6 @@
 "use client";
-import React, { Suspense, useState, useEffect } from "react";
 import { Button } from "flowbite-react";
+import { useState, useEffect } from "react";
 import { BiSearchAlt } from "react-icons/bi";
 import Styles from "./search.module.css";
 import { useRouter } from "next/navigation";
@@ -88,7 +88,9 @@ const Search = () => {
 
     if (filtersFromParams) {
       try {
-        const parsedFilters = JSON.parse(filtersFromParams) as Partial<FiltersType>;
+        const parsedFilters = JSON.parse(
+          filtersFromParams
+        ) as Partial<FiltersType>;
         setFiltersFromSearch((prevFilters) => ({
           ...prevFilters,
           ...parsedFilters,
@@ -100,10 +102,12 @@ const Search = () => {
   }, [searchParams]);
 
   const handleApplyFilters = () => {
+    // Serialize the filters object into a JSON string
     const query = new URLSearchParams({
       filters: JSON.stringify(filters),
     }).toString();
 
+    // Use router.push to navigate to the search results page
     router.push(`/search/results?${query}`);
   };
 
@@ -112,10 +116,14 @@ const Search = () => {
       const response = await fetch(`${BASE_URL}/MenuCategory/CategoryList`);
       if (response.ok) {
         const data: Category[] = await response.json();
+
         const processedData = data.map((service) => ({
           ...service,
-          thumbnailImagePath: service.thumbnailImagePath ? service.thumbnailImagePath.replace(/~/g, "") : null,
+          thumbnailImagePath: service.thumbnailImagePath
+            ? service.thumbnailImagePath.replace(/~/g, "")
+            : null,
         }));
+
         setCategory(processedData);
         setIsLoading(false);
       } else {
@@ -130,13 +138,19 @@ const Search = () => {
 
   const fetchSubCategory = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/MenuSubCategory/SubCategoryList`);
+      const response = await fetch(
+        `${BASE_URL}/MenuSubCategory/SubCategoryList`
+      );
       if (response.ok) {
         const data: subCategory[] = await response.json();
+
         const processedData = data.map((service) => ({
           ...service,
-          thumbnailImagePath: service.thumbnailImagePath ? service.thumbnailImagePath.replace(/~/g, "") : null,
+          thumbnailImagePath: service.thumbnailImagePath
+            ? service.thumbnailImagePath.replace(/~/g, "")
+            : null,
         }));
+
         setSubCategory(processedData);
         setIsLoading(false);
       } else {
@@ -160,72 +174,284 @@ const Search = () => {
   };
 
   return (
-    <Suspense fallback={<div>Loading search results...</div>}>
-      <div className="flex justify-center mx-auto">
-        <div id={Styles.desktopView}>
-          <div className={Styles.fixedFormContainer}>
-            <form className="mx-auto p-4 shadow-md rounded-lg">
-              <div className="flex gap-9 items-center">
-                <div>
-                  <div className="font-semibold">Category</div>
-                  <select
-                    id="propertyType"
-                    value={filtersFromSearch.CategoryId}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFiltersFromSearch((prevFilters) => ({
-                        ...prevFilters,
-                        CategoryId: value,
-                      }));
-                      updateFilters("CategoryId", value);
-                      setSelectedCategory(value);
-                    }}
-                    className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {category.map((data) =>
-                      data.status === true ? (
+    <div className="flex justify-center mx-auto">
+      <div id={Styles.desktopView}>
+        <div className={Styles.fixedFormContainer}>
+          <form className="mx-auto p-4   shadow-md rounded-lg">
+            <div className="flex gap-9 items-center">
+              <div>
+                <div className="font-semibold">Category</div>
+                <select
+                  id="propertyType"
+                  value={filtersFromSearch.CategoryId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      CategoryId: value,
+                    }));
+                    updateFilters("CategoryId", value);
+                    setSelectedCategory(value);
+                  }}
+                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {category.map((data) =>
+                    data.status === true ? (
+                      <option key={data.id} value={data.id}>
+                        {data.categoryTitle}
+                      </option>
+                    ) : null
+                  )}
+                </select>
+              </div>
+              <div>
+                <div className="font-semibold">Property</div>
+                <select
+                  id="propertyType"
+                  value={filtersFromSearch.SubCategoryId} // Set value from filtersFromSearch
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      SubCategoryId: value,
+                    })); // Update filtersFromSearch state
+                    updateFilters("SubCategoryId", value);
+                    setSelectedSubCategory(value); // Optional: Update selectedSubCategory state
+                  }}
+                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {subCategory.map(
+                    (data) =>
+                      data.status && (
                         <option key={data.id} value={data.id}>
-                          {data.categoryTitle}
+                          {data.subCategoryTitle}
                         </option>
-                      ) : null
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <div className="font-semibold">Property</div>
-                  <select
-                    id="propertyType"
-                    value={filtersFromSearch.SubCategoryId}
+                      )
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <div className="font-semibold">Number</div>
+
+                <div className="flex gap-2 w-max ">
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-24 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Bedroom"
+                    required
+                    value={filtersFromSearch.RoomCount}
                     onChange={(e) => {
                       const value = e.target.value;
                       setFiltersFromSearch((prevFilters) => ({
                         ...prevFilters,
-                        SubCategoryId: value,
+                        RoomCount: value,
                       }));
-                      updateFilters("SubCategoryId", value);
-                      setSelectedSubCategory(value);
+                      updateFilters("RoomCount", value);
                     }}
-                    className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {subCategory.map(
-                      (data) =>
-                        data.status && (
-                          <option key={data.id} value={data.id}>
-                            {data.subCategoryTitle}
-                          </option>
-                        )
-                    )}
-                  </select>
+                  />
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-24 py-2 px-1 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Bathroom"
+                    required
+                    value={filtersFromSearch.BathRoomCount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        BathRoomCount: value,
+                      }));
+                      updateFilters("BathRoomCount", value);
+                    }}
+                  />
+
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-24 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Car Park"
+                    required
+                    value={filtersFromSearch.ParkingCount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        ParkingCount: value,
+                      }));
+                      updateFilters("ParkingCount", value);
+                    }}
+                  />
                 </div>
+              </div>
 
-                <div>
-                  <div className="font-semibold">Number</div>
+              <div>
+                <div className="font-semibold">Price</div>
+                <div className="flex gap-2 w-max ">
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Min Price"
+                    required
+                    value={filtersFromSearch.MinPrice}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        MinPrice: value,
+                      }));
+                      updateFilters("MinPrice", value);
+                    }}
+                  />
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Max Price"
+                    required
+                    value={filtersFromSearch.MaxPrice}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        MaxPrice: value,
+                      }));
+                      updateFilters("MaxPrice", value);
+                    }}
+                  />
+                </div>
+              </div>
 
-                  <div className="flex gap-2 w-max ">
+              <div>
+                <div className="font-semibold">Area</div>
+                <div className="flex gap-2 w-max ">
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Min Area"
+                    required
+                    value={filtersFromSearch.MinArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        MinArea: value,
+                      }));
+                      updateFilters("MinArea", value);
+                    }}
+                  />
+                  <input
+                    type="number"
+                    id="car-park"
+                    className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Max Area"
+                    required
+                    value={filtersFromSearch.MaxArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFiltersFromSearch((prevFilters) => ({
+                        ...prevFilters,
+                        MaxArea: value,
+                      }));
+                      updateFilters("MaxArea", value);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Button
+                  style={{ backgroundColor: "#14222d" }}
+                  className="w-full md:w-auto flex items-center"
+                  onClick={handleApplyFilters}
+                >
+                  <BiSearchAlt className="mr-2" />
+                  Filter
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id={Styles.mobileView} className="mt-6 md:mt-0 w-full mx-4">
+        <div
+          className="flex justify-center items-center mb-4 cursor-pointer text-white rounded-lg  py-4 "
+          onClick={toggleFormVisibility}
+          style={{ backgroundColor: "#f27423" }}
+        >
+          <BiSearchAlt className="" />
+          <span className="ml-2   ">Search</span>
+        </div>
+
+        {isFormVisible && (
+          <form className="mx-auto px-4 py-6 bg-white shadow-md rounded-lg">
+            <div className="space-y-4">
+              <div>
+                <div className="font-semibold">Category</div>
+                <select
+                  id="propertyType"
+                  value={filtersFromSearch.CategoryId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      CategoryId: value,
+                    }));
+                    updateFilters("CategoryId", value);
+                    setSelectedCategory(value);
+                  }}
+                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {category.map((data) =>
+                    data.status === true ? (
+                      <option key={data.id} value={data.id}>
+                        {data.categoryTitle}
+                      </option>
+                    ) : null
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <div className="font-semibold">Property</div>
+                <select
+                  id="propertyType"
+                  value={filtersFromSearch.SubCategoryId} // Set value from filtersFromSearch
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFiltersFromSearch((prevFilters) => ({
+                      ...prevFilters,
+                      SubCategoryId: value,
+                    })); // Update filtersFromSearch state
+                    updateFilters("SubCategoryId", value);
+                    setSelectedSubCategory(value); // Optional: Update selectedSubCategory state
+                  }}
+                  className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {subCategory.map(
+                    (data) =>
+                      data.status && (
+                        <option key={data.id} value={data.id}>
+                          {data.subCategoryTitle}
+                        </option>
+                      )
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <div className="font-semibold">Number</div>
+                <div className="flex gap-2">
+                  <div>
                     <input
                       type="number"
-                      id="car-park"
-                      className="w-24 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      id="bed"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Bedroom"
                       required
                       value={filtersFromSearch.RoomCount}
@@ -238,10 +464,12 @@ const Search = () => {
                         updateFilters("RoomCount", value);
                       }}
                     />
+                  </div>
+                  <div>
                     <input
                       type="number"
-                      id="car-park"
-                      className="w-24 py-2 px-1 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      id="bathroom"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Bathroom"
                       required
                       value={filtersFromSearch.BathRoomCount}
@@ -254,11 +482,13 @@ const Search = () => {
                         updateFilters("BathRoomCount", value);
                       }}
                     />
+                  </div>
 
+                  <div>
                     <input
                       type="number"
                       id="car-park"
-                      className="w-24 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Car Park"
                       required
                       value={filtersFromSearch.ParkingCount}
@@ -273,14 +503,16 @@ const Search = () => {
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <div className="font-semibold">Price</div>
-                  <div className="flex gap-2 w-max ">
+              <div>
+                <div className="font-semibold">Price</div>
+                <div className="flex gap-2">
+                  <div>
                     <input
                       type="number"
                       id="car-park"
-                      className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Min Price"
                       required
                       value={filtersFromSearch.MinPrice}
@@ -293,10 +525,12 @@ const Search = () => {
                         updateFilters("MinPrice", value);
                       }}
                     />
+                  </div>
+                  <div>
                     <input
                       type="number"
                       id="car-park"
-                      className="w-28 p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Max Price"
                       required
                       value={filtersFromSearch.MaxPrice}
@@ -311,61 +545,64 @@ const Search = () => {
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <Button onClick={handleApplyFilters}>Apply Filters</Button>
+              <div>
+                <div className="font-semibold">Area</div>
+                <div className="flex gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Min Area"
+                      required
+                      value={filtersFromSearch.MinArea}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MinArea: value,
+                        }));
+                        updateFilters("MinArea", value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      id="car-park"
+                      className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Max Area"
+                      required
+                      value={filtersFromSearch.MaxArea}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFiltersFromSearch((prevFilters) => ({
+                          ...prevFilters,
+                          MaxArea: value,
+                        }));
+                        updateFilters("MaxArea", value);
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
 
-        {/* Mobile View */}
-        <div className="lg:hidden">
-          <Button onClick={toggleFormVisibility}>Filter</Button>
-          {isFormVisible && (
-            <form className="p-4 shadow-md rounded-lg">
-              <div className="flex gap-9 items-center">
-                <div>
-                  <div className="font-semibold">Category</div>
-                  <select
-                    value={filtersFromSearch.CategoryId}
-                    onChange={(e) => updateFilters("CategoryId", e.target.value)}
-                    className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {category.map((data) =>
-                      data.status === true ? (
-                        <option key={data.id} value={data.id}>
-                          {data.categoryTitle}
-                        </option>
-                      ) : null
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <div className="font-semibold">Property</div>
-                  <select
-                    value={filtersFromSearch.SubCategoryId}
-                    onChange={(e) => updateFilters("SubCategoryId", e.target.value)}
-                    className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {subCategory.map((data) =>
-                      data.status === true ? (
-                        <option key={data.id} value={data.id}>
-                          {data.subCategoryTitle}
-                        </option>
-                      ) : null
-                    )}
-                  </select>
-                </div>
-                <Button onClick={handleApplyFilters}>Apply Filters</Button>
+              <div className="flex justify-center">
+                <Button
+                  className="bg-cyan-950 w-full md:w-auto flex items-center"
+                  onClick={handleApplyFilters}
+                >
+                  <BiSearchAlt className="mr-2" />
+                  Filter
+                </Button>
               </div>
-            </form>
-          )}
-        </div>
+            </div>
+          </form>
+        )}
       </div>
-    </Suspense>
+    </div>
   );
 };
-
 export default Search;
