@@ -41,12 +41,13 @@ function Result() {
   const [fetchError, setFetchError] = useState(false);
   const [filterResult, setFilterResult] = useState<FilterList[]>([]);
   const itemsPerPage = 8;
-  
+
   const searchParams = useSearchParams();
   const filters = searchParams.get("filters");
 
   const fetchFilteredData = async () => {
-    const url = "https://merorealstateapi.ism.com.np/api/Product/FilterProductList";
+    const url =
+      "https://merorealstateapi.ism.com.np/api/Product/FilterProductList";
     const filterParams = filters ? JSON.parse(filters) : {};
 
     const formData = new FormData();
@@ -132,7 +133,7 @@ function Result() {
                             </h3>
                             <div className="flex justify-between">
                               <div>
-                                <Badge color="warning">
+                                <Badge color="warning" className="text-sm">
                                   {product.propertyStatusValue.toString()}
                                 </Badge>
                               </div>

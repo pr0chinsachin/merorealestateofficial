@@ -165,7 +165,7 @@ const LatestProductView: React.FC = () => {
                               <div className="flex w-full justify-between">
                                 <div>
                                   <span className="inline-flex float-right items-baseline">
-                                    <Badge color="success">
+                                    <Badge color="success" className="text-sm">
                                       {product.propertyStatusValue}
                                     </Badge>
                                   </span>
