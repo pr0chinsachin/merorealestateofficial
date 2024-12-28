@@ -1,8 +1,7 @@
 "use client";
-import { Card, Pagination, Badge, Button, Spinner } from "flowbite-react";
+import { Card, Pagination, Badge, Button, Spinner, Tabs } from "flowbite-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { HiPencilAlt, HiEye } from "react-icons/hi";
 import { BiSearchAlt } from "react-icons/bi";
 import carIcon from "../../../public/car.svg";
 import Bathroom from "../../../public/bathtub-bold-bathroom.svg";
@@ -40,39 +39,28 @@ const ProductByPrice: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentSoldPage, setCurrentSoldPage] = useState(1);
+  const [currentLeasedPage, setCurrentLeasedPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<string>("sold");
   const itemsPerPage = 8;
 
   const filteredProducts = productsByPrice.filter((product) =>
     product.productName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch(`${BASE_URL}/Product/ProductList`);
-  //       if (response.ok) {
-  //         const data: ProductList[] = await response.json();
-  //         const processedData = data.map((product) => ({
-  //           ...product,
-  //           thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
-  //         }));
-  //         setProductsByPrice(processedData);
-  //         setIsLoading(false);
-  //       } else {
-  //         setIsLoading(false);
-  //         setFetchError(true);
-  //         console.error("Failed to fetch data");
-  //       }
-  //     } catch (error) {
-  //       setIsLoading(false);
-  //       setFetchError(true);
-  //       console.error("Error:", error);
-  //     }
-  //   };
+  const soldProducts = filteredProducts.filter(
+    (product) =>
+      product.status === true && product.propertyStatusValue === "Sold"
+  );
 
-  //   fetchData();
-  // }, []);
+  const leasedProducts = filteredProducts.filter(
+    (product) =>
+      product.status === true && product.propertyStatusValue === "Leased"
+  );
+
+  const totalSoldPages = Math.ceil(soldProducts.length / itemsPerPage);
+  const totalLeasedPages = Math.ceil(leasedProducts.length / itemsPerPage);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -89,7 +77,6 @@ const ProductByPrice: React.FC = () => {
               ...product,
               thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
             }));
-          console.log("here i am", processedData);
           setProductsByPrice(processedData);
           setIsLoading(false);
         } else {
@@ -107,21 +94,116 @@ const ProductByPrice: React.FC = () => {
     fetchData();
   }, []);
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const getPaginatedProducts = (
+    products: ProductList[],
+    currentPage: number
+  ) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, products.length);
+    return products.slice(startIndex, endIndex);
+  };
 
-  const onPageChange = (page: number) => setCurrentPage(page);
+  const handleTabChange = (activeTab: number) => {
+    const tab = activeTab === 0 ? "sold" : "leased";
+    setActiveTab(tab);
+    // Reset pagination when switching tabs
+    if (tab === "sold") {
+      setCurrentSoldPage(1);
+    } else {
+      setCurrentLeasedPage(1);
+    }
+  };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  const renderProductCard = (product: ProductList) => (
+    <div key={product.id} className="group">
+      <Link href={`product/hotlistproduct/hotlistProductView/${product.id}`}>
+        <Card
+          imgSrc={`${SERVER_URL}${product.thumbnailImgPath}`}
+          className="w-full max-w-lg"
+          theme={customTheme}
+        >
+          <h3 className="text-md text-black font-semibold truncate">
+            {product.productName}
+          </h3>
+          <div className="flex justify-between">
+            <div>
+              <span className="inline-flex items-baseline ">
+                <Badge color="warning" className="text-sm">
+                  {product.propertyStatusValue.toString()}
+                </Badge>
+              </span>
+            </div>
+            <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
+              <div>${product.price}</div>
+              <div className="mt-1">
+                <span className=""></span>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <Image
+                        src={Bedroom}
+                        alt="Bedroom Icon"
+                        width={20}
+                        height={20}
+                      />
+                    </td>
+                    <td className="pl-2">{product.roomCount}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <Image
+                        src={Bathroom}
+                        alt="Bathroom Icon"
+                        width={20}
+                        height={20}
+                      />
+                    </td>
+                    <td className="pl-2">{product.bathRoomCount}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <Image
+                        src={carIcon}
+                        alt="Car Icon"
+                        width={20}
+                        height={20}
+                      />
+                    </td>
+                    <td className="pl-2">{product.parkingCount}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Card>
+      </Link>
+    </div>
+  );
 
   return (
     <div className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto  md:py-8">
+      <div className="max-w-7xl mx-auto md:py-8">
         <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
           Sold and Leased
         </h2>
-        {/* Search Box */}
         <div className="mb-6 flex flex-col sm:flex-row justify-center sm:justify-start gap-2">
           <input
             type="text"
@@ -139,7 +221,7 @@ const ProductByPrice: React.FC = () => {
             Search
           </Button>
         </div>
-        {/* Search Box ends */}
+
         {fetchError ? (
           <div className="text-red-500 mt-4 text-center">
             Failed to fetch data. Please try again later.
@@ -150,134 +232,56 @@ const ProductByPrice: React.FC = () => {
           </div>
         ) : (
           <div>
-            {paginatedProducts.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <div className="text-center text-gray-500">
                 No products found.
               </div>
             ) : (
-              <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-                {paginatedProducts
-                  .filter((product) => product.status === true) // Filter by status
-                  .map((product) => (
-                    <div key={product.id} className="group">
-                      <Link
-                        href={`product/hotlistproduct/hotlistProductView/${product.id}`}
-                      >
-                        <Card
-                          imgSrc={`${SERVER_URL}${product.thumbnailImgPath}`}
-                          className="w-full max-w-lg"
-                          theme={customTheme}
-                        >
-                          <h3 className="text-md text-black font-semibold    truncate">
-                            {product.productName}
-                          </h3>
-                          <div className="flex justify-between ">
-                            {/* <div>
-                              <span className="inline-flex items-baseline">
-                                <HiPencilAlt /> &nbsp;
-                                <span>{product.area} m.sq</span>
-                              </span>
-                            </div> */}
-                            <div>
-                              <span className="inline-flex  items-baseline">
-                                <Badge color="warning">
-                                  {product.propertyStatusValue.toString()}
-                                </Badge>
-                              </span>
-                            </div>
-
-                            <div className=" text-orange-500 hover:text-red-500 font-bold   items-baseline">
-                              <div>${product.price}</div>
-                              <div className="mt-1">
-                                <span className=""></span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* <div className="text-lg font-medium text-gray-900 ">
-                            <div className="grid grid-cols-2">
-                              <div>${product.price}</div>
-                              <div className="mt-1">
-                                <span className="float-right">
-                                  <HiEye />
-                                </span>
-                              </div>
-                            </div>
-                          </div> */}
-                          <div className="flex justify-between ">
-                            <div>
-                              <table>
-                                <tbody>
-                                  <tr>
-                                    <td>
-                                      <Image
-                                        src={Bedroom}
-                                        alt="Bedroom Icon"
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </td>
-                                    <td className="pl-2">
-                                      {product.roomCount}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                            <div>
-                              <table>
-                                <tbody>
-                                  <tr>
-                                    <td>
-                                      <Image
-                                        src={Bathroom}
-                                        alt="Bathroom Icon"
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </td>
-                                    <td className="pl-2">
-                                      {product.bathRoomCount}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                            <div>
-                              <table>
-                                <tbody>
-                                  <tr>
-                                    <td>
-                                      <Image
-                                        src={carIcon}
-                                        alt="Car Icon"
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </td>
-                                    <td className="pl-2">
-                                      {product.parkingCount}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </Card>
-                      </Link>
+              <Tabs onActiveTabChange={handleTabChange}>
+                <Tabs.Item title="Sold" active={activeTab === "sold"}>
+                  <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+                    {getPaginatedProducts(soldProducts, currentSoldPage).map(
+                      renderProductCard
+                    )}
+                  </div>
+                  {soldProducts.length > 0 && (
+                    <div className="mt-8 flex justify-end">
+                      <Pagination
+                        currentPage={currentSoldPage}
+                        totalPages={totalSoldPages}
+                        onPageChange={setCurrentSoldPage}
+                      />
                     </div>
-                  ))}
-              </div>
+                  )}
+                </Tabs.Item>
+
+                <Tabs.Item title="Leased" active={activeTab === "leased"}>
+                  <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+                    {leasedProducts.length === 0 ? (
+                      <div className="text-center text-gray-500">
+                        No products leased.
+                      </div>
+                    ) : (
+                      getPaginatedProducts(
+                        leasedProducts,
+                        currentLeasedPage
+                      ).map(renderProductCard)
+                    )}
+                  </div>
+                  {leasedProducts.length > 0 && (
+                    <div className="mt-8 flex justify-end">
+                      <Pagination
+                        currentPage={currentLeasedPage}
+                        totalPages={totalLeasedPages}
+                        onPageChange={setCurrentLeasedPage}
+                      />
+                    </div>
+                  )}
+                </Tabs.Item>
+              </Tabs>
             )}
           </div>
         )}
-        <div className="mt-8 flex justify-end">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
       </div>
     </div>
   );

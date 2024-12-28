@@ -153,7 +153,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
                             </div> */}
                             <div>
                               <span className="inline-flex  items-baseline">
-                                <Badge color="warning">
+                                <Badge color="warning" className="text-sm">
                                   {product.propertyStatusValue.toString()}
                                 </Badge>
                               </span>

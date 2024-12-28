@@ -131,7 +131,7 @@ const ProductByPrice: React.FC = () => {
                         </div>
                         <div>
                           <span className="inline-flex float-right items-baseline">
-                            <Badge color="warning">
+                            <Badge color="warning" className="text-sm">
                               {product.propertyStatusValue.toString()}
                             </Badge>
                           </span>
@@ -178,7 +178,9 @@ const ProductByPrice: React.FC = () => {
                                     height={20}
                                   />
                                 </td>
-                                <td className="pl-2">{product.bathRoomCount}</td>
+                                <td className="pl-2">
+                                  {product.bathRoomCount}
+                                </td>
                               </tr>
                             </tbody>
                           </table>

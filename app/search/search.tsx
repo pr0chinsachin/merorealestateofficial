@@ -183,24 +183,29 @@ const Search = () => {
                 <div className="font-semibold">Category</div>
                 <select
                   id="propertyType"
-                  value={filtersFromSearch.CategoryId}
+                  value={filtersFromSearch.CategoryId || ""} // Default value
                   onChange={(e) => {
                     const value = e.target.value;
                     setFiltersFromSearch((prevFilters) => ({
                       ...prevFilters,
                       CategoryId: value,
+                      SubCategoryId: "", // Reset subcategory when category changes
                     }));
                     updateFilters("CategoryId", value);
                     setSelectedCategory(value);
                   }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {category.map((data) =>
-                    data.status === true ? (
-                      <option key={data.id} value={data.id}>
-                        {data.categoryTitle}
-                      </option>
-                    ) : null
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {category.map(
+                    (data) =>
+                      data.status && (
+                        <option key={data.id} value={data.id}>
+                          {data.categoryTitle}
+                        </option>
+                      )
                   )}
                 </select>
               </div>
@@ -208,26 +213,34 @@ const Search = () => {
                 <div className="font-semibold">Property</div>
                 <select
                   id="propertyType"
-                  value={filtersFromSearch.SubCategoryId} // Set value from filtersFromSearch
+                  value={filtersFromSearch.SubCategoryId || ""} // Default value
                   onChange={(e) => {
                     const value = e.target.value;
                     setFiltersFromSearch((prevFilters) => ({
                       ...prevFilters,
                       SubCategoryId: value,
-                    })); // Update filtersFromSearch state
+                    }));
                     updateFilters("SubCategoryId", value);
-                    setSelectedSubCategory(value); // Optional: Update selectedSubCategory state
+                    setSelectedSubCategory(value);
                   }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!filtersFromSearch.CategoryId} // Disable if no category selected
                 >
-                  {subCategory.map(
-                    (data) =>
-                      data.status && (
-                        <option key={data.id} value={data.id}>
-                          {data.subCategoryTitle}
-                        </option>
-                      )
-                  )}
+                  <option value="" disabled>
+                    Select a subcategory
+                  </option>
+                  {subCategory
+                    .filter(
+                      (data) => data.categoryID == filtersFromSearch.CategoryId
+                    )
+                    .map(
+                      (data) =>
+                        data.status && (
+                          <option key={data.id} value={data.id}>
+                            {data.subCategoryTitle}
+                          </option>
+                        )
+                    )}
                 </select>
               </div>
 
@@ -395,24 +408,29 @@ const Search = () => {
                 <div className="font-semibold">Category</div>
                 <select
                   id="propertyType"
-                  value={filtersFromSearch.CategoryId}
+                  value={filtersFromSearch.CategoryId || ""} // Default value
                   onChange={(e) => {
                     const value = e.target.value;
                     setFiltersFromSearch((prevFilters) => ({
                       ...prevFilters,
                       CategoryId: value,
+                      SubCategoryId: "", // Reset subcategory when category changes
                     }));
                     updateFilters("CategoryId", value);
                     setSelectedCategory(value);
                   }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {category.map((data) =>
-                    data.status === true ? (
-                      <option key={data.id} value={data.id}>
-                        {data.categoryTitle}
-                      </option>
-                    ) : null
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {category.map(
+                    (data) =>
+                      data.status && (
+                        <option key={data.id} value={data.id}>
+                          {data.categoryTitle}
+                        </option>
+                      )
                   )}
                 </select>
               </div>
@@ -421,26 +439,34 @@ const Search = () => {
                 <div className="font-semibold">Property</div>
                 <select
                   id="propertyType"
-                  value={filtersFromSearch.SubCategoryId} // Set value from filtersFromSearch
+                  value={filtersFromSearch.SubCategoryId || ""} // Default value
                   onChange={(e) => {
                     const value = e.target.value;
                     setFiltersFromSearch((prevFilters) => ({
                       ...prevFilters,
                       SubCategoryId: value,
-                    })); // Update filtersFromSearch state
+                    }));
                     updateFilters("SubCategoryId", value);
-                    setSelectedSubCategory(value); // Optional: Update selectedSubCategory state
+                    setSelectedSubCategory(value);
                   }}
                   className="w-full p-2 border rounded-md text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!filtersFromSearch.CategoryId} // Disable if no category selected
                 >
-                  {subCategory.map(
-                    (data) =>
-                      data.status && (
-                        <option key={data.id} value={data.id}>
-                          {data.subCategoryTitle}
-                        </option>
-                      )
-                  )}
+                  <option value="" disabled>
+                    Select a subcategory
+                  </option>
+                  {subCategory
+                    .filter(
+                      (data) => data.categoryID == filtersFromSearch.CategoryId
+                    )
+                    .map(
+                      (data) =>
+                        data.status && (
+                          <option key={data.id} value={data.id}>
+                            {data.subCategoryTitle}
+                          </option>
+                        )
+                    )}
                 </select>
               </div>
 
