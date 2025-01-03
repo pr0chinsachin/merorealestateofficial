@@ -160,7 +160,13 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
                             </div>
 
                             <div className=" text-orange-500 hover:text-red-500 font-bold   items-baseline">
-                              <div>${product.price}</div>
+                              <div>
+                                $
+                                {Intl.NumberFormat("en-US", {
+                                  maximumFractionDigits: 2,
+                                  minimumFractionDigits: 2,
+                                }).format(product.price)}
+                              </div>
                               <div className="mt-1">
                                 <span className=""></span>
                               </div>

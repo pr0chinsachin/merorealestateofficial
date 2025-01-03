@@ -43,6 +43,7 @@ const ProductByPrice: React.FC = () => {
   const [currentLeasedPage, setCurrentLeasedPage] = useState(1);
   const [activeTab, setActiveTab] = useState<string>("sold");
   const itemsPerPage = 8;
+  const options = { maximumFractionDigits: 2, minimumFractionDigits: 2 };
 
   const filteredProducts = productsByPrice.filter((product) =>
     product.productName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -134,7 +135,9 @@ const ProductByPrice: React.FC = () => {
               </span>
             </div>
             <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
-              <div>${product.price}</div>
+              <div>
+                ${Intl.NumberFormat("en-US", options).format(product.price)}
+              </div>
               <div className="mt-1">
                 <span className=""></span>
               </div>

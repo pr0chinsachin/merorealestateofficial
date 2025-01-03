@@ -46,6 +46,8 @@ const LatestProductView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
+  const options = { maximumFractionDigits: 2, minimumFractionDigits: 2 };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -171,7 +173,10 @@ const LatestProductView: React.FC = () => {
                                   </span>
                                 </div>
                                 <div className=" text-orange-500 hover:text-red-500 font-bold items-baseline">
-                                  ${product.price}
+                                  $
+                                  {Intl.NumberFormat("en-US", options).format(
+                                    product.price
+                                  )}
                                 </div>
                               </div>
 
