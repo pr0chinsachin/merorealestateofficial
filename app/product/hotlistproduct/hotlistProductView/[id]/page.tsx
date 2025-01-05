@@ -197,7 +197,10 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               <h1 className="text-xl sm:text-2xl text-orange-500 hover:text-red-500">
                 <b>
                   <span>$</span>
-                  {productData.price}
+                  {Intl.NumberFormat("en-US", {
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(productData.price)}
                 </b>
               </h1>
             </div>
@@ -238,7 +241,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 <span>{productData.area} m.sq </span>
               </span>
             )}
-               {productData.parkingCount < 1 ? (
+            {productData.parkingCount < 1 ? (
               ""
             ) : (
               <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
