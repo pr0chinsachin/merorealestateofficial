@@ -164,7 +164,9 @@ const ProductByPrice: React.FC = () => {
                         height={20}
                       />
                     </td>
-                    <td className="pl-2">{product.roomCount}</td>
+                    <td className="pl-2">
+                      {product.roomCount < 1 ? "-" : product.roomCount}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -181,7 +183,9 @@ const ProductByPrice: React.FC = () => {
                         height={20}
                       />
                     </td>
-                    <td className="pl-2">{product.bathRoomCount}</td>
+                    <td className="pl-2">
+                      {product.bathRoomCount < 1 ? "-" : product.bathRoomCount}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -198,7 +202,9 @@ const ProductByPrice: React.FC = () => {
                         height={20}
                       />
                     </td>
-                    <td className="pl-2">{product.parkingCount}</td>
+                    <td className="pl-2">
+                      {product.parkingCount < 1 ? "-" : product.parkingCount}
+                    </td>
                   </tr>
                 </tbody>
               </table>

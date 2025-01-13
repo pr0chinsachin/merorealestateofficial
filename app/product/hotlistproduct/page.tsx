@@ -199,7 +199,9 @@ const LatestProductView: React.FC = () => {
                                     height={20}
                                   />
                                   <span className="pl-2">
-                                    {product.roomCount}
+                                    {product.roomCount < 1
+                                      ? "-"
+                                      : product.roomCount}
                                   </span>
                                 </div>
                                 <div className="flex items-center">
@@ -210,7 +212,9 @@ const LatestProductView: React.FC = () => {
                                     height={20}
                                   />
                                   <span className="pl-2">
-                                    {product.bathRoomCount}
+                                    {product.bathRoomCount < 1
+                                      ? "-"
+                                      : product.bathRoomCount}
                                   </span>
                                 </div>
                                 <div className="flex items-center">
@@ -221,7 +225,9 @@ const LatestProductView: React.FC = () => {
                                     height={20}
                                   />
                                   <span className="pl-2">
-                                    {product.parkingCount}
+                                    {product.parkingCount < 1
+                                      ? "-"
+                                      : product.parkingCount}
                                   </span>
                                 </div>
                               </div>
