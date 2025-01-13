@@ -24,6 +24,8 @@ interface ProductList {
   propertyStatusValue: string;
   href: string;
   status: boolean;
+  createdDate: string;
+  updatedDate: string;
 }
 
 const customTheme: CustomFlowbiteTheme["card"] = {
@@ -45,9 +47,14 @@ const ProductByPrice: React.FC = () => {
   const itemsPerPage = 8;
   const options = { maximumFractionDigits: 2, minimumFractionDigits: 2 };
 
-  const filteredProducts = productsByPrice.filter((product) =>
-    product.productName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = productsByPrice
+    .filter((product) =>
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.updatedDate).getTime() - new Date(a.updatedDate).getTime()
+    );
 
   const soldProducts = filteredProducts.filter(
     (product) =>
@@ -79,6 +86,7 @@ const ProductByPrice: React.FC = () => {
               thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
             }));
           setProductsByPrice(processedData);
+          console.log("processedData", processedData);
           setIsLoading(false);
         } else {
           setIsLoading(false);
