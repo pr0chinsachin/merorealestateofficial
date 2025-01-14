@@ -1,7 +1,6 @@
 "use client";
 import { Card, Spinner, Pagination, Tabs } from "flowbite-react";
 import React, { useEffect, useState } from "react";
-import { HiEye, HiPencilAlt } from "react-icons/hi";
 import { Badge } from "flowbite-react";
 import Image from "next/image";
 import carIcon from "../../../../../public/car.svg";
@@ -26,7 +25,31 @@ interface ServiceProduct {
   propertyStatusValue: string;
   href: string;
   status: boolean;
-  packageType?: string; // Added for filtering house packages
+}
+
+interface HotlistById {
+  id: string;
+  productCode: string;
+  productName: string;
+  categoryId: string;
+  subCategoryId: string;
+  address: string;
+  price: number;
+  mapLink: string;
+  thumbnailImgPath: string;
+  newThumbnailImg: string;
+  videoLink: string;
+  description: string;
+  details: string;
+  propertyStatusValue: string;
+  parkingCount: number;
+  roomCount: number;
+  bathRoomCount: number;
+  area: number;
+  images: {
+    name: string;
+    filePath: string;
+  }[];
 }
 
 interface ServiceProductProps {
@@ -46,6 +69,31 @@ const customTheme: CustomFlowbiteTheme["card"] = {
 
 const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const { id, title } = params;
+  const [productData, setProductData] = useState<HotlistById>({
+    id: "",
+    productCode: "",
+    productName: "",
+    categoryId: "",
+    subCategoryId: "",
+    address: "",
+    price: 0,
+    mapLink: "",
+    thumbnailImgPath: "",
+    newThumbnailImg: "",
+    videoLink: "",
+    description: "",
+    details: "",
+    propertyStatusValue: "",
+    parkingCount: 0,
+    roomCount: 0,
+    bathRoomCount: 0,
+    area: 0,
+    images: [],
+  });
+  const [productDetails, setProductDetails] = useState<Map<string, string>>(
+    new Map()
+  );
+  const [error, setError] = useState<string | null>(null);
   const [productsByPrice, setProductsByPrice] = useState<ServiceProduct[]>([]);
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,14 +113,42 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           thumbnailImgPath: hotListProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
         setProductsByPrice(processedData);
+
+        // Fetch details for all products
+        await Promise.all(
+          processedData.map(async (product) => {
+            await fetchDataProduct(product.id);
+          })
+        );
+
         setIsLoading(false);
       } else {
+        setFetchError(true);
         setIsLoading(false);
         console.error("Failed to fetch data");
       }
     } catch (error) {
+      setFetchError(true);
       setIsLoading(false);
       console.error("Error:", error);
+    }
+  };
+
+  const fetchDataProduct = async (productId: string) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/Product/UpdateProduct?id=${productId}`
+      );
+      if (response.ok) {
+        const data: HotlistById = await response.json();
+        setProductDetails((prev) => new Map(prev).set(productId, data.details));
+        setError(null);
+      } else {
+        setError("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Error: Unable to fetch data from server");
     }
   };
 
@@ -86,10 +162,23 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     setCurrentPage(1);
   };
 
-  // Filter products based on active tab
-  const filteredProducts = productsByPrice.filter(
-    (product) => product.status === true
-  );
+  // Filter products based on active tab, status, and title
+  const filteredProducts = productsByPrice.filter((product) => {
+    const isActiveProduct = product.status === true;
+
+    // If title is not "Buy", show all active products
+    if (title !== "Buy") {
+      return isActiveProduct;
+    }
+
+    // For "Buy" title, filter based on the tab and details
+    const productDetailsValue = productDetails.get(product.id);
+    const matchesTab =
+      activeTab === "house"
+        ? productDetailsValue === "0"
+        : productDetailsValue === "1";
+    return isActiveProduct && matchesTab;
+  });
 
   const renderProductCard = (product: ServiceProduct) => (
     <div key={product.id} className="group">
@@ -108,7 +197,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             <div>
               <span className="inline-flex items-baseline">
                 <Badge color="warning" className="text-sm">
-                  {product.propertyStatusValue.toString()}
+                  {product.propertyStatusValue.toString() === "Rented"
+                    ? "Buy"
+                    : product.propertyStatusValue.toString()}
                 </Badge>
               </span>
             </div>

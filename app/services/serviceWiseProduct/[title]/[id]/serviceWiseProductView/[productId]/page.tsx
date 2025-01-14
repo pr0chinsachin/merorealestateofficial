@@ -413,7 +413,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                 />
               </Accordion.Content>
             </Accordion.Panel>
-            <Accordion.Panel>
+            {/* <Accordion.Panel>
               <Accordion.Title>Features</Accordion.Title>
               <Accordion.Content>
                 <div
@@ -432,7 +432,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                   }}
                 />
               </Accordion.Content>
-            </Accordion.Panel>
+            </Accordion.Panel> */}
             <Accordion.Panel>
               <Accordion.Title>Video</Accordion.Title>
               <Accordion.Content>
@@ -469,7 +469,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                     }}
                   />
                 </Tabs.Item>
-                <Tabs.Item title="Features" icon={MdDashboard}>
+                {/* <Tabs.Item title="Features" icon={MdDashboard}>
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
@@ -478,7 +478,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
-                </Tabs.Item>
+                </Tabs.Item> */}
                 <Tabs.Item
                   title="Floor Plan"
                   icon={HiClipboardList}
