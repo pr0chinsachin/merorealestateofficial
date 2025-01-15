@@ -62,7 +62,7 @@ const LatestProductView: React.FC = () => {
           ...latestProduct,
           thumbnailImgPath: latestProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
-console.log("Buy and rent",processedData);
+        console.log("Buy and rent", processedData);
         setlatestProducts(processedData);
         setIsLoading(false);
       } else {
@@ -140,7 +140,7 @@ console.log("Buy and rent",processedData);
                   .filter((product) => product.status === true) // Filter by status
                   .map((product) => {
                     if (
-                      product.propertyStatusValue === "OnRent" ||
+                      product.propertyStatusValue === "Rent" ||
                       product.propertyStatusValue === "Buy"
                     ) {
                       return (

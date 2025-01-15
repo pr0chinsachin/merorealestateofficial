@@ -23,9 +23,10 @@ interface ServiceProduct {
   parkingCount: number;
   area: number;
   propertyStatusValue: string;
-  href: string;
   status: boolean;
-  
+  details:string;
+}
+
 interface HotlistById {
   id: string;
   productCode: string;
@@ -61,38 +62,13 @@ interface ServiceProductProps {
 const customTheme: CustomFlowbiteTheme["card"] = {
   img: {
     horizontal: {
-      off: "rounded-t-lg object-cover aspect-[4/3] ",
+      off: "rounded-t-lg object-cover aspect-[4/3]",
     },
   },
 };
 
 const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const { id, title } = params;
-  const [productData, setProductData] = useState<HotlistById>({
-    id: "",
-    productCode: "",
-    productName: "",
-    categoryId: "",
-    subCategoryId: "",
-    address: "",
-    price: 0,
-    mapLink: "",
-    thumbnailImgPath: "",
-    newThumbnailImg: "",
-    videoLink: "",
-    description: "",
-    details: "",
-    propertyStatusValue: "",
-    parkingCount: 0,
-    roomCount: 0,
-    bathRoomCount: 0,
-    area: 0,
-    images: [],
-  });
-  const [productDetails, setProductDetails] = useState<Map<string, string>>(
-    new Map()
-  );
-  const [error, setError] = useState<string | null>(null);
   const [productsByPrice, setProductsByPrice] = useState<ServiceProduct[]>([]);
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,52 +78,22 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        `${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`
-      );
+      const response = await fetch(`${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`);
       if (response.ok) {
         const data: ServiceProduct[] = await response.json();
-        const processedData = data.map((hotListProduct) => ({
-          ...hotListProduct,
-          thumbnailImgPath: hotListProduct.thumbnailImgPath.replace(/~/g, ""),
+        const processedData = data.map((product) => ({
+          ...product,
+          thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
         }));
         setProductsByPrice(processedData);
-
-        // Fetch details for all products
-        await Promise.all(
-          processedData.map(async (product) => {
-            await fetchDataProduct(product.id);
-          })
-        );
-
         setIsLoading(false);
       } else {
         setFetchError(true);
         setIsLoading(false);
-        console.error("Failed to fetch data");
       }
     } catch (error) {
       setFetchError(true);
       setIsLoading(false);
-      console.error("Error:", error);
-    }
-  };
-
-  const fetchDataProduct = async (productId: string) => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/Product/UpdateProduct?id=${productId}`
-      );
-      if (response.ok) {
-        const data: HotlistById = await response.json();
-        setProductDetails((prev) => new Map(prev).set(productId, data.details));
-        setError(null);
-      } else {
-        setError("Failed to fetch data");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Error: Unable to fetch data from server");
     }
   };
 
@@ -161,31 +107,13 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     setCurrentPage(1);
   };
 
-  // Filter products based on active tab, status, and title
   const filteredProducts = productsByPrice.filter((product) => {
-    const isActiveProduct = product.status === true;
+    if (title !== "Buy") return product.status;
 
-    // If title is not "Buy", show all active products
-    if (title !== "Buy") {
-      return isActiveProduct;
-    }
-
-    // For "Buy" title, filter based on the tab and details
-    const productDetailsValue = productDetails.get(product.id);
-    const matchesTab =
-      activeTab === "house-land"
-        ? productDetailsValue === "1"
-        : productDetailsValue === "0";
-    return isActiveProduct && matchesTab;
+    return activeTab === "house-land"
+      ? product.details === "1"
+      : product.details === "0";
   });
-
-
-  const houseProducts = filteredProducts.filter(
-    (product) => product.details !== "1"
-  );
-  const houseAndLandProducts = filteredProducts.filter(
-    (product) => product.details === "1"
-  );
 
   const renderProductCard = (product: ServiceProduct) => (
     <div key={product.id} className="group">
@@ -201,76 +129,28 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             {product.productName}
           </h3>
           <div className="flex justify-between">
-            <div>
-              <span className="inline-flex items-baseline">
-                <Badge color="warning" className="text-sm">
-                  {product.propertyStatusValue.toString() === "Rented"
-                    ? "Buy"
-                    : product.propertyStatusValue.toString()}
-                </Badge>
-              </span>
-            </div>
-            <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
-              <div>
-                $
-                {Intl.NumberFormat("en-US", {
-                  maximumFractionDigits: 2,
-                  minimumFractionDigits: 2,
-                }).format(product.price)}
-              </div>
+            <Badge color="warning" className="text-sm">
+              {product.propertyStatusValue === "Rented" ? "Buy" : product.propertyStatusValue}
+            </Badge>
+            <div className="text-orange-500 font-bold">${" "}
+              {Intl.NumberFormat("en-US", {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2,
+              }).format(product.price)}
             </div>
           </div>
           <div className="flex justify-between">
-            <div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>
-                      <Image
-                        src={Bedroom}
-                        alt="Bedroom Icon"
-                        width={20}
-                        height={20}
-                      />
-                    </td>
-                    <td className="pl-2">{product.roomCount}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex items-center">
+              <Image src={Bedroom} alt="Bedroom Icon" width={20} height={20} />
+              <span className="pl-2">{product.roomCount}</span>
             </div>
-            <div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>
-                      <Image
-                        src={Bathroom}
-                        alt="Bathroom Icon"
-                        width={20}
-                        height={20}
-                      />
-                    </td>
-                    <td className="pl-2">{product.bathRoomCount}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex items-center">
+              <Image src={Bathroom} alt="Bathroom Icon" width={20} height={20} />
+              <span className="pl-2">{product.bathRoomCount}</span>
             </div>
-            <div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>
-                      <Image
-                        src={carIcon}
-                        alt="Car Icon"
-                        width={20}
-                        height={20}
-                      />
-                    </td>
-                    <td className="pl-2">{product.parkingCount}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="flex items-center">
+              <Image src={carIcon} alt="Car Icon" width={20} height={20} />
+              <span className="pl-2">{product.parkingCount}</span>
             </div>
           </div>
         </Card>
@@ -282,6 +162,39 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const renderProductsList = () => {
+    if (fetchError) {
+      return <div className="text-red-500 mt-4 text-center">Failed to fetch data. Please try again later.</div>;
+    }
+
+    if (isLoading) {
+      return (
+        <div className="relative w-full h-64 flex justify-center items-center">
+          <Spinner size="xl" />
+        </div>
+      );
+    }
+
+    if (paginatedProducts.length === 0) {
+      return <div className="text-center text-gray-500">No products found.</div>;
+    }
+
+    return (
+      <>
+        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+          {paginatedProducts.map(renderProductCard)}
+        </div>
+        <div className="mt-8 flex justify-end">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </>
+    );
+  };
 
   return (
     <div
@@ -309,82 +222,6 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           </Tabs>
         ) : (
           renderProductsList()
-        )}
-      </div>
-    </div>
-  );
-
-  function renderProductsList() {
-
-    if (fetchError) {
-      return (
-        <div className="text-red-500 mt-4 text-center">
-          Failed to fetch data. Please try again later.
-        </div>
-      );
-    }
-
-    if (isLoading) {
-      return (
-        <div className="relative w-full h-64 flex justify-center items-center">
-          <Spinner size="xl" />
-        </div>
-      );
-    }
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, products.length);
-    const paginatedProducts = products.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-
-    return (
-      <div>
-        {paginatedProducts.length === 0 ? (
-          <div className="text-center text-gray-500">No products found.</div>
-        ) : (
-          <>
-            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-              {paginatedProducts.map(renderProductCard)}
-            </div>
-            <div className="mt-8 flex justify-end">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div
-      className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "#14222d" }}
-    >
-      <div className="max-w-7xl mx-auto md:py-8">
-        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
-          {title}
-        </h2>
-
-        {title === "Sale" ? (
-          <DarkFormSale />
-        ) : title === "Buy" ? (
-          <Tabs onActiveTabChange={handleTabChange}>
-            <Tabs.Item title="House Package" active={activeTab === "house"}>
-              {renderProductsList(houseProducts)}
-            </Tabs.Item>
-            <Tabs.Item
-              title="House and Land Package"
-              active={activeTab === "house-land"}
-            >
-              {renderProductsList(houseAndLandProducts)}
-            </Tabs.Item>
-          </Tabs>
-        ) : (
-          renderProductsList(filteredProducts)
         )}
       </div>
     </div>
