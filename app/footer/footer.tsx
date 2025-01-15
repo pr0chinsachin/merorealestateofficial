@@ -7,7 +7,7 @@ import Link from "next/link";
 import img1 from "./images/docusign1.svg";
 import img2 from "./images/mri.svg";
 import img3 from "./images/rei.svg";
-import img4 from "./images/reisa.png";
+import img4 from "./images/reisa.svg";
 
 const FooterSection = () => {
   const [cDate, setcDate] = useState(new Date());
