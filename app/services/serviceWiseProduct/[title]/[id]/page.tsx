@@ -98,7 +98,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("house");
+  const [activeTab, setActiveTab] = useState<string>("house-land"); // Default to "house-land"
   const itemsPerPage = 8;
 
   const fetchData = async () => {
@@ -157,7 +157,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   }, []);
 
   const handleTabChange = (activeTab: number) => {
-    const tab = activeTab === 0 ? "house" : "house-land";
+    const tab = activeTab === 0 ? "house-land" : "house";
     setActiveTab(tab);
     setCurrentPage(1);
   };
@@ -174,9 +174,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     // For "Buy" title, filter based on the tab and details
     const productDetailsValue = productDetails.get(product.id);
     const matchesTab =
-      activeTab === "house"
-        ? productDetailsValue === "0"
-        : productDetailsValue === "1";
+      activeTab === "house-land"
+        ? productDetailsValue === "1"
+        : productDetailsValue === "0";
     return isActiveProduct && matchesTab;
   });
 
@@ -290,13 +290,13 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           <DarkFormSale />
         ) : title === "Buy" ? (
           <Tabs onActiveTabChange={handleTabChange}>
-            <Tabs.Item title="House Package" active={activeTab === "house"}>
-              {renderProductsList()}
-            </Tabs.Item>
             <Tabs.Item
               title="House and Land Package"
               active={activeTab === "house-land"}
             >
+              {renderProductsList()}
+            </Tabs.Item>
+            <Tabs.Item title="House Package" active={activeTab === "house"}>
               {renderProductsList()}
             </Tabs.Item>
           </Tabs>
