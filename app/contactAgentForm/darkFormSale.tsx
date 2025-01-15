@@ -133,7 +133,7 @@ const DarkFormSale: React.FC = () => {
   };
 
   return (
-    <div className="m-10 ">
+    <div className="mb-5">
       <h1 className={`text-2xl font-bold mb-5 text-white`}>
         Request Appraisel for Sale
       </h1>

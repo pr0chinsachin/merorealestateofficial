@@ -25,8 +25,7 @@ interface ServiceProduct {
   propertyStatusValue: string;
   href: string;
   status: boolean;
-}
-
+  
 interface HotlistById {
   id: string;
   productCode: string;
@@ -180,6 +179,14 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     return isActiveProduct && matchesTab;
   });
 
+
+  const houseProducts = filteredProducts.filter(
+    (product) => product.details !== "1"
+  );
+  const houseAndLandProducts = filteredProducts.filter(
+    (product) => product.details === "1"
+  );
+
   const renderProductCard = (product: ServiceProduct) => (
     <div key={product.id} className="group">
       <Link
@@ -308,6 +315,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   );
 
   function renderProductsList() {
+
     if (fetchError) {
       return (
         <div className="text-red-500 mt-4 text-center">
@@ -323,6 +331,11 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
         </div>
       );
     }
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, products.length);
+    const paginatedProducts = products.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(products.length / itemsPerPage);
 
     return (
       <div>
@@ -344,7 +357,38 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
         )}
       </div>
     );
-  }
+  };
+
+  return (
+    <div
+      className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8"
+      style={{ backgroundColor: "#14222d" }}
+    >
+      <div className="max-w-7xl mx-auto md:py-8">
+        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
+          {title}
+        </h2>
+
+        {title === "Sale" ? (
+          <DarkFormSale />
+        ) : title === "Buy" ? (
+          <Tabs onActiveTabChange={handleTabChange}>
+            <Tabs.Item title="House Package" active={activeTab === "house"}>
+              {renderProductsList(houseProducts)}
+            </Tabs.Item>
+            <Tabs.Item
+              title="House and Land Package"
+              active={activeTab === "house-land"}
+            >
+              {renderProductsList(houseAndLandProducts)}
+            </Tabs.Item>
+          </Tabs>
+        ) : (
+          renderProductsList(filteredProducts)
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ServiceWiseProduct;

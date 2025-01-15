@@ -62,7 +62,7 @@ const LatestProductView: React.FC = () => {
           ...latestProduct,
           thumbnailImgPath: latestProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
-
+console.log("Buy and rent",processedData);
         setlatestProducts(processedData);
         setIsLoading(false);
       } else {
