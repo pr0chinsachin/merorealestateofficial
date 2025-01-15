@@ -1,7 +1,6 @@
 "use client";
 import { Card, Spinner, Pagination, Tabs } from "flowbite-react";
 import React, { useEffect, useState } from "react";
-import { HiEye, HiPencilAlt } from "react-icons/hi";
 import { Badge } from "flowbite-react";
 import Image from "next/image";
 import carIcon from "../../../../../public/car.svg";
@@ -26,8 +25,30 @@ interface ServiceProduct {
   propertyStatusValue: string;
   href: string;
   status: boolean;
+  
+interface HotlistById {
+  id: string;
+  productCode: string;
+  productName: string;
+  categoryId: string;
+  subCategoryId: string;
+  address: string;
+  price: number;
+  mapLink: string;
+  thumbnailImgPath: string;
+  newThumbnailImg: string;
+  videoLink: string;
+  description: string;
   details: string;
-  packageType?: string; // Added for filtering house packages
+  propertyStatusValue: string;
+  parkingCount: number;
+  roomCount: number;
+  bathRoomCount: number;
+  area: number;
+  images: {
+    name: string;
+    filePath: string;
+  }[];
 }
 
 interface ServiceProductProps {
@@ -47,11 +68,36 @@ const customTheme: CustomFlowbiteTheme["card"] = {
 
 const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const { id, title } = params;
+  const [productData, setProductData] = useState<HotlistById>({
+    id: "",
+    productCode: "",
+    productName: "",
+    categoryId: "",
+    subCategoryId: "",
+    address: "",
+    price: 0,
+    mapLink: "",
+    thumbnailImgPath: "",
+    newThumbnailImg: "",
+    videoLink: "",
+    description: "",
+    details: "",
+    propertyStatusValue: "",
+    parkingCount: 0,
+    roomCount: 0,
+    bathRoomCount: 0,
+    area: 0,
+    images: [],
+  });
+  const [productDetails, setProductDetails] = useState<Map<string, string>>(
+    new Map()
+  );
+  const [error, setError] = useState<string | null>(null);
   const [productsByPrice, setProductsByPrice] = useState<ServiceProduct[]>([]);
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("house");
+  const [activeTab, setActiveTab] = useState<string>("house-land"); // Default to "house-land"
   const itemsPerPage = 8;
 
   const fetchData = async () => {
@@ -66,14 +112,42 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           thumbnailImgPath: hotListProduct.thumbnailImgPath.replace(/~/g, ""),
         }));
         setProductsByPrice(processedData);
+
+        // Fetch details for all products
+        await Promise.all(
+          processedData.map(async (product) => {
+            await fetchDataProduct(product.id);
+          })
+        );
+
         setIsLoading(false);
       } else {
+        setFetchError(true);
         setIsLoading(false);
         console.error("Failed to fetch data");
       }
     } catch (error) {
+      setFetchError(true);
       setIsLoading(false);
       console.error("Error:", error);
+    }
+  };
+
+  const fetchDataProduct = async (productId: string) => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/Product/UpdateProduct?id=${productId}`
+      );
+      if (response.ok) {
+        const data: HotlistById = await response.json();
+        setProductDetails((prev) => new Map(prev).set(productId, data.details));
+        setError(null);
+      } else {
+        setError("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Error: Unable to fetch data from server");
     }
   };
 
@@ -82,14 +156,29 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   }, []);
 
   const handleTabChange = (activeTab: number) => {
-    const tab = activeTab === 0 ? "house" : "house-land";
+    const tab = activeTab === 0 ? "house-land" : "house";
     setActiveTab(tab);
     setCurrentPage(1);
   };
 
-  const filteredProducts = productsByPrice.filter(
-    (product) => product.status === true
-  );
+  // Filter products based on active tab, status, and title
+  const filteredProducts = productsByPrice.filter((product) => {
+    const isActiveProduct = product.status === true;
+
+    // If title is not "Buy", show all active products
+    if (title !== "Buy") {
+      return isActiveProduct;
+    }
+
+    // For "Buy" title, filter based on the tab and details
+    const productDetailsValue = productDetails.get(product.id);
+    const matchesTab =
+      activeTab === "house-land"
+        ? productDetailsValue === "1"
+        : productDetailsValue === "0";
+    return isActiveProduct && matchesTab;
+  });
+
 
   const houseProducts = filteredProducts.filter(
     (product) => product.details !== "1"
@@ -115,7 +204,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             <div>
               <span className="inline-flex items-baseline">
                 <Badge color="warning" className="text-sm">
-                  {product.propertyStatusValue.toString()}
+                  {product.propertyStatusValue.toString() === "Rented"
+                    ? "Buy"
+                    : product.propertyStatusValue.toString()}
                 </Badge>
               </span>
             </div>
@@ -187,7 +278,44 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     </div>
   );
 
-  const renderProductsList = (products: ServiceProduct[]) => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  return (
+    <div
+      className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8"
+      style={{ backgroundColor: "#14222d" }}
+    >
+      <div className="max-w-7xl mx-auto md:py-8">
+        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
+          {title}
+        </h2>
+
+        {title === "Sale" ? (
+          <DarkFormSale />
+        ) : title === "Buy" ? (
+          <Tabs onActiveTabChange={handleTabChange}>
+            <Tabs.Item
+              title="House and Land Package"
+              active={activeTab === "house-land"}
+            >
+              {renderProductsList()}
+            </Tabs.Item>
+            <Tabs.Item title="House Package" active={activeTab === "house"}>
+              {renderProductsList()}
+            </Tabs.Item>
+          </Tabs>
+        ) : (
+          renderProductsList()
+        )}
+      </div>
+    </div>
+  );
+
+  function renderProductsList() {
+
     if (fetchError) {
       return (
         <div className="text-red-500 mt-4 text-center">
