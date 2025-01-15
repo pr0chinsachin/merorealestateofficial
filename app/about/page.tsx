@@ -54,13 +54,8 @@ function About() {
 
             <div>
               <div className="flex items-center gap-10 mt-10 ">
-                <Image
-                  className="rounded-full"
-                  src={Founder}
-                  alt="founder"
-                  width={100}
-                  height={100}
-                />
+                <div className="bg-[url('./about/images/founder.jpg')] bg-no-repeat bg-cover overflow-hidden h-20 w-20 rounded-full"></div>
+
                 <div>
                   <div className="font-bold">Pushpa Maharjan</div>
                   <div>FOUNDER</div>
