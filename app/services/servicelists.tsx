@@ -83,7 +83,7 @@ const ServiceLists: React.FC = () => {
   };
 
   return (
-    <div style={{ backgroundColor: "#14222d" }}>
+    <div className="py-14" style={{ backgroundColor: "#14222d" }}>
       <h2 className="mb-7 pt-7 text-3xl md:text-4xl text-center font-bold text-sky-50">
         Our Services
       </h2>

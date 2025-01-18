@@ -24,7 +24,7 @@ interface ServiceProduct {
   area: number;
   propertyStatusValue: string;
   status: boolean;
-  details:string;
+  details: string;
 }
 
 interface HotlistById {
@@ -78,7 +78,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`);
+      const response = await fetch(
+        `${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`
+      );
       if (response.ok) {
         const data: ServiceProduct[] = await response.json();
         const processedData = data.map((product) => ({
@@ -130,9 +132,12 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           </h3>
           <div className="flex justify-between">
             <Badge color="warning" className="text-sm">
-              {product.propertyStatusValue === "Rented" ? "Buy" : product.propertyStatusValue}
+              {product.propertyStatusValue === "Rented"
+                ? "Buy"
+                : product.propertyStatusValue}
             </Badge>
-            <div className="text-orange-500 font-bold">${" "}
+            <div className="text-orange-500 font-bold">
+              ${" "}
               {Intl.NumberFormat("en-US", {
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2,
@@ -145,7 +150,12 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
               <span className="pl-2">{product.roomCount}</span>
             </div>
             <div className="flex items-center">
-              <Image src={Bathroom} alt="Bathroom Icon" width={20} height={20} />
+              <Image
+                src={Bathroom}
+                alt="Bathroom Icon"
+                width={20}
+                height={20}
+              />
               <span className="pl-2">{product.bathRoomCount}</span>
             </div>
             <div className="flex items-center">
@@ -165,7 +175,11 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
   const renderProductsList = () => {
     if (fetchError) {
-      return <div className="text-red-500 mt-4 text-center">Failed to fetch data. Please try again later.</div>;
+      return (
+        <div className="text-red-500 mt-4 text-center">
+          Failed to fetch data. Please try again later.
+        </div>
+      );
     }
 
     if (isLoading) {
@@ -177,7 +191,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     }
 
     if (paginatedProducts.length === 0) {
-      return <div className="text-center text-gray-500">No products found.</div>;
+      return (
+        <div className="text-center text-gray-500">No products found.</div>
+      );
     }
 
     return (
@@ -203,7 +219,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     >
       <div className="max-w-7xl mx-auto md:py-8">
         <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
-          {title}
+          {title === "Sale" ? "Sale with us" : title}
         </h2>
 
         {title === "Sale" ? (

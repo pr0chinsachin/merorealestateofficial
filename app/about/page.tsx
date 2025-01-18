@@ -16,7 +16,7 @@ function About() {
         </span>
       </div>
       <Card
-        className="grid place-items-center "
+        className="grid place-items-center border-none rounded-none"
         style={{ backgroundColor: "#14222d", color: "#fff" }}
       >
         <div className="sm:flex sm:gap-14 2xl:px-72  sm:my-20 my-10 ">
@@ -81,7 +81,7 @@ function About() {
 
       {/* explore section */}
       <Card
-        className="flex justify-center  text-white 2xl:px-40 py-20"
+        className="flex justify-center  text-white 2xl:px-40 py-20 border-none rounded-none"
         style={{ backgroundColor: "#14222d" }}
       >
         <span className="font-bold text-3xl text-center">Explore More</span>
@@ -109,7 +109,7 @@ function About() {
       </Card>
 
       {/* location section */}
-      <Card className="2xl:px-40 bg-white">
+      <Card className="2xl:px-40 bg-white rounded-none">
         <Contact />
       </Card>
     </div>

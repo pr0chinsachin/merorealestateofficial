@@ -133,9 +133,9 @@ const DarkFormSale: React.FC = () => {
   };
 
   return (
-    <div className="mb-5">
+    <div className="m-10 pb-10">
       <h1 className={`text-2xl font-bold mb-5 text-white`}>
-        Request Appraisel for Sale
+        Request Appraisel
       </h1>
       <hr />
       <form className="flex flex-col gap-6 mt-10" onSubmit={handleSubmit}>

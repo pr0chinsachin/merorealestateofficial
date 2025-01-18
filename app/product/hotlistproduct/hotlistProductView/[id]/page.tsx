@@ -469,7 +469,9 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             <Accordion.Panel>
               <Accordion.Title>Contact Agent</Accordion.Title>
               <Accordion.Content>
-                <ContactAgentForm />
+                <div className="-m-10">
+                  <ContactAgentForm />
+                </div>
               </Accordion.Content>
             </Accordion.Panel>
           </Accordion>
