@@ -17,7 +17,7 @@ const Dashboard = () => {
       <div>
         <Search />
       </div>
-      <div className="">
+      <div className="-my-14">
         <Servicelists />
       </div>
       <HighlightedProduct />
