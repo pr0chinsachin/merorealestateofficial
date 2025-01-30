@@ -192,7 +192,9 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
     if (paginatedProducts.length === 0) {
       return (
-        <div className="text-center text-gray-500">No products found.</div>
+        <div className="text-center text-gray-500">
+          {title === "Build" ? "Comming Soon." : "No Products Found."}
+        </div>
       );
     }
 
