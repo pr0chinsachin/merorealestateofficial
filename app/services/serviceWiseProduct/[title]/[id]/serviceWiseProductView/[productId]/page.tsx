@@ -439,6 +439,24 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
               </Accordion.Content>
             </Accordion.Panel> */}
             <Accordion.Panel>
+              <Accordion.Title>Floor Plan</Accordion.Title>
+              <Accordion.Content>
+                {productData.images.map((item, index) => (
+                  <div>
+                    <Image
+                      src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
+                      alt={productData.productName}
+                      width={800}
+                      height={300}
+                      className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                      onLoad={handleImageLoad}
+                      priority
+                    />
+                  </div>
+                ))}
+              </Accordion.Content>
+            </Accordion.Panel>
+            <Accordion.Panel>
               <Accordion.Title>Video</Accordion.Title>
               <Accordion.Content>
                 <div
