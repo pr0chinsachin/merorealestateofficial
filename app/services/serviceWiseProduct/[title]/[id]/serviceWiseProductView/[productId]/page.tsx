@@ -180,6 +180,11 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             </div>
             <div className="flex justify-end">
               <h1 className="text-xl sm:text-2xl text-orange-500 hover:text-red-500">
+                {productData.propertyStatusValue.toLowerCase() === "buy" ? (
+                  <div>Starting From</div>
+                ) : (
+                  ""
+                )}
                 <b>
                   <span>$</span>
                   {Intl.NumberFormat("en-US", {
@@ -481,10 +486,21 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
                 </Tabs.Item> */}
-                <Tabs.Item
-                  title="Floor Plan"
-                  icon={HiClipboardList}
-                ></Tabs.Item>
+                <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
+                  {productData.images.map((item, index) => (
+                    <div>
+                      <Image
+                        src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
+                        alt={productData.productName}
+                        width={800}
+                        height={300}
+                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                        onLoad={handleImageLoad}
+                        priority
+                      />
+                    </div>
+                  ))}
+                </Tabs.Item>
                 <Tabs.Item title="Video" icon={HiClipboardList}>
                   <div
                     className="Container w-full grid place-items-center"

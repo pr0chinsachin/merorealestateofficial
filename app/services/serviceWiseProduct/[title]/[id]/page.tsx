@@ -232,7 +232,10 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             >
               {renderProductsList()}
             </Tabs.Item>
-            <Tabs.Item title="House Package" active={activeTab === "house"}>
+            <Tabs.Item
+              title="Residental Properties"
+              active={activeTab === "house"}
+            >
               {renderProductsList()}
             </Tabs.Item>
           </Tabs>
