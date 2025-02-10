@@ -113,8 +113,8 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     if (title !== "Buy") return product.status;
 
     return activeTab === "house-land"
-      ? product.details === "1"
-      : product.details === "0";
+      ? product.details === "0"
+      : product.details === "1";
   });
 
   const renderProductCard = (product: ServiceProduct) => (
@@ -229,14 +229,14 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
         ) : title === "Buy" ? (
           <Tabs onActiveTabChange={handleTabChange}>
             <Tabs.Item
-              title="House and Land Package"
-              active={activeTab === "house-land"}
+              title="Residental Properties"
+              active={activeTab === "house"}
             >
               {renderProductsList()}
             </Tabs.Item>
             <Tabs.Item
-              title="Residental Properties"
-              active={activeTab === "house"}
+              title="House and Land Package"
+              active={activeTab === "house-land"}
             >
               {renderProductsList()}
             </Tabs.Item>
