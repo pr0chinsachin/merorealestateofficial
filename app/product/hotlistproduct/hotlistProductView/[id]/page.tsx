@@ -439,13 +439,26 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               </Accordion.Content>
             </Accordion.Panel>
             <Accordion.Panel>
-              <Accordion.Title>Details</Accordion.Title>
+              <Accordion.Title>Floor plan</Accordion.Title>
               <Accordion.Content>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: productData.details,
-                  }}
-                />
+                {productData.propertyStatusValue === "Buy"
+                  ? productData.images.map((item, index) => (
+                      <div>
+                        <Image
+                          src={`${SERVER_URL}${item.filePath.replace(
+                            /~/g,
+                            ""
+                          )}`}
+                          alt={productData.productName}
+                          width={800}
+                          height={300}
+                          className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                          onLoad={handleImageLoad}
+                          priority
+                        />
+                      </div>
+                    ))
+                  : ""}
               </Accordion.Content>
             </Accordion.Panel>
             <Accordion.Panel>
@@ -486,7 +499,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                     }}
                   />
                 </Tabs.Item>
-                <Tabs.Item title="Features" icon={MdDashboard}>
+                {/* <Tabs.Item title="Features" icon={MdDashboard}>
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
@@ -495,11 +508,27 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
+                </Tabs.Item> */}
+                <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
+                  {productData.propertyStatusValue === "Buy"
+                    ? productData.images.map((item, index) => (
+                        <div>
+                          <Image
+                            src={`${SERVER_URL}${item.filePath.replace(
+                              /~/g,
+                              ""
+                            )}`}
+                            alt={productData.productName}
+                            width={800}
+                            height={300}
+                            className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                            onLoad={handleImageLoad}
+                            priority
+                          />
+                        </div>
+                      ))
+                    : ""}
                 </Tabs.Item>
-                <Tabs.Item
-                  title="Floor Plan"
-                  icon={HiClipboardList}
-                ></Tabs.Item>
                 <Tabs.Item title="Video" icon={HiClipboardList}>
                   <div
                     className="Container w-full grid place-items-center"

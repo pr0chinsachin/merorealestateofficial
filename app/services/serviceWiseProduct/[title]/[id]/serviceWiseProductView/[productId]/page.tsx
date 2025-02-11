@@ -441,19 +441,24 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             <Accordion.Panel>
               <Accordion.Title>Floor Plan</Accordion.Title>
               <Accordion.Content>
-                {productData.images.map((item, index) => (
-                  <div>
-                    <Image
-                      src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
-                      alt={productData.productName}
-                      width={800}
-                      height={300}
-                      className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                      onLoad={handleImageLoad}
-                      priority
-                    />
-                  </div>
-                ))}
+                {productData.propertyStatusValue === "Buy"
+                  ? productData.images.map((item, index) => (
+                      <div>
+                        <Image
+                          src={`${SERVER_URL}${item.filePath.replace(
+                            /~/g,
+                            ""
+                          )}`}
+                          alt={productData.productName}
+                          width={800}
+                          height={300}
+                          className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                          onLoad={handleImageLoad}
+                          priority
+                        />
+                      </div>
+                    ))
+                  : ""}
               </Accordion.Content>
             </Accordion.Panel>
             <Accordion.Panel>
@@ -505,19 +510,24 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                   />
                 </Tabs.Item> */}
                 <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
-                  {productData.images.map((item, index) => (
-                    <div>
-                      <Image
-                        src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
-                        alt={productData.productName}
-                        width={800}
-                        height={300}
-                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                        onLoad={handleImageLoad}
-                        priority
-                      />
-                    </div>
-                  ))}
+                  {productData.propertyStatusValue === "Buy"
+                    ? productData.images.map((item, index) => (
+                        <div>
+                          <Image
+                            src={`${SERVER_URL}${item.filePath.replace(
+                              /~/g,
+                              ""
+                            )}`}
+                            alt={productData.productName}
+                            width={800}
+                            height={300}
+                            className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                            onLoad={handleImageLoad}
+                            priority
+                          />
+                        </div>
+                      ))
+                    : ""}
                 </Tabs.Item>
                 <Tabs.Item title="Video" icon={HiClipboardList}>
                   <div
