@@ -1,6 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Card, Badge, Tabs, Spinner, Accordion } from "flowbite-react";
+import { useEffect, useState, ChangeEvent } from "react";
+import {
+  Card,
+  Badge,
+  Tabs,
+  Spinner,
+  Accordion,
+  Button,
+  Modal,
+  FileInput,
+} from "flowbite-react";
 import {
   HiEye,
   HiCalendar,
@@ -79,6 +88,112 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
   const [imageLoading, setImageLoading] = useState<boolean>(false); // State to track loading image
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [fullScreen, setFullScreen] = useState(false);
+
+  // for application request
+  const [openModal, setOpenModal] = useState(false);
+  const [openModalSubmittion, setOpenModalSubmittion] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    phoneNumber: "",
+    address: "",
+    email: "",
+    description: "",
+    status: true,
+    deleted: false,
+    applicationFormFile: [] as File[],
+  });
+
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return;
+    const files = Array.from(event.target.files);
+
+    setFormData((prevState) => ({
+      ...prevState,
+      applicationFormFile: files,
+    }));
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      applicationFormFile: prevState.applicationFormFile.filter(
+        (_, i) => i !== index
+      ),
+    }));
+  };
+
+  const handleConfirm = async () => {
+    const uploadData = new FormData();
+
+    uploadData.append("FirstName", formData.firstName);
+    uploadData.append("MiddleName", formData.middleName);
+    uploadData.append("LastName", formData.lastName);
+    uploadData.append("ContactNumber", formData.phoneNumber);
+    uploadData.append("Address", formData.address);
+    uploadData.append("EmailAddress", formData.email);
+    uploadData.append("Description", formData.description);
+    uploadData.append("Status", formData.status.toString());
+    uploadData.append("Deleted", formData.deleted.toString());
+
+    formData.applicationFormFile.forEach((file) => {
+      uploadData.append("ApplicationFormFile.ImgFile", file);
+    });
+
+    try {
+      const response = await fetch(`${BASE_URL}/ApplicationForm/FormSubmit`, {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (response.ok) {
+        alert("Files uploaded successfully!");
+        setFormData({
+          firstName: "",
+          middleName: "",
+          lastName: "",
+          phoneNumber: "",
+          address: "",
+          email: "",
+          description: "",
+          status: true,
+          deleted: false,
+          applicationFormFile: [],
+        });
+        setOpenModal(false);
+        setOpenModalSubmittion(true);
+      } else {
+        alert("Upload failed");
+      }
+    } catch (error) {
+      alert("Error uploading files");
+    }
+  };
+
+  const handleDownload = () => {
+    const files = ["OFFER FORM.pdf", "Rental Application.pdf"];
+
+    files.forEach((file) => {
+      const link = document.createElement("a");
+      link.href = `/${file}`;
+      link.download = file;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  };
+  // for application request
 
   useEffect(() => {
     const fetchData = async () => {
@@ -180,18 +295,21 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             </div>
             <div className="flex justify-end">
               <h1 className="text-xl sm:text-2xl text-orange-500 hover:text-red-500">
-                {productData.propertyStatusValue.toLowerCase() === "buy" ? (
-                  <div>Starting From</div>
+                {productData.price === 0 ? (
+                  "Contact Agent for Price"
                 ) : (
-                  ""
+                  <>
+                    {productData.propertyStatusValue.toLowerCase() ===
+                      "buy" && <div>Starting From</div>}
+                    <b>
+                      <span>$</span>
+                      {Intl.NumberFormat("en-US", {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      }).format(productData.price)}
+                    </b>
+                  </>
                 )}
-                <b>
-                  <span>$</span>
-                  {Intl.NumberFormat("en-US", {
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2,
-                  }).format(productData.price)}
-                </b>
               </h1>
             </div>
           </div>
@@ -441,19 +559,22 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             <Accordion.Panel>
               <Accordion.Title>Floor Plan</Accordion.Title>
               <Accordion.Content>
-                {productData.images.map((item, index) => (
-                  <div>
-                    <Image
-                      src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
-                      alt={productData.productName}
-                      width={800}
-                      height={300}
-                      className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                      onLoad={handleImageLoad}
-                      priority
-                    />
-                  </div>
-                ))}
+                {productData.propertyStatusValue === "Buy" &&
+                  productData.images.length > 0 && (
+                    <div>
+                      <Image
+                        src={`${SERVER_URL}${productData.images[
+                          productData.images.length - 1
+                        ].filePath.replace(/~/g, "")}`}
+                        alt={productData.productName}
+                        width={800}
+                        height={300}
+                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                        onLoad={handleImageLoad}
+                        priority
+                      />
+                    </div>
+                  )}
               </Accordion.Content>
             </Accordion.Panel>
             <Accordion.Panel>
@@ -474,6 +595,198 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                 ></div>
               </Accordion.Content>
             </Accordion.Panel>
+
+            {productData.propertyStatusValue === "Rent" ||
+            productData.propertyStatusValue === "Buy" ? (
+              <Accordion.Panel>
+                <Accordion.Title>Application Request</Accordion.Title>
+                <Accordion.Content>
+                  <Button onClick={handleDownload}>Download Form</Button>
+
+                  <br />
+                  <div>
+                    <Button onClick={() => setOpenModal(true)}>
+                      Upload Form
+                    </Button>
+
+                    <Modal show={openModal} onClose={() => setOpenModal(false)}>
+                      <Modal.Header style={{ backgroundColor: "#14222d" }}>
+                        <div className="text-white"> Upload Instructions</div>
+                      </Modal.Header>
+                      <Modal.Body style={{ backgroundColor: "#14222d" }}>
+                        <p className="text-white">
+                          Please select your files and confirm to upload them.
+                          Files must be in .jpg or .png format
+                        </p>
+
+                        <form className="flex flex-col gap-6 mt-10">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* First Name */}
+                            <div>
+                              <label htmlFor="firstName" className="text-white">
+                                First Name
+                              </label>
+                              <input
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Middle Name */}
+                            <div>
+                              <label
+                                htmlFor="middleName"
+                                className="text-white"
+                              >
+                                Middle Name
+                              </label>
+                              <input
+                                id="middleName"
+                                name="middleName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.middleName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Last Name */}
+                            <div>
+                              <label htmlFor="lastName" className="text-white">
+                                Last Name
+                              </label>
+                              <input
+                                id="lastName"
+                                name="lastName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Phone Number */}
+                            <div>
+                              <label
+                                htmlFor="phoneNumber"
+                                className="text-white"
+                              >
+                                Phone Number
+                              </label>
+                              <input
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Address */}
+                            <div>
+                              <label htmlFor="address" className="text-white">
+                                Address
+                              </label>
+                              <input
+                                id="address"
+                                name="address"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                              <label htmlFor="email" className="text-white">
+                                Your Email
+                              </label>
+                              <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="name@domain.com"
+                                required
+                                className="text-black p-2"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div className="flex flex-col">
+                            <label htmlFor="description" className="text-white">
+                              Your Message
+                            </label>
+                            <textarea
+                              id="description"
+                              name="description"
+                              rows={4}
+                              className="w-full text-black p-2 rounded"
+                              value={formData.description}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          {/* File Upload */}
+                          <div className="flex flex-col">
+                            <label
+                              htmlFor="applicationFormFile"
+                              className="text-white"
+                            >
+                              Application Request
+                            </label>
+                            <FileInput
+                              id="applicationFormFile"
+                              name="applicationFormFile"
+                              multiple
+                              onChange={handleFileChange}
+                              className="text-white"
+                            />
+                            <ul>
+                              {formData.applicationFormFile.map(
+                                (file, index) => (
+                                  <li
+                                    key={index}
+                                    className="text-sm text-white flex justify-between p-4 bg-slate-700 my-3"
+                                  >
+                                    {file.name}
+                                    <button
+                                      className="text-red-500 ml-2"
+                                      onClick={() => handleRemoveFile(index)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        </form>
+
+                        <Button
+                          className="bg-green-600 text-white px-4 py-2 rounded mt-4"
+                          onClick={handleConfirm}
+                          disabled={formData.applicationFormFile.length === 0}
+                        >
+                          Confirm Upload
+                        </Button>
+                      </Modal.Body>
+                    </Modal>
+                  </div>
+                </Accordion.Content>
+              </Accordion.Panel>
+            ) : (
+              <></>
+            )}
+
             <Accordion.Panel>
               <Accordion.Title>Contact Agent</Accordion.Title>
               <Accordion.Content>
@@ -505,19 +818,22 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                   />
                 </Tabs.Item> */}
                 <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
-                  {productData.images.map((item, index) => (
-                    <div>
-                      <Image
-                        src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`}
-                        alt={productData.productName}
-                        width={800}
-                        height={300}
-                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                        onLoad={handleImageLoad}
-                        priority
-                      />
-                    </div>
-                  ))}
+                  {productData.propertyStatusValue === "Buy" &&
+                    productData.images.length > 0 && (
+                      <div>
+                        <Image
+                          src={`${SERVER_URL}${productData.images[
+                            productData.images.length - 1
+                          ].filePath.replace(/~/g, "")}`}
+                          alt={productData.productName}
+                          width={800}
+                          height={300}
+                          className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                          onLoad={handleImageLoad}
+                          priority
+                        />
+                      </div>
+                    )}
                 </Tabs.Item>
                 <Tabs.Item title="Video" icon={HiClipboardList}>
                   <div
@@ -531,6 +847,206 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                     dangerouslySetInnerHTML={{ __html: productData.mapLink }}
                   ></div>
                 </Tabs.Item>
+
+                {productData.propertyStatusValue === "Rent" ||
+                productData.propertyStatusValue === "Buy" ? (
+                  <Tabs.Item title="Application Request" icon={HiClipboardList}>
+                    <Button onClick={handleDownload}>Download Form</Button>
+
+                    <br />
+                    <div>
+                      <Button onClick={() => setOpenModal(true)}>
+                        Upload Form
+                      </Button>
+
+                      <Modal
+                        show={openModal}
+                        onClose={() => setOpenModal(false)}
+                      >
+                        <Modal.Header style={{ backgroundColor: "#14222d" }}>
+                          <div className="text-white"> Upload Instructions</div>
+                        </Modal.Header>
+                        <Modal.Body style={{ backgroundColor: "#14222d" }}>
+                          <p className="text-white">
+                            Please select your files and confirm to upload them.
+                            Files must be in .jpg or .png format
+                          </p>
+
+                          <form className="flex flex-col gap-6 mt-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {/* First Name */}
+                              <div>
+                                <label
+                                  htmlFor="firstName"
+                                  className="text-white"
+                                >
+                                  First Name
+                                </label>
+                                <input
+                                  id="firstName"
+                                  name="firstName"
+                                  type="text"
+                                  className="text-black p-2"
+                                  value={formData.firstName}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              {/* Middle Name */}
+                              <div>
+                                <label
+                                  htmlFor="middleName"
+                                  className="text-white"
+                                >
+                                  Middle Name
+                                </label>
+                                <input
+                                  id="middleName"
+                                  name="middleName"
+                                  type="text"
+                                  className="text-black p-2"
+                                  value={formData.middleName}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              {/* Last Name */}
+                              <div>
+                                <label
+                                  htmlFor="lastName"
+                                  className="text-white"
+                                >
+                                  Last Name
+                                </label>
+                                <input
+                                  id="lastName"
+                                  name="lastName"
+                                  type="text"
+                                  className="text-black p-2"
+                                  value={formData.lastName}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              {/* Phone Number */}
+                              <div>
+                                <label
+                                  htmlFor="phoneNumber"
+                                  className="text-white"
+                                >
+                                  Phone Number
+                                </label>
+                                <input
+                                  id="phoneNumber"
+                                  name="phoneNumber"
+                                  type="text"
+                                  className="text-black p-2"
+                                  value={formData.phoneNumber}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              {/* Address */}
+                              <div>
+                                <label htmlFor="address" className="text-white">
+                                  Address
+                                </label>
+                                <input
+                                  id="address"
+                                  name="address"
+                                  type="text"
+                                  className="text-black p-2"
+                                  value={formData.address}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+
+                              {/* Email */}
+                              <div>
+                                <label htmlFor="email" className="text-white">
+                                  Your Email
+                                </label>
+                                <input
+                                  id="email"
+                                  name="email"
+                                  type="email"
+                                  placeholder="name@domain.com"
+                                  required
+                                  className="text-black p-2"
+                                  value={formData.email}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Description */}
+                            <div className="flex flex-col">
+                              <label
+                                htmlFor="description"
+                                className="text-white"
+                              >
+                                Your Message
+                              </label>
+                              <textarea
+                                id="description"
+                                name="description"
+                                rows={4}
+                                className="w-full text-black p-2 rounded"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* File Upload */}
+                            <div className="flex flex-col">
+                              <label
+                                htmlFor="applicationFormFile"
+                                className="text-white"
+                              >
+                                Application Request
+                              </label>
+                              <FileInput
+                                id="applicationFormFile"
+                                name="applicationFormFile"
+                                multiple
+                                onChange={handleFileChange}
+                                className="text-white"
+                              />
+                              <ul>
+                                {formData.applicationFormFile.map(
+                                  (file, index) => (
+                                    <li
+                                      key={index}
+                                      className="text-sm text-white flex justify-between p-4 bg-slate-700 my-3"
+                                    >
+                                      {file.name}
+                                      <button
+                                        className="text-red-500 ml-2"
+                                        onClick={() => handleRemoveFile(index)}
+                                      >
+                                        Remove
+                                      </button>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          </form>
+
+                          <Button
+                            className="bg-green-600 text-white px-4 py-2 rounded mt-4"
+                            onClick={handleConfirm}
+                            disabled={formData.applicationFormFile.length === 0}
+                          >
+                            Confirm Upload
+                          </Button>
+                        </Modal.Body>
+                      </Modal>
+                    </div>
+                  </Tabs.Item>
+                ) : (
+                  ""
+                )}
               </Tabs>
             </div>
             <div className="pt-1 px-4 sm:px-0">
@@ -548,6 +1064,22 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
             </div>
           </Card>
         )}
+
+        {/* confirmation modal */}
+        <Modal
+          show={openModalSubmittion}
+          onClose={() => setOpenModalSubmittion(false)}
+          className="pt-96 lg:pt-0"
+        >
+          <Modal.Header style={{ backgroundColor: "#14222d" }}>
+            <div className="text-white"> Form Submitted Successfully</div>
+          </Modal.Header>
+          <Modal.Body style={{ backgroundColor: "#14222d" }}>
+            <p className="text-white">
+              Thank you for the Application Submit. Will reach you within 24 hr.
+            </p>
+          </Modal.Body>
+        </Modal>
       </div>
     </>
   );

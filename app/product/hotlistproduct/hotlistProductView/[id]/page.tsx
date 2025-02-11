@@ -1,6 +1,18 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Card, Badge, Tabs, Spinner, Accordion } from "flowbite-react";
+import React, { useEffect, useState, ChangeEvent } from "react";
+import {
+  Card,
+  Badge,
+  Tabs,
+  Spinner,
+  Accordion,
+  Button,
+  Modal,
+  FileInput,
+  TextInput,
+  Textarea,
+  Label,
+} from "flowbite-react";
 import {
   HiEye,
   HiCalendar,
@@ -9,6 +21,8 @@ import {
   HiAdjustments,
   HiClipboardList,
 } from "react-icons/hi";
+import { IoMdDownload } from "react-icons/io";
+import { MdFileUpload } from "react-icons/md";
 import { MdMeetingRoom } from "react-icons/md";
 import { FaCarAlt, FaBath } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
@@ -84,6 +98,114 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [fullScreen, setFullScreen] = useState(false);
 
+  //for application request
+  const [openModal, setOpenModal] = useState(false);
+  const [openModalSubmittion, setOpenModalSubmittion] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    phoneNumber: "",
+    address: "",
+    email: "",
+    description: "",
+    status: true,
+    deleted: false,
+    applicationFormFile: [] as File[],
+  });
+
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return;
+    const files = Array.from(event.target.files);
+
+    setFormData((prevState) => ({
+      ...prevState,
+      applicationFormFile: files,
+    }));
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      applicationFormFile: prevState.applicationFormFile.filter(
+        (_, i) => i !== index
+      ),
+    }));
+  };
+
+  const handleConfirm = async () => {
+    console.log(formData);
+
+    const uploadData = new FormData();
+
+    uploadData.append("FirstName", formData.firstName);
+    uploadData.append("MiddleName", formData.middleName);
+    uploadData.append("LastName", formData.lastName);
+    uploadData.append("ContactNumber", formData.phoneNumber);
+    uploadData.append("Address", formData.address);
+    uploadData.append("EmailAddress", formData.email);
+    uploadData.append("Description", formData.description);
+    uploadData.append("Status", formData.status.toString());
+    uploadData.append("Deleted", formData.deleted.toString());
+
+    formData.applicationFormFile.forEach((file) => {
+      uploadData.append("ApplicationFormFile.ImgFile", file);
+    });
+
+    try {
+      const response = await fetch(`${BASE_URL}/ApplicationForm/FormSubmit`, {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (response.ok) {
+        alert("Files uploaded successfully!");
+        setFormData({
+          firstName: "",
+          middleName: "",
+          lastName: "",
+          phoneNumber: "",
+          address: "",
+          email: "",
+          description: "",
+          status: true,
+          deleted: false,
+          applicationFormFile: [],
+        });
+        setOpenModal(false);
+        setOpenModalSubmittion(true);
+      } else {
+        alert("Upload failed");
+      }
+    } catch (error) {
+      alert("Error uploading files");
+    }
+  };
+
+  const handleDownload = () => {
+    const files = ["OFFER FORM.pdf", "Rental Application.pdf"];
+
+    files.forEach((file) => {
+      const link = document.createElement("a");
+      link.href = `/${file}`;
+      link.download = file;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  };
+  //for application request
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -101,6 +223,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               ? data.newThumbnailImg.replace(/~z/g, "")
               : "",
           });
+
           setIsLoading(false);
           setError(null);
         } else {
@@ -210,7 +333,6 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 </b>
               </h1>
             </div>
-
           </div>
 
           <hr />
@@ -435,24 +557,26 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 />
               </Accordion.Content>
             </Accordion.Panel>
+
             <Accordion.Panel>
-              <Accordion.Title>Features</Accordion.Title>
+              <Accordion.Title>Floor plan</Accordion.Title>
               <Accordion.Content>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: productData.details,
-                  }}
-                />
-              </Accordion.Content>
-            </Accordion.Panel>
-            <Accordion.Panel>
-              <Accordion.Title>Details</Accordion.Title>
-              <Accordion.Content>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: productData.details,
-                  }}
-                />
+                {productData.propertyStatusValue === "Buy" &&
+                  productData.images.length > 0 && (
+                    <div>
+                      <Image
+                        src={`${SERVER_URL}${productData.images[
+                          productData.images.length - 1
+                        ].filePath.replace(/~/g, "")}`}
+                        alt={productData.productName}
+                        width={800}
+                        height={300}
+                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                        onLoad={handleImageLoad}
+                        priority
+                      />
+                    </div>
+                  )}
               </Accordion.Content>
             </Accordion.Panel>
             <Accordion.Panel>
@@ -473,6 +597,239 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 ></div>
               </Accordion.Content>
             </Accordion.Panel>
+
+            {productData.propertyStatusValue === "Rent" ||
+            productData.propertyStatusValue === "Buy" ? (
+              <Accordion.Panel>
+                <Accordion.Title>Application Request</Accordion.Title>
+                <Accordion.Content>
+                  <Card className="w-full ">
+                    {productData.propertyStatusValue === "Buy" ? (
+                      <a href="/OFFER FORM.pdf" download="Offer Form">
+                        <Button className="w-full">Download Offer Form</Button>
+                        <br />
+
+                        <div
+                          style={{ color: "#0f7490" }}
+                          className=" grid place-items-center w-full"
+                        >
+                          <IoMdDownload size={50} />
+                        </div>
+                      </a>
+                    ) : (
+                      <a
+                        href="/Rental Application.pdf"
+                        download="Rental Application"
+                      >
+                        <Button className="w-full">Download Rental Form</Button>
+                        <br />
+
+                        <div
+                          style={{ color: "#0f7490" }}
+                          className=" grid place-items-center w-full"
+                        >
+                          <IoMdDownload size={50} />
+                        </div>
+                      </a>
+                    )}
+                  </Card>
+
+                  <br />
+
+                  <div>
+                    <Card
+                      className="w-full cursor-pointer"
+                      onClick={() => setOpenModal(true)}
+                    >
+                      <Button>Upload Form</Button>
+
+                      <div
+                        style={{ color: "#0f7490" }}
+                        className=" grid place-items-center w-full"
+                      >
+                        <MdFileUpload size={50} />
+                      </div>
+                    </Card>
+
+                    <Modal show={openModal} onClose={() => setOpenModal(false)}>
+                      <Modal.Header style={{ backgroundColor: "#14222d" }}>
+                        <div className="text-white"> Upload Instructions</div>
+                      </Modal.Header>
+                      <Modal.Body style={{ backgroundColor: "#14222d" }}>
+                        <p className="text-white">
+                          Please select your files and confirm to upload them.
+                          Files must be in .jpg or .png format
+                        </p>
+
+                        <form className="flex flex-col gap-6 mt-10">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* First Name */}
+                            <div>
+                              <Label htmlFor="firstName" className="text-white">
+                                First Name
+                              </Label>
+                              <TextInput
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Middle Name */}
+                            <div>
+                              <Label
+                                htmlFor="middleName"
+                                className="text-white"
+                              >
+                                Middle Name
+                              </Label>
+                              <TextInput
+                                id="middleName"
+                                name="middleName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.middleName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Last Name */}
+                            <div>
+                              <Label htmlFor="lastName" className="text-white">
+                                Last Name
+                              </Label>
+                              <TextInput
+                                id="lastName"
+                                name="lastName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Phone Number */}
+                            <div>
+                              <Label
+                                htmlFor="phoneNumber"
+                                className="text-white"
+                              >
+                                Phone Number
+                              </Label>
+                              <TextInput
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Address */}
+                            <div>
+                              <Label htmlFor="address" className="text-white">
+                                Address
+                              </Label>
+                              <TextInput
+                                id="address"
+                                name="address"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                              <Label htmlFor="email" className="text-white">
+                                Your Email
+                              </Label>
+                              <TextInput
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="name@domain.com"
+                                required
+                                className="text-black p-2"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div className="flex flex-col">
+                            <Label htmlFor="description" className="text-white">
+                              Your Message
+                            </Label>
+                            <Textarea
+                              id="description"
+                              name="description"
+                              rows={4}
+                              className="w-full text-black p-2 rounded"
+                              value={formData.description}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          {/* File Upload */}
+                          <div className="flex flex-col">
+                            <Label
+                              htmlFor="applicationFormFile"
+                              className="text-white"
+                            >
+                              Application Request
+                            </Label>
+                            <FileInput
+                              id="applicationFormFile"
+                              name="applicationFormFile"
+                              multiple
+                              onChange={handleFileChange}
+                              className="text-white"
+                            />
+                            <ul>
+                              {formData.applicationFormFile.map(
+                                (file, index) => (
+                                  <li
+                                    key={index}
+                                    className="text-sm text-white flex justify-between p-4 bg-slate-700 my-3"
+                                  >
+                                    {file.name}
+                                    <button
+                                      className="text-red-500 ml-2"
+                                      onClick={() => handleRemoveFile(index)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        </form>
+
+                        <Button
+                          className=" text-white px-4 py-2 rounded mt-4 w-full"
+                          style={{ backgroundColor: "#F27423" }}
+                          onClick={handleConfirm}
+                          disabled={formData.applicationFormFile.length === 0}
+                        >
+                          Confirm Upload
+                        </Button>
+                      </Modal.Body>
+                    </Modal>
+                  </div>
+                </Accordion.Content>
+              </Accordion.Panel>
+            ) : (
+              <></>
+            )}
+
             <Accordion.Panel>
               <Accordion.Title>Contact Agent</Accordion.Title>
               <Accordion.Content>
@@ -493,7 +850,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                     }}
                   />
                 </Tabs.Item>
-                <Tabs.Item title="Features" icon={MdDashboard}>
+                {/* <Tabs.Item title="Features" icon={MdDashboard}>
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
@@ -502,11 +859,25 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                   <div
                     dangerouslySetInnerHTML={{ __html: productData.details }}
                   />
+                </Tabs.Item> */}
+                <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
+                  {productData.propertyStatusValue === "Buy" &&
+                    productData.images.length > 0 && (
+                      <div>
+                        <Image
+                          src={`${SERVER_URL}${productData.images[
+                            productData.images.length - 1
+                          ].filePath.replace(/~/g, "")}`}
+                          alt={productData.productName}
+                          width={800}
+                          height={300}
+                          className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
+                          onLoad={handleImageLoad}
+                          priority
+                        />
+                      </div>
+                    )}
                 </Tabs.Item>
-                <Tabs.Item
-                  title="Floor Plan"
-                  icon={HiClipboardList}
-                ></Tabs.Item>
                 <Tabs.Item title="Video" icon={HiClipboardList}>
                   <div
                     className="Container w-full grid place-items-center"
@@ -519,6 +890,242 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                     dangerouslySetInnerHTML={{ __html: productData.mapLink }}
                   ></div>
                 </Tabs.Item>
+
+                {productData.propertyStatusValue === "Rent" ||
+                productData.propertyStatusValue === "Buy" ? (
+                  <Tabs.Item title="Application Request" icon={HiClipboardList}>
+                    <div className="flex justify-between w-full items-center gap-3">
+                      <Card className="w-1/2 ">
+                        {productData.propertyStatusValue === "Buy" ? (
+                          <a href="/OFFER FORM.pdf" download="Offer Form">
+                            <Button className="w-full">
+                              Download Offer Form
+                            </Button>
+                            <br />
+
+                            <div
+                              style={{ color: "#0f7490" }}
+                              className=" grid place-items-center w-full"
+                            >
+                              <IoMdDownload size={50} />
+                            </div>
+                          </a>
+                        ) : (
+                          <a
+                            href="/Rental Application.pdf"
+                            download="Rental Application"
+                          >
+                            <Button className="w-full">
+                              Download Rental Form
+                            </Button>
+                            <br />
+
+                            <div
+                              style={{ color: "#0f7490" }}
+                              className=" grid place-items-center w-full"
+                            >
+                              <IoMdDownload size={50} />
+                            </div>
+                          </a>
+                        )}
+                      </Card>
+
+                      <Card
+                        className="w-1/2 cursor-pointer"
+                        onClick={() => setOpenModal(true)}
+                      >
+                        <Button>Upload Form</Button>
+
+                        <div
+                          style={{ color: "#0f7490" }}
+                          className=" grid place-items-center w-full"
+                        >
+                          <MdFileUpload size={50} />
+                        </div>
+                      </Card>
+                    </div>
+                    <Modal
+                      dismissible
+                      show={openModal}
+                      onClose={() => setOpenModal(false)}
+                      size="8xl"
+                      className="p-72"
+                    >
+                      <Modal.Header style={{ backgroundColor: "#14222d" }}>
+                        <div className="text-white"> Upload Instructions</div>
+                      </Modal.Header>
+                      <Modal.Body style={{ backgroundColor: "#14222d" }}>
+                        <p className="text-white">
+                          Please select your files and confirm to upload them.
+                          Files must be in .jpg or .png format
+                        </p>
+
+                        <form className="flex flex-col gap-6 mt-10">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* First Name */}
+                            <div>
+                              <Label htmlFor="firstName" className="text-white">
+                                First Name
+                              </Label>
+                              <TextInput
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Middle Name */}
+                            <div>
+                              <Label
+                                htmlFor="middleName"
+                                className="text-white"
+                              >
+                                Middle Name
+                              </Label>
+                              <TextInput
+                                id="middleName"
+                                name="middleName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.middleName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Last Name */}
+                            <div>
+                              <Label htmlFor="lastName" className="text-white">
+                                Last Name
+                              </Label>
+                              <TextInput
+                                id="lastName"
+                                name="lastName"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Phone Number */}
+                            <div>
+                              <Label
+                                htmlFor="phoneNumber"
+                                className="text-white"
+                              >
+                                Phone Number
+                              </Label>
+                              <TextInput
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Address */}
+                            <div>
+                              <Label htmlFor="address" className="text-white">
+                                Address
+                              </Label>
+                              <TextInput
+                                id="address"
+                                name="address"
+                                type="text"
+                                className="text-black p-2"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+
+                            {/* Email */}
+                            <div>
+                              <Label htmlFor="email" className="text-white">
+                                Your Email
+                              </Label>
+                              <TextInput
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="name@domain.com"
+                                required
+                                className="text-black p-2"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div className="flex flex-col">
+                            <Label htmlFor="description" className="text-white">
+                              Your Message
+                            </Label>
+                            <Textarea
+                              id="description"
+                              name="description"
+                              rows={4}
+                              className="w-full text-black p-2 rounded"
+                              value={formData.description}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+
+                          {/* File Upload */}
+                          <div className="flex flex-col">
+                            <Label
+                              htmlFor="applicationFormFile"
+                              className="text-white"
+                            >
+                              Application Request
+                            </Label>
+                            <FileInput
+                              id="applicationFormFile"
+                              name="applicationFormFile"
+                              multiple
+                              onChange={handleFileChange}
+                              className="text-white"
+                            />
+                            <ul>
+                              {formData.applicationFormFile.map(
+                                (file, index) => (
+                                  <li
+                                    key={index}
+                                    className="text-sm text-white flex justify-between p-4 bg-slate-700 my-3"
+                                  >
+                                    {file.name}
+                                    <button
+                                      className="text-red-500 ml-2"
+                                      onClick={() => handleRemoveFile(index)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
+                        </form>
+
+                        <Button
+                          className=" text-white px-4 py-2 rounded mt-4 w-full"
+                          style={{ backgroundColor: "#F27423" }}
+                          onClick={handleConfirm}
+                          disabled={formData.applicationFormFile.length === 0}
+                        >
+                          Confirm Upload
+                        </Button>
+                      </Modal.Body>
+                    </Modal>
+                  </Tabs.Item>
+                ) : (
+                  ""
+                )}
               </Tabs>
             </div>
             <div className="pt-1 px-4 sm:px-0">
@@ -536,6 +1143,23 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             </div>
           </Card>
         )}
+
+        {/* confirmation modal */}
+        <Modal
+          show={openModalSubmittion}
+          onClose={() => setOpenModalSubmittion(false)}
+          className="pt-96 lg:pt-0"
+          size="7xl"
+        >
+          <Modal.Header style={{ backgroundColor: "#14222d" }}>
+            <div className="text-white"> Form Submitted Successfully</div>
+          </Modal.Header>
+          <Modal.Body style={{ backgroundColor: "#14222d" }}>
+            <p className="text-white">
+              Thank you for the Application Submit. Will reach you within 24 hr.
+            </p>
+          </Modal.Body>
+        </Modal>
       </div>
     </>
   );
