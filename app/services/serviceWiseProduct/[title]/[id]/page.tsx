@@ -73,7 +73,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("house-land"); // Default to "house-land"
+  const [activeTab, setActiveTab] = useState<string>("house"); // Default to "house-land"
   const itemsPerPage = 8;
 
   const fetchData = async () => {
@@ -103,8 +103,8 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     fetchData();
   }, []);
 
-  const handleTabChange = (activeTab: number) => {
-    const tab = activeTab === 0 ? "house-land" : "house";
+  const handleTabChange = (index: number) => {
+    const tab = index === 0 ? "house" : "house-land";
     setActiveTab(tab);
     setCurrentPage(1);
   };
@@ -112,16 +112,14 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const filteredProducts = productsByPrice.filter((product) => {
     if (title !== "Buy") return product.status;
 
-    return activeTab === "house-land"
+    return activeTab === "house"
       ? product.details === "0"
       : product.details === "1";
   });
 
   const renderProductCard = (product: ServiceProduct) => (
     <div key={product.id} className="group">
-      <Link
-        href={`/services/serviceWiseProduct/${title}/${id}/serviceWiseProductView/${product.id}`}
-      >
+      <Link href={`/product/hotlistproduct/hotlistProductView/${product.id}`}>
         <Card
           imgSrc={`${SERVER_URL}${product.thumbnailImgPath}`}
           className="w-full max-w-lg"
@@ -137,11 +135,12 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
                 : product.propertyStatusValue}
             </Badge>
             <div className="text-orange-500 font-bold">
-              ${" "}
-              {Intl.NumberFormat("en-US", {
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2,
-              }).format(product.price)}
+              {product.price === 0
+                ? "NA"
+                : `$ ${Intl.NumberFormat("en-US", {
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                  }).format(product.price)}`}
             </div>
           </div>
           <div className="flex justify-between">
