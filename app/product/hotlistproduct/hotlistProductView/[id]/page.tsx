@@ -196,14 +196,21 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             <div className="flex justify-end">
               <h1 className="text-xl sm:text-2xl text-orange-500 hover:text-red-500">
                 <b>
-                  <span>$</span>
-                  {Intl.NumberFormat("en-US", {
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2,
-                  }).format(productData.price)}
+                  {productData.price === 0 ? (
+                    "Contact Agent for Price"
+                  ) : (
+                    <>
+                      <span>$</span>
+                      {Intl.NumberFormat("en-US", {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 2,
+                      }).format(productData.price)}
+                    </>
+                  )}
                 </b>
               </h1>
             </div>
+
           </div>
 
           <hr />

@@ -163,7 +163,7 @@ const AgentViewDetails: React.FC<UpdateAgentProps> = ({ params }) => {
                       </div>
                       <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Occupation
+                        Designation
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                           {agentData.designation}
@@ -177,14 +177,14 @@ const AgentViewDetails: React.FC<UpdateAgentProps> = ({ params }) => {
                           {agentData.experience}
                         </dd>
                       </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                      {/* <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt className="text-sm font-medium leading-6 text-gray-900">
                           Skills
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                           {agentData.skill}
                         </dd>
-                      </div>
+                      </div> */}
                       <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt className="text-sm font-medium leading-6 text-gray-900">
                           Website Link
@@ -276,7 +276,7 @@ const AgentViewDetails: React.FC<UpdateAgentProps> = ({ params }) => {
                       </div>
                       <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Occupation
+                        Designation
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                           {agentData.designation}
@@ -290,14 +290,14 @@ const AgentViewDetails: React.FC<UpdateAgentProps> = ({ params }) => {
                           {agentData.experience}
                         </dd>
                       </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                      {/* <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                         <dt className="text-sm font-medium leading-6 text-gray-900">
                           Skills
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                           {agentData.skill}
                         </dd>
-                      </div>
+                      </div> */}
                     </dl>
                   </Card>
 

@@ -133,7 +133,7 @@ const ContactAgentForm: React.FC = () => {
   };
 
   return (
-    <div className="m-10 ">
+    <div className="m-5 ">
       <h1 className={`text-2xl font-bold mb-5 `}>Contact Agent</h1>
       <hr />
       <form className="flex flex-col gap-6 mt-10" onSubmit={handleSubmit}>
