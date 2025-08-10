@@ -601,11 +601,22 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             {productData.propertyStatusValue === "Rent" ||
             productData.propertyStatusValue === "Buy" ? (
               <Accordion.Panel>
-                <Accordion.Title>Application Request</Accordion.Title>
+                <Accordion.Title>
+                  {productData.details === "0"
+                    ? "Offer Form"
+                    : "Application Request"}
+                </Accordion.Title>
                 <Accordion.Content>
                   <Card className="w-full ">
                     {productData.propertyStatusValue === "Buy" ? (
-                      <a href="/OFFER FORM.pdf" download="Offer Form">
+                      <a
+                        href={
+                          productData.details === "0"
+                            ? "/Residental Form.pdf"
+                            : "/OFFER FORM.pdf"
+                        }
+                        download="Offer Form"
+                      >
                         <Button className="w-full">Download Offer Form</Button>
                         <br />
 
@@ -833,7 +844,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             <Accordion.Panel>
               <Accordion.Title>Contact Agent</Accordion.Title>
               <Accordion.Content>
-                <div className="-m-10">
+                <div className="-m-5">
                   <ContactAgentForm />
                 </div>
               </Accordion.Content>
@@ -893,11 +904,25 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
 
                 {productData.propertyStatusValue === "Rent" ||
                 productData.propertyStatusValue === "Buy" ? (
-                  <Tabs.Item title="Application Request" icon={HiClipboardList}>
+                  <Tabs.Item
+                    title={
+                      productData.details === "0"
+                        ? "Offer Form"
+                        : "Application Request"
+                    }
+                    icon={HiClipboardList}
+                  >
                     <div className="flex justify-between w-full items-center gap-3">
                       <Card className="w-1/2 ">
                         {productData.propertyStatusValue === "Buy" ? (
-                          <a href="/OFFER FORM.pdf" download="Offer Form">
+                          <a
+                            href={
+                              productData.details === "0"
+                                ? "/Residental Form.pdf"
+                                : "/OFFER FORM.pdf"
+                            }
+                            download="Offer Form"
+                          >
                             <Button className="w-full">
                               Download Offer Form
                             </Button>
@@ -1087,7 +1112,6 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                             <FileInput
                               id="applicationFormFile"
                               name="applicationFormFile"
-                              multiple
                               onChange={handleFileChange}
                               className="text-white"
                             />

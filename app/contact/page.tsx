@@ -22,7 +22,7 @@ const Contact = () => {
             <div className="space-y-2">
               <p className="flex items-center">
                 <HiLocationMarker className="mr-2" />
-                29 Jennifer Avenue Ridgeheaven SA 5097
+                29 Jennifer Avenue Ridgehaven SA 5097
               </p>
 
               <p className="flex items-center">
