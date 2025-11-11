@@ -73,7 +73,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("house"); // Default to "house-land"
+  const [activeTab, setActiveTab] = useState<string>("house");
   const itemsPerPage = 8;
 
   const fetchData = async () => {
@@ -109,14 +109,29 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     setCurrentPage(1);
   };
 
+  // ✅ Fixed filtering logic
   const filteredProducts = productsByPrice.filter((product) => {
-    if (title !== "Buy") return product.status;
+    // For "Buy"
+    if (title === "Buy") {
+      return activeTab === "house"
+        ? product.details === "0"
+        : product.details === "1";
+    }
 
-    return activeTab === "house"
-      ? product.details === "0"
-      : product.details === "1";
+    // For "Rent" (exclude leased)
+    if (title === "Rent") {
+      return (
+        product.status &&
+        (product.propertyStatusValue === "Rent" ||
+          product.propertyStatusValue === "Rented")
+      );
+    }
+
+    // For "Sale" or other titles
+    return product.status;
   });
 
+  // ✅ Product card UI
   const renderProductCard = (product: ServiceProduct) => (
     <div key={product.id} className="group">
       <Link href={`/product/hotlistproduct/hotlistProductView/${product.id}`}>
@@ -128,12 +143,18 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           <h3 className="text-md text-black font-semibold truncate">
             {product.productName}
           </h3>
+
           <div className="flex justify-between">
+            {/* ✅ Fixed badge logic */}
             <Badge color="warning" className="text-sm">
-              {product.propertyStatusValue === "Rented"
-                ? "Buy"
+              {title === "Rent"
+                ? "Rent"
+                : product.propertyStatusValue === "Leased" ||
+                  product.propertyStatusValue === "Rented"
+                ? "Rent"
                 : product.propertyStatusValue}
             </Badge>
+
             <div className="text-orange-500 font-bold">
               {product.price === 0
                 ? "NA"
@@ -143,18 +164,14 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
                   }).format(product.price)}`}
             </div>
           </div>
+
           <div className="flex justify-between">
             <div className="flex items-center">
               <Image src={Bedroom} alt="Bedroom Icon" width={20} height={20} />
               <span className="pl-2">{product.roomCount}</span>
             </div>
             <div className="flex items-center">
-              <Image
-                src={Bathroom}
-                alt="Bathroom Icon"
-                width={20}
-                height={20}
-              />
+              <Image src={Bathroom} alt="Bathroom Icon" width={20} height={20} />
               <span className="pl-2">{product.bathRoomCount}</span>
             </div>
             <div className="flex items-center">
@@ -167,11 +184,13 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     </div>
   );
 
+  // ✅ Pagination logic
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+  // ✅ Render section
   const renderProductsList = () => {
     if (fetchError) {
       return (
@@ -192,7 +211,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     if (paginatedProducts.length === 0) {
       return (
         <div className="text-center text-gray-500">
-          {title === "Build" ? "Comming Soon." : "No Products Found."}
+          {title === "Build" ? "Coming Soon." : "No Products Found."}
         </div>
       );
     }
@@ -228,7 +247,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
         ) : title === "Buy" ? (
           <Tabs onActiveTabChange={handleTabChange}>
             <Tabs.Item
-              title="Residental Properties"
+              title="Residential Properties"
               active={activeTab === "house"}
             >
               {renderProductsList()}
