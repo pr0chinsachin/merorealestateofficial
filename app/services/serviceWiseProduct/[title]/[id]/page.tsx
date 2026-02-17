@@ -79,7 +79,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`
+        `${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`,
       );
       if (response.ok) {
         const data: ServiceProduct[] = await response.json();
@@ -88,6 +88,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
         }));
         setProductsByPrice(processedData);
+        console.log("Fetched Products:mmm", processedData);
         setIsLoading(false);
       } else {
         setFetchError(true);
@@ -123,7 +124,8 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
       return (
         product.status &&
         (product.propertyStatusValue === "Rent" ||
-          product.propertyStatusValue === "Rented")
+          product.propertyStatusValue === "Rented" ||
+          product.propertyStatusValue === "UnderManagement")
       );
     }
 
@@ -145,14 +147,20 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           </h3>
 
           <div className="flex justify-between">
-            {/* ✅ Fixed badge logic */}
-            <Badge color="warning" className="text-sm">
-              {title === "Rent"
-                ? "Rent"
-                : product.propertyStatusValue === "Leased" ||
-                  product.propertyStatusValue === "Rented"
-                ? "Rent"
-                : product.propertyStatusValue}
+            <Badge
+              color={
+                product.propertyStatusValue === "UnderManagement"
+                  ? "indigo"
+                  : "success"
+              }
+              className="text-sm"
+            >
+              {product.propertyStatusValue === "UnderManagement"
+                ? "Under Management"
+                : title === "Rent" ||
+                    ["Leased", "Rented"].includes(product.propertyStatusValue)
+                  ? "Rent"
+                  : product.propertyStatusValue}
             </Badge>
 
             <div className="text-orange-500 font-bold">
@@ -171,7 +179,12 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
               <span className="pl-2">{product.roomCount}</span>
             </div>
             <div className="flex items-center">
-              <Image src={Bathroom} alt="Bathroom Icon" width={20} height={20} />
+              <Image
+                src={Bathroom}
+                alt="Bathroom Icon"
+                width={20}
+                height={20}
+              />
               <span className="pl-2">{product.bathRoomCount}</span>
             </div>
             <div className="flex items-center">
