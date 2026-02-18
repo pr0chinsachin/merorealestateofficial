@@ -150,7 +150,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             <Badge
               color={
                 product.propertyStatusValue === "UnderManagement"
-                  ? "indigo"
+                  ? "purple"
                   : "success"
               }
               className="text-sm"
