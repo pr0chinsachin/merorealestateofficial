@@ -141,7 +141,8 @@ const LatestProductView: React.FC = () => {
                   .map((product) => {
                     if (
                       product.propertyStatusValue === "Rent" ||
-                      product.propertyStatusValue === "Buy"
+                      product.propertyStatusValue === "Buy" ||
+                      product.propertyStatusValue === "UnderManagement"
                     ) {
                       return (
                         <div key={product.id} className="px-3 ">
@@ -173,9 +174,10 @@ const LatestProductView: React.FC = () => {
                                   </span>
                                 </div>
                                 <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
-                                  {product.price === 0 ? "NA" : `$${Intl.NumberFormat("en-US", options).format(product.price)}`}
+                                  {product.price === 0
+                                    ? "NA"
+                                    : `$${Intl.NumberFormat("en-US", options).format(product.price)}`}
                                 </div>
-
                               </div>
 
                               {/* <div className=" text-lg font-medium text-gray-900 ">
