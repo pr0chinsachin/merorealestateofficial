@@ -150,7 +150,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             <Badge
               color={
                 product.propertyStatusValue === "UnderManagement"
-                  ? "purple"
+                  ? "dark"
                   : "success"
               }
               className="text-sm"
@@ -215,7 +215,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
     if (isLoading) {
       return (
-        <div className="relative w-full h-64 flex justify-center items-center">
+        <div className="relative w-full h-96 flex justify-center items-center ">
           <Spinner size="xl" />
         </div>
       );
@@ -234,7 +234,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {paginatedProducts.map(renderProductCard)}
         </div>
-        <div className="mt-8 flex justify-end">
+        <div className="m-8 flex justify-end pb-8">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -250,31 +250,33 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
       className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8"
       style={{ backgroundColor: "#14222d" }}
     >
-      <div className="max-w-7xl mx-auto md:py-8">
-        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 mb-6">
-          {title === "Sale" ? "Sale with us" : title}
+      <div className="max-w-7xl mx-auto md:py-8 h-max">
+        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 md:mt-3 md:mb-16">
+          {title === "Sale" ? "Sale with us" : decodeURIComponent(title)}
         </h2>
-
-        {title === "Sale" ? (
-          <DarkFormSale />
-        ) : title === "Buy" ? (
-          <Tabs onActiveTabChange={handleTabChange}>
-            <Tabs.Item
-              title="Residential Properties"
-              active={activeTab === "house"}
-            >
-              {renderProductsList()}
-            </Tabs.Item>
-            <Tabs.Item
-              title="House and Land Package"
-              active={activeTab === "house-land"}
-            >
-              {renderProductsList()}
-            </Tabs.Item>
-          </Tabs>
-        ) : (
-          renderProductsList()
-        )}
+        <div className="my-10">
+          {title === "Sale" ? (
+            <DarkFormSale />
+          ) : title === "Buy" ? (
+            // <Tabs onActiveTabChange={handleTabChange}>
+            //   <Tabs.Item
+            //     title="Residential Properties"
+            //     active={activeTab === "house"}
+            //   >
+            //     {renderProductsList()}
+            //   </Tabs.Item>
+            //   <Tabs.Item
+            //     title="House and Land Package"
+            //     active={activeTab === "house-land"}
+            //   >
+            //     {renderProductsList()}
+            //   </Tabs.Item>
+            // </Tabs>
+            renderProductsList()
+          ) : (
+            renderProductsList()
+          )}
+        </div>
       </div>
     </div>
   );
