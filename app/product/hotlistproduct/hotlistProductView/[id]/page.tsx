@@ -115,7 +115,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   });
 
   const handleInputChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
     setFormData((prev) => ({
@@ -138,7 +138,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     setFormData((prevState) => ({
       ...prevState,
       applicationFormFile: prevState.applicationFormFile.filter(
-        (_, i) => i !== index
+        (_, i) => i !== index,
       ),
     }));
   };
@@ -210,7 +210,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/Product/UpdateProduct?id=${id}`
+          `${BASE_URL}/Product/UpdateProduct?id=${id}`,
         );
         if (response.ok) {
           const data: HotlistById = await response.json();
@@ -529,7 +529,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                         <img
                           src={`${SERVER_URL}${item.filePath.replace(
                             /~/g,
-                            ""
+                            "",
                           )}`}
                           alt={item.name}
                           style={{ width: "100px", cursor: "pointer" }} // Adjust the width if needed
@@ -818,7 +818,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                                       Remove
                                     </button>
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           </div>
@@ -856,6 +856,17 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               <Tabs aria-label="Full width tabs">
                 <Tabs.Item active title="Description" icon={HiUserCircle}>
                   <div
+                    className="
+                      [&_p]:min-h-[1em]
+                      [&_ul]:list-disc [&_ul]:pl-5
+                      [&_ol]:list-decimal [&_ol]:pl-5
+                      [&_li]:my-0.5
+                      [&_strong]:font-bold
+                      [&_em]:italic
+                      [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-2
+                      [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-2
+                      [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-1
+                    "
                     dangerouslySetInnerHTML={{
                       __html: productData.description,
                     }}
@@ -1130,7 +1141,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                                       Remove
                                     </button>
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           </div>
