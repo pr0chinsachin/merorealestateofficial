@@ -141,8 +141,7 @@ const LatestProductView: React.FC = () => {
                   .map((product) => {
                     if (
                       product.propertyStatusValue === "Rent" ||
-                      product.propertyStatusValue === "Buy" ||
-                      product.propertyStatusValue === "UnderManagement"
+                      product.propertyStatusValue === "Buy"
                     ) {
                       return (
                         <div key={product.id} className="px-3 ">
@@ -168,19 +167,9 @@ const LatestProductView: React.FC = () => {
                               <div className="flex w-full justify-between">
                                 <div>
                                   <span className="inline-flex float-right items-baseline">
-                                    {product.propertyStatusValue ===
-                                    "UnderManagement" ? (
-                                      <Badge color="dark" className="text-sm">
-                                        Under Management
-                                      </Badge>
-                                    ) : (
-                                      <Badge
-                                        color="success"
-                                        className=" text-sm"
-                                      >
-                                        {product.propertyStatusValue}
-                                      </Badge>
-                                    )}
+                                    <Badge color="success" className=" text-sm">
+                                      {product.propertyStatusValue}
+                                    </Badge>
                                   </span>
                                 </div>
                                 <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">

@@ -49,21 +49,23 @@ const ProductByPrice: React.FC = () => {
 
   const filteredProducts = productsByPrice
     .filter((product) =>
-      product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .sort(
       (a, b) =>
-        new Date(b.updatedDate).getTime() - new Date(a.updatedDate).getTime()
+        new Date(b.updatedDate).getTime() - new Date(a.updatedDate).getTime(),
     );
 
   const soldProducts = filteredProducts.filter(
     (product) =>
-      product.status === true && product.propertyStatusValue === "Sold"
+      product.status === true && product.propertyStatusValue === "Sold",
   );
 
   const leasedProducts = filteredProducts.filter(
     (product) =>
-      product.status === true && product.propertyStatusValue === "Leased"
+      product.status === true &&
+      (product.propertyStatusValue === "Leased" ||
+        product.propertyStatusValue === "UnderManagement"),
   );
 
   const totalSoldPages = Math.ceil(soldProducts.length / itemsPerPage);
@@ -79,7 +81,8 @@ const ProductByPrice: React.FC = () => {
             .filter(
               (product) =>
                 product.propertyStatusValue === "Sold" ||
-                product.propertyStatusValue === "Leased"
+                product.propertyStatusValue === "Leased" ||
+                product.propertyStatusValue === "UnderManagement",
             )
             .map((product) => ({
               ...product,
@@ -105,7 +108,7 @@ const ProductByPrice: React.FC = () => {
 
   const getPaginatedProducts = (
     products: ProductList[],
-    currentPage: number
+    currentPage: number,
   ) => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, products.length);
@@ -137,9 +140,15 @@ const ProductByPrice: React.FC = () => {
           <div className="flex justify-between">
             <div>
               <span className="inline-flex items-baseline ">
-                <Badge color="warning" className="text-sm">
-                  {product.propertyStatusValue.toString()}
-                </Badge>
+                {product.propertyStatusValue === "UnderManagement" ? (
+                  <Badge color="dark" className="text-sm">
+                    Under Management
+                  </Badge>
+                ) : (
+                  <Badge color="warning" className="text-sm">
+                    {product.propertyStatusValue.toString()}
+                  </Badge>
+                )}
               </span>
             </div>
             <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
@@ -258,7 +267,7 @@ const ProductByPrice: React.FC = () => {
                 <Tabs.Item title="Sold" active={activeTab === "sold"}>
                   <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
                     {getPaginatedProducts(soldProducts, currentSoldPage).map(
-                      renderProductCard
+                      renderProductCard,
                     )}
                   </div>
                   {soldProducts.length > 0 && (
@@ -281,7 +290,7 @@ const ProductByPrice: React.FC = () => {
                     ) : (
                       getPaginatedProducts(
                         leasedProducts,
-                        currentLeasedPage
+                        currentLeasedPage,
                       ).map(renderProductCard)
                     )}
                   </div>

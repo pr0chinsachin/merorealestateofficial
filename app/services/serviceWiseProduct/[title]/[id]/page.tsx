@@ -164,8 +164,12 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
             </Badge>
 
             <div className="text-orange-500 font-bold">
+              {product.propertyStatusValue === "Buy" && product.price !== 0 && (
+                <div className="text-sm text-gray-500">Starting From</div>
+              )}
+
               {product.price === 0
-                ? "NA"
+                ? "Contact for Price"
                 : `$ ${Intl.NumberFormat("en-US", {
                     maximumFractionDigits: 2,
                     minimumFractionDigits: 2,
