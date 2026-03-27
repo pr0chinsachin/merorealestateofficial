@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, ChangeEvent } from "react";
+import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import {
   Card,
   Badge,
@@ -31,7 +31,8 @@ import BASE_URL from "../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./hostlist.module.css";
 import ContactAgentForm from "../../../../contactAgentForm/page";
-import { PhotoProvider, PhotoView } from "react-photo-view";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import "photoswipe/style.css";
 import Slider from "react-slick";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 
@@ -94,9 +95,10 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [imageLoading, setImageLoading] = useState<boolean>(false); // State to track loading image
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [fullScreen, setFullScreen] = useState(false);
+
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   //for application request
   const [openModal, setOpenModal] = useState(false);
@@ -256,6 +258,28 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (isLoading || !productData.thumbnailImgPath) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: "#property-gallery",
+      children: "a",
+      mouseMovePan: true,
+
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 1.5,
+      maxZoomLevel: 1,
+
+      pswpModule: () => import("photoswipe"),
+    });
+
+    lightbox.init();
+
+    return () => {
+      lightbox.destroy();
+    };
+  }, [isLoading, productData]);
+
   const handleImageLoad = () => {
     setImageLoading(false);
   };
@@ -276,18 +300,16 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     );
   }
 
-  function toggleFullScreen() {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-      setFullScreen(false);
-    } else {
-      const element = document.querySelector(".PhotoView-Portal");
-      if (element) {
-        element.requestFullscreen();
-        setFullScreen(true);
-      }
-    }
-  }
+  const allImages = [
+    {
+      src: `${SERVER_URL}${productData.thumbnailImgPath}`,
+      name: productData.productName,
+    },
+    ...productData.images.map((img) => ({
+      src: `${SERVER_URL}${img.filePath.replace(/~/g, "")}`,
+      name: img.name,
+    })),
+  ];
 
   const settings = {
     dots: true,
@@ -384,161 +406,46 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
       <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
         <Card style={{ backgroundColor: "#14222d" }}>
           <div className="flex flex-col items-center">
-            <div>
-              <PhotoProvider
-                maskOpacity={0.8}
-                toolbarRender={({ onScale, scale, rotate, onRotate }) => {
-                  return (
-                    <div className="flex justify-center items-center gap-5">
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => onScale(scale + 1)}
-                      >
-                        <svg
-                          className="w-6 h-6 text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeWidth="2"
-                            d="m21 21-3.5-3.5M10 7v6m-3-3h6m4 0a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => onScale(scale - 1)}
-                      >
-                        <svg
-                          className="w-6 h-6 text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeWidth="2"
-                            d="m21 21-3.5-3.5M7 10h6m4 0a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => onRotate(rotate + 90)}
-                      >
-                        <svg
-                          className="w-6 h-6 text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"
-                          />
-                        </svg>
-                      </div>
-
-                      {document.fullscreenEnabled && (
-                        <div
-                          className="cursor-pointer"
-                          onClick={toggleFullScreen}
-                        >
-                          {fullScreen ? (
-                            <svg
-                              className="w-6 h-6 text-white"
-                              aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 9h4m0 0V5m0 4L4 4m15 5h-4m0 0V5m0 4 5-5M5 15h4m0 0v4m0-4-5 5m15-5h-4m0 0v4m0-4 5 5"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="w-6 h-6 text-white"
-                              aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }}
+            <div id="property-gallery" ref={galleryRef}>
+              <a
+                href={allImages[0]?.src}
+                data-pswp-width={800}
+                data-pswp-height={900}
+                target="_blank"
+                rel="noreferrer"
               >
-                <PhotoView
-                  src={`${SERVER_URL}${productData.thumbnailImgPath}`} // Ensure the URL is correct
-                >
-                  <Image
-                    src={`${SERVER_URL}${productData.thumbnailImgPath}`}
-                    alt={productData.productName}
-                    width={800}
-                    height={600}
-                    className="cursor-pointer rounded-lg"
-                    onLoad={handleImageLoad}
-                    priority
-                  />
-                </PhotoView>
+                <Image
+                  src={allImages[0]?.src}
+                  alt={productData.productName}
+                  width={800}
+                  height={600}
+                  className="cursor-pointer rounded-lg"
+                  onLoad={handleImageLoad}
+                  priority
+                />
+              </a>
 
-                <div
-                  className={`flex flex-wrap justify-center gap-4 w-full ${Style.side_view}`}
-                >
-                  {productData.images.map((item, index) => (
-                    <div>
-                      <PhotoView
-                        key={index}
-                        src={`${SERVER_URL}${item.filePath.replace(/~/g, "")}`} // Ensure the URL is correct
-                      >
-                        <img
-                          src={`${SERVER_URL}${item.filePath.replace(
-                            /~/g,
-                            "",
-                          )}`}
-                          alt={item.name}
-                          style={{ width: "100px", cursor: "pointer" }} // Adjust the width if needed
-                        />
-                      </PhotoView>
-                    </div>
-                  ))}
-                </div>
-              </PhotoProvider>
+              <div
+                className={`flex flex-wrap justify-center gap-4 w-full ${Style.side_view}`}
+              >
+                {allImages.slice(1).map((item, index) => (
+                  <div key={index}>
+                    <a
+                      href={item.src}
+                      data-pswp-width={800}
+                      data-pswp-height={600}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img
+                        src={item.src}
+                        alt={item.name}
+                        style={{ width: "100px", cursor: "pointer" }}
+                      />
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Card>
