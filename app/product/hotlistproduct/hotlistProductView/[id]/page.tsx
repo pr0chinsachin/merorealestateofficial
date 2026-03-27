@@ -410,7 +410,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               <a
                 href={allImages[0]?.src}
                 data-pswp-width={800}
-                data-pswp-height={900}
+                data-pswp-height={600}
                 target="_blank"
                 rel="noreferrer"
               >
