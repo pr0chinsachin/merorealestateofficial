@@ -122,7 +122,9 @@ function Result() {
                     .filter((product) => product.status === true)
                     .map((product) => (
                       <div key={product.id} className="group">
-                        <Link href={`results/hotlistProductView/${product.id}`}>
+                        <Link
+                          href={`../product/hotlistproduct/hotlistProductView/${product.id}`}
+                        >
                           <Card
                             imgSrc={`${SERVER_URL}${product.thumbnailImgPath}`}
                             className="w-full max-w-lg"

@@ -79,7 +79,7 @@ const LatestProductView: React.FC = () => {
 
   const settings = {
     dots: true,
-    infinite: latestProducts.length < 4,
+    infinite: latestProducts.length >= 4,
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
@@ -137,49 +137,59 @@ const LatestProductView: React.FC = () => {
             ) : (
               <Slider {...settings}>
                 {latestProducts
-                  .filter((product) => product.status === true) // Filter by status
-                  .map((product) => {
-                    if (
+                  .filter((product) => product.status === true)
+                  .filter(
+                    (product) =>
                       product.propertyStatusValue === "Rent" ||
-                      product.propertyStatusValue === "Buy"
-                    ) {
-                      return (
-                        <div key={product.id} className="px-3 ">
-                          <Link
-                            href={`/product/hotlistproduct/hotlistProductView/${product.id}`}
-                          >
-                            <Card
-                              imgSrc={
-                                product.thumbnailImgPath
-                                  ? `${SERVER_URL}${product.thumbnailImgPath}`
-                                  : logo.src
-                              }
-                              className="w-full max-w-lg shadow-md"
-                              style={{
-                                backgroundColor: "",
-                                color: "black",
-                              }}
-                              theme={customTheme}
-                            >
-                              <h3 className="text-lg font-semibold   truncate">
-                                {product.productName}
-                              </h3>
-                              <div className="flex w-full justify-between">
-                                <div>
-                                  <span className="inline-flex float-right items-baseline">
-                                    <Badge color="success" className=" text-sm">
-                                      {product.propertyStatusValue}
-                                    </Badge>
-                                  </span>
-                                </div>
-                                <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
-                                  {product.price === 0
-                                    ? "NA"
-                                    : `$${Intl.NumberFormat("en-US", options).format(product.price)}`}
-                                </div>
-                              </div>
+                      product.propertyStatusValue === "Buy",
+                  )
+                  .filter(
+                    (product) =>
+                      product.productName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                      product.propertyStatusValue
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                      product.price.toString().includes(searchTerm),
+                  )
+                  .map((product) => (
+                    <div key={product.id} className="px-3 ">
+                      <Link
+                        href={`/product/hotlistproduct/hotlistProductView/${product.id}`}
+                      >
+                        <Card
+                          imgSrc={
+                            product.thumbnailImgPath
+                              ? `${SERVER_URL}${product.thumbnailImgPath}`
+                              : logo.src
+                          }
+                          className="w-full max-w-lg shadow-md"
+                          style={{
+                            backgroundColor: "",
+                            color: "black",
+                          }}
+                          theme={customTheme}
+                        >
+                          <h3 className="text-lg font-semibold   truncate">
+                            {product.productName}
+                          </h3>
+                          <div className="flex w-full justify-between">
+                            <div>
+                              <span className="inline-flex float-right items-baseline">
+                                <Badge color="success" className=" text-sm">
+                                  {product.propertyStatusValue}
+                                </Badge>
+                              </span>
+                            </div>
+                            <div className="text-orange-500 hover:text-red-500 font-bold items-baseline">
+                              {product.price === 0
+                                ? "NA"
+                                : `$${Intl.NumberFormat("en-US", options).format(product.price)}`}
+                            </div>
+                          </div>
 
-                              {/* <div className=" text-lg font-medium text-gray-900 ">
+                          {/* <div className=" text-lg font-medium text-gray-900 ">
                                 <div className="flex justify-between items-center">
                                   <div className=" text-orange-500 hover:text-red-500 font-bold">
                                     ${product.price}
@@ -189,55 +199,51 @@ const LatestProductView: React.FC = () => {
                                   </div>
                                 </div>
                               </div> */}
-                              <div className="flex justify-between  ">
-                                <div className="flex items-center">
-                                  <Image
-                                    src={Bedroom}
-                                    alt="Bedroom Icon"
-                                    width={20}
-                                    height={20}
-                                  />
-                                  <span className="pl-2">
-                                    {product.roomCount < 1
-                                      ? "-"
-                                      : product.roomCount}
-                                  </span>
-                                </div>
-                                <div className="flex items-center">
-                                  <Image
-                                    src={Bathroom}
-                                    alt="Bathroom Icon"
-                                    width={20}
-                                    height={20}
-                                  />
-                                  <span className="pl-2">
-                                    {product.bathRoomCount < 1
-                                      ? "-"
-                                      : product.bathRoomCount}
-                                  </span>
-                                </div>
-                                <div className="flex items-center">
-                                  <Image
-                                    src={carIcon}
-                                    alt="Car Icon"
-                                    width={20}
-                                    height={20}
-                                  />
-                                  <span className="pl-2">
-                                    {product.parkingCount < 1
-                                      ? "-"
-                                      : product.parkingCount}
-                                  </span>
-                                </div>
-                              </div>
-                            </Card>
-                          </Link>
-                        </div>
-                      );
-                    } else {
-                      return null; // Return null if the condition is not met
-                    }
-                  })}
+                          <div className="flex justify-between  ">
+                            <div className="flex items-center">
+                              <Image
+                                src={Bedroom}
+                                alt="Bedroom Icon"
+                                width={20}
+                                height={20}
+                              />
+                              <span className="pl-2">
+                                {product.roomCount < 1
+                                  ? "-"
+                                  : product.roomCount}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Image
+                                src={Bathroom}
+                                alt="Bathroom Icon"
+                                width={20}
+                                height={20}
+                              />
+                              <span className="pl-2">
+                                {product.bathRoomCount < 1
+                                  ? "-"
+                                  : product.bathRoomCount}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Image
+                                src={carIcon}
+                                alt="Car Icon"
+                                width={20}
+                                height={20}
+                              />
+                              <span className="pl-2">
+                                {product.parkingCount < 1
+                                  ? "-"
+                                  : product.parkingCount}
+                              </span>
+                            </div>
+                          </div>
+                        </Card>
+                      </Link>
+                    </div>
+                  ))}
               </Slider>
             )}
           </div>
