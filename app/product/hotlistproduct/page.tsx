@@ -79,7 +79,7 @@ const LatestProductView: React.FC = () => {
 
   const settings = {
     dots: true,
-    infinite: latestProducts.length >= 4,
+    infinite: latestProducts.length <= 4,
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
