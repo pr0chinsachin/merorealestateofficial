@@ -144,7 +144,10 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     uploadData.append("MiddleName", formData.middleName);
     uploadData.append("LastName", formData.lastName);
     uploadData.append("ContactNumber", formData.phoneNumber);
-    uploadData.append("Address", formData.address);
+    uploadData.append(
+      "Address",
+      `${productData.address} — ${formData.address}`,
+    );
     uploadData.append("EmailAddress", formData.email);
     uploadData.append("Description", formData.description);
     uploadData.append("Status", formData.status.toString());
