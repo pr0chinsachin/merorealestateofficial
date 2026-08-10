@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Button,
   Textarea,
@@ -22,7 +23,7 @@ interface CustomerLead {
   property: string;
   category: string;
   agent: string;
-  queryMessgae: string; // Match the Swagger sample's field name
+  queryMessgae: string;
   status: boolean;
   deleted: boolean;
 }
@@ -39,10 +40,40 @@ interface ServiceData {
   categoryTitle: string;
 }
 
-const ContactAgentForm: React.FC = () => {
+interface ProductAddressData {
+  address?: string;
+}
+
+interface ContactAgentFormProps {
+  // Called once the lead has been created successfully. Lets a parent
+  // (e.g. a wrapping modal/toggle) know it can close itself too.
+  onSubmitSuccess?: () => void;
+  // How long to show the "thank you" confirmation before auto-closing it
+  // and notifying the parent, in ms. Defaults to 3000.
+  autoCloseDelayMs?: number;
+}
+
+const PRODUCT_ID_REGEX =
+  /hotlistProductView\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
+
+const extractProductId = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  const match = path.match(PRODUCT_ID_REGEX);
+  return match ? match[1] : null;
+};
+
+const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
+  onSubmitSuccess,
+  autoCloseDelayMs = 3000,
+}) => {
+  const pathname = usePathname();
+
   const [agentDetails, setAgentDetails] = useState<AgentDetails[]>([]);
   const [serviceLists, setServiceLists] = useState<ServiceData[]>([]);
-  const [formData, setFormData] = useState<CustomerLead>({
+
+  const [productAddress, setProductAddress] = useState<string | null>(null);
+
+  const initialFormData: CustomerLead = {
     id: "",
     firstName: "",
     middleName: "",
@@ -53,26 +84,84 @@ const ContactAgentForm: React.FC = () => {
     property: "",
     category: "",
     agent: "",
-    queryMessgae: "", // Match the Swagger sample's field name
-    status: true, // Default status value
-    deleted: false, // Default deleted value
-  });
+    queryMessgae: "",
+    status: true,
+    deleted: false,
+  };
 
-  // for modal
+  const [formData, setFormData] = useState<CustomerLead>(initialFormData);
+
   const [openModal, setOpenModal] = useState(false);
+  const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const closeSuccessModal = () => {
+    if (autoCloseTimer.current) {
+      clearTimeout(autoCloseTimer.current);
+      autoCloseTimer.current = null;
+    }
+    setOpenModal(false);
+    onSubmitSuccess?.();
+  };
 
   const onCloseModal = () => {
-    setOpenModal(false);
+    closeSuccessModal();
   };
 
   const handleResponeClose = () => {
-    setOpenModal(false);
+    closeSuccessModal();
   };
 
   useEffect(() => {
     fetchAgentData();
     fetchServiceData();
   }, []);
+
+  // Clear any pending auto-close timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (autoCloseTimer.current) {
+        clearTimeout(autoCloseTimer.current);
+      }
+    };
+  }, []);
+
+  // Resolve product id from current path (works on any domain, since it
+  // only looks at the pathname, not the host).
+  useEffect(() => {
+    const currentPath =
+      pathname ||
+      (typeof window !== "undefined" ? window.location.pathname : "");
+    const productId = extractProductId(currentPath);
+
+    if (!productId) {
+      setProductAddress(null);
+      return;
+    }
+
+    const fetchProductAddress = async () => {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/Product/UpdateProduct?id=${productId}`,
+        );
+        if (response.ok) {
+          const data: ProductAddressData = await response.json();
+          if (data?.address) {
+            setProductAddress(data.address);
+          } else {
+            setProductAddress(null);
+          }
+        } else {
+          console.error("Failed to fetch product address");
+          setProductAddress(null);
+        }
+      } catch (error) {
+        console.error("Error fetching product address:", error);
+        setProductAddress(null);
+      }
+    };
+
+    fetchProductAddress();
+  }, [pathname]);
 
   const fetchAgentData = async () => {
     try {
@@ -105,7 +194,7 @@ const ContactAgentForm: React.FC = () => {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { id, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [id]: value }));
@@ -113,17 +202,39 @@ const ContactAgentForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form Data:", formData); // Debug log
+
+    const finalAddress = productAddress
+      ? `${formData.address} - [${productAddress}]`
+      : formData.address;
+
+    const payload: CustomerLead = {
+      ...formData,
+      address: finalAddress,
+    };
+
+    console.log("Form Data:", payload); // Debug log
     try {
       const response = await fetch(`${BASE_URL}/Lead/CreateLead`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       if (response.ok) {
-        setOpenModal(true); // Show modal on success
+        setFormData(initialFormData); // Clear the form
+        setOpenModal(true);
+
+        // Auto-close the confirmation and notify the parent (e.g. the
+        // modal toggle wrapping this form) after a short delay so the
+        // whole form/modal closes on its own instead of requiring a
+        // manual click.
+        if (autoCloseTimer.current) {
+          clearTimeout(autoCloseTimer.current);
+        }
+        autoCloseTimer.current = setTimeout(() => {
+          closeSuccessModal();
+        }, autoCloseDelayMs);
       } else {
         console.error("Failed to create customer lead");
       }
@@ -168,6 +279,7 @@ const ContactAgentForm: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
+
           <div className="flex flex-col">
             <Label htmlFor="address" value="Address" />
             <TextInput
@@ -178,6 +290,7 @@ const ContactAgentForm: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
+
           <div className="flex flex-col">
             <Label htmlFor="email" value="Your Email" />
             <TextInput
@@ -194,7 +307,6 @@ const ContactAgentForm: React.FC = () => {
             <Label htmlFor="property" value="Property" />
             <Select
               id="property"
-              required
               value={formData.property}
               onChange={handleInputChange}
             >
@@ -209,7 +321,6 @@ const ContactAgentForm: React.FC = () => {
             <Label htmlFor="category" value="Category" />
             <Select
               id="category"
-              required
               value={formData.category}
               onChange={handleInputChange}
             >
@@ -226,7 +337,6 @@ const ContactAgentForm: React.FC = () => {
             <Label htmlFor="agent" value="Select Agent" />
             <Select
               id="agent"
-              required
               value={formData.agent}
               onChange={handleInputChange}
             >
@@ -241,14 +351,12 @@ const ContactAgentForm: React.FC = () => {
         </div>
 
         <div className="flex flex-col mt-6">
-          <Label htmlFor="queryMessgae" value="Your Message" />{" "}
-          {/* Match the Swagger sample's field name */}
+          <Label htmlFor="queryMessgae" value="Your Message" />
           <Textarea
-            id="queryMessgae" // Match the Swagger sample's field name
+            id="queryMessgae"
             placeholder="Leave a comment..."
-            required
             rows={4}
-            value={formData.queryMessgae} // Match the Swagger sample's field name
+            value={formData.queryMessgae}
             onChange={handleInputChange}
           />
         </div>
@@ -261,41 +369,38 @@ const ContactAgentForm: React.FC = () => {
           Submit
         </Button>
       </form>
-      {/* popup modal */}
-      <>
-        <Modal
-          dismissible
-          show={openModal}
-          size="7xl"
-          onClose={onCloseModal}
-          popup
-          style={{ zIndex: 100000 }}
-        >
-          <Modal.Header />
-          <Modal.Body>
-            <div className="relative">
-              <h1 className="text-3xl font-bold mb-5">
-                Thank you for your submission!
-              </h1>
-              <hr />
-              <div className="text-lg">
-                Thank you for contacting us! Your message has been received, and
-                we will get back to you as soon as possible. In the meantime,
-                feel free to browse our listings or check out our resources for
-                more information.
-              </div>
-              <Button
-                className="mt-10 float-end"
-                color="failure"
-                onClick={handleResponeClose}
-              >
-                Close
-              </Button>
+
+      <Modal
+        dismissible
+        show={openModal}
+        size="7xl"
+        onClose={onCloseModal}
+        popup
+        style={{ zIndex: 100000 }}
+      >
+        <Modal.Header />
+        <Modal.Body>
+          <div className="relative">
+            <h1 className="text-3xl font-bold mb-5">
+              Thank you for your submission!
+            </h1>
+            <hr />
+            <div className="text-lg">
+              Thank you for contacting us! Your message has been received, and
+              we will get back to you as soon as possible. In the meantime, feel
+              free to browse our listings or check out our resources for more
+              information.
             </div>
-          </Modal.Body>
-        </Modal>
-      </>
-      {/* popup modal */}
+            <Button
+              className="mt-10 float-end"
+              color="failure"
+              onClick={handleResponeClose}
+            >
+              Close
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
