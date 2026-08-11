@@ -103,9 +103,10 @@ const ServiceLists: React.FC = () => {
               .map((service) => (
                 <Link
                   href={`/services/serviceWiseProduct/${encodeURIComponent(
-                    service.categoryTitle
+                    service.categoryTitle,
                   )}/${service.id}`}
                   key={service.id}
+                  onClick={() => window.scrollTo({ top: 0 })}
                 >
                   <div
                     className={`${styles.zoomEffect} max-w-sm mx-auto group transition-all`}

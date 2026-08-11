@@ -1,5 +1,5 @@
 "use client";
-import { Card, Spinner, Pagination, Tabs } from "flowbite-react";
+import { Card, Spinner, Pagination, Button } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { Badge } from "flowbite-react";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Link from "next/link";
 import type { CustomFlowbiteTheme } from "flowbite-react";
 import DarkFormSale from "@/app/contactAgentForm/darkFormSale";
+import { BiSearchAlt } from "react-icons/bi";
 
 interface ServiceProduct {
   id: string;
@@ -25,31 +26,6 @@ interface ServiceProduct {
   propertyStatusValue: string;
   status: boolean;
   details: string;
-}
-
-interface HotlistById {
-  id: string;
-  productCode: string;
-  productName: string;
-  categoryId: string;
-  subCategoryId: string;
-  address: string;
-  price: number;
-  mapLink: string;
-  thumbnailImgPath: string;
-  newThumbnailImg: string;
-  videoLink: string;
-  description: string;
-  details: string;
-  propertyStatusValue: string;
-  parkingCount: number;
-  roomCount: number;
-  bathRoomCount: number;
-  area: number;
-  images: {
-    name: string;
-    filePath: string;
-  }[];
 }
 
 interface ServiceProductProps {
@@ -67,6 +43,37 @@ const customTheme: CustomFlowbiteTheme["card"] = {
   },
 };
 
+// ✅ Highlights matched text within a string
+const HighlightText = ({
+  text,
+  highlight,
+}: {
+  text: string;
+  highlight: string;
+}) => {
+  if (!highlight.trim()) return <span>{text}</span>;
+
+  const regex = new RegExp(
+    `(${highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+    "gi",
+  );
+  const parts = text.split(regex);
+
+  return (
+    <span>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-orange-300 text-black rounded px-0.5">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </span>
+  );
+};
+
 const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const { id, title } = params;
   const [productsByPrice, setProductsByPrice] = useState<ServiceProduct[]>([]);
@@ -74,6 +81,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<string>("house");
+  const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 8;
 
   const fetchData = async () => {
@@ -88,7 +96,6 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
         }));
         setProductsByPrice(processedData);
-        console.log("Fetched Products:mmm", processedData);
         setIsLoading(false);
       } else {
         setFetchError(true);
@@ -110,16 +117,18 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
     setCurrentPage(1);
   };
 
-  // ✅ Fixed filtering logic
-  const filteredProducts = productsByPrice.filter((product) => {
-    // For "Buy"
+  const handleClear = () => {
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
+  // ✅ Filter by category/status
+  const categoryFilteredProducts = productsByPrice.filter((product) => {
     if (title === "Buy") {
       return activeTab === "house"
         ? product.details === "0"
         : product.details === "1";
     }
-
-    // For "Rent" (exclude leased)
     if (title === "Rent") {
       return (
         product.status &&
@@ -128,10 +137,28 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           product.propertyStatusValue === "UnderManagement")
       );
     }
-
-    // For "Sale" or other titles
     return product.status;
   });
+
+  // ✅ Further filter by search term (name or price)
+  const filteredProducts = categoryFilteredProducts.filter((product) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    const nameMatch = product.productName.toLowerCase().includes(term);
+    const priceStr =
+      product.price === 0 ? "contact for price" : product.price.toString();
+    const priceMatch = priceStr.includes(term);
+    return nameMatch || priceMatch;
+  });
+
+  // ✅ Format price string for display/highlight
+  const formatPrice = (product: ServiceProduct): string => {
+    if (product.price === 0) return "Contact for Price";
+    return `$ ${Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    }).format(product.price)}`;
+  };
 
   // ✅ Product card UI
   const renderProductCard = (product: ServiceProduct) => (
@@ -143,7 +170,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           theme={customTheme}
         >
           <h3 className="text-md text-black font-semibold truncate">
-            {product.productName}
+            <HighlightText text={product.productName} highlight={searchTerm} />
           </h3>
 
           <div className="flex justify-between">
@@ -167,13 +194,10 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
               {product.propertyStatusValue === "Buy" && product.price !== 0 && (
                 <div className="text-sm text-gray-500">Starting From</div>
               )}
-
-              {product.price === 0
-                ? "Contact for Price"
-                : `$ ${Intl.NumberFormat("en-US", {
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2,
-                  }).format(product.price)}`}
+              <HighlightText
+                text={formatPrice(product)}
+                highlight={searchTerm}
+              />
             </div>
           </div>
 
@@ -219,32 +243,74 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
 
     if (isLoading) {
       return (
-        <div className="relative w-full h-96 flex justify-center items-center ">
+        <div className="relative w-full h-96 flex justify-center items-center">
           <Spinner size="xl" />
-        </div>
-      );
-    }
-
-    if (paginatedProducts.length === 0) {
-      return (
-        <div className="text-center text-gray-500">
-          {title === "Build" ? "Coming Soon." : "No Products Found."}
         </div>
       );
     }
 
     return (
       <>
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-          {paginatedProducts.map(renderProductCard)}
+        {/* Search Box */}
+        <div className="mb-6 flex flex-col sm:flex-row justify-center sm:justify-end gap-2">
+          <div className="relative w-full sm:w-72">
+            <input
+              type="text"
+              placeholder="Search by Location or price..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none text-black w-full"
+            />
+            {searchTerm && (
+              <button
+                onClick={handleClear}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl leading-none"
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          {/* <Button
+            style={{ backgroundColor: "#f27423" }}
+            className="text-white px-4 py-2 rounded-lg focus:outline-none flex items-center gap-1"
+          >
+            <BiSearchAlt className="mr-1" />
+            Search
+          </Button> */}
         </div>
-        <div className="m-8 flex justify-end pb-8">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        {/* Search result count */}
+        {searchTerm && (
+          <p className="text-gray-400 text-sm mb-4 text-right">
+            {filteredProducts.length} result
+            {filteredProducts.length !== 1 ? "s" : ""} for &ldquo;{searchTerm}
+            &rdquo;
+          </p>
+        )}
+
+        {paginatedProducts.length === 0 ? (
+          <div className="text-center text-gray-500 py-12">
+            {title === "Build"
+              ? "Coming Soon."
+              : `No properties found matching "${searchTerm}".`}
+          </div>
+        ) : (
+          <>
+            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+              {paginatedProducts.map(renderProductCard)}
+            </div>
+            <div className="m-8 flex justify-end pb-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
+        )}
       </>
     );
   };
@@ -259,27 +325,7 @@ const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
           {title === "Sale" ? "Sale with us" : decodeURIComponent(title)}
         </h2>
         <div className="my-10">
-          {title === "Sale" ? (
-            <DarkFormSale />
-          ) : title === "Buy" ? (
-            // <Tabs onActiveTabChange={handleTabChange}>
-            //   <Tabs.Item
-            //     title="Residential Properties"
-            //     active={activeTab === "house"}
-            //   >
-            //     {renderProductsList()}
-            //   </Tabs.Item>
-            //   <Tabs.Item
-            //     title="House and Land Package"
-            //     active={activeTab === "house-land"}
-            //   >
-            //     {renderProductsList()}
-            //   </Tabs.Item>
-            // </Tabs>
-            renderProductsList()
-          ) : (
-            renderProductsList()
-          )}
+          {title === "Sale" ? <DarkFormSale /> : renderProductsList()}
         </div>
       </div>
     </div>
