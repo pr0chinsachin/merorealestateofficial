@@ -58,6 +58,7 @@ interface HotlistById {
     name: string;
     filePath: string;
   }[];
+  deleted: boolean;
 }
 
 interface UpdateHotlistById {
@@ -88,6 +89,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     bathRoomCount: 0,
     area: 0,
     images: [],
+    deleted: false,
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,7 +196,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
 
         if (response.ok) {
           const data: HotlistById = await response.json();
-          console.log("Fetched product data:", data); // Log the fetched data for debugging
+          console.log("Fetched product data:", data);
           setProductData({
             ...data,
             thumbnailImgPath: data.thumbnailImgPath
@@ -262,7 +264,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
 
   if (isLoading) {
     return (
-      <div className="container items-center justify-center mx-auto mt-10 mb-10 px-4 sm:px-0">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Spinner size="xl" />
       </div>
     );
@@ -530,6 +532,30 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
       </Card>
     </div>
   );
+
+  //no ptoduct error
+  if (productData.deleted) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] px-4 sm:px-0">
+        <Card style={{ backgroundColor: "#14222d" }}>
+          <div className="flex flex-col items-center justify-center py-10 gap-3">
+            <Badge color="failure" size="lg">
+              Unavailable
+            </Badge>
+            <h2 className="text-xl font-semibold text-white">
+              Property No Longer Available
+            </h2>
+            <p className="text-sm text-gray-400">
+              This listing has been removed or is no longer active.
+            </p>
+            <Button color="gray" onClick={() => window.history.back()}>
+              ← Go Back
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <>
