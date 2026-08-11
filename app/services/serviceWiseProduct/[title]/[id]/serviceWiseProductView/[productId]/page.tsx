@@ -24,7 +24,7 @@ import Image from "next/image";
 import BASE_URL from "../../../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../../../urlConfig/serverUrl";
 import Style from "./serviceWiseProduct.module.css";
-import ContactAgentForm from "../../../../../../contactAgentForm/page";
+import ContactAgentForm from "../../../../../../contactAgentForm/AgentForm";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 import Bedroom from "@/public/bed-bedroom-alt.svg";
@@ -106,7 +106,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
   });
 
   const handleInputChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
     setFormData((prev) => ({
@@ -129,7 +129,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
     setFormData((prevState) => ({
       ...prevState,
       applicationFormFile: prevState.applicationFormFile.filter(
-        (_, i) => i !== index
+        (_, i) => i !== index,
       ),
     }));
   };
@@ -199,7 +199,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/Product/UpdateProduct?id=${productId}`
+          `${BASE_URL}/Product/UpdateProduct?id=${productId}`,
         );
         if (response.ok) {
           const data: ProductById = await response.json();
@@ -508,7 +508,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                         <img
                           src={`${SERVER_URL}${item.filePath.replace(
                             /~/g,
-                            ""
+                            "",
                           )}`}
                           alt={item.name}
                           style={{ width: "100px", cursor: "pointer" }} // Adjust the width if needed
@@ -765,7 +765,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                                       Remove
                                     </button>
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           </div>
@@ -1027,7 +1027,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                                         Remove
                                       </button>
                                     </li>
-                                  )
+                                  ),
                                 )}
                               </ul>
                             </div>

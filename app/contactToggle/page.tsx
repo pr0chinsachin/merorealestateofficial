@@ -2,7 +2,7 @@
 
 import { Button, Modal } from "flowbite-react";
 import { useState } from "react";
-import ContactAgentForm from "../contactAgentForm/page";
+import ContactAgentForm from "../contactAgentForm/AgentForm";
 import contact from "../../public/contactagent.svg";
 import Image from "next/image";
 
