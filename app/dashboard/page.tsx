@@ -3,7 +3,7 @@ import { Card } from "flowbite-react";
 import CarouselImage from "./carouselImage/carouselImage"; // Adjusted component name and path
 import Agent from "../agent/page";
 import Servicelists from "../services/servicelists";
-import ContactAgentForm from "../contactAgentForm/page";
+import ContactAgentForm from "../contactAgentForm/AgentForm";
 import HighlightedProduct from "../product/hotlistproduct/page";
 import ProductsByPrice from "../product/productByPrice/productByPrice"; // Adjusted component name and path
 import Search from "../search/search";

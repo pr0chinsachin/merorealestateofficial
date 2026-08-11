@@ -14,7 +14,7 @@ import Image from "next/image";
 import BASE_URL from "../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./productByCateoryView.module.css";
-import ContactAgentForm from "../../../../contactAgentForm/page";
+import ContactAgentForm from "../../../../contactAgentForm/AgentForm";
 
 interface ProductByCategroy {
   id: string;
@@ -80,7 +80,7 @@ const ProductByCategoryView: React.FC<UpdateProductByCategroy> = ({
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/Product/UpdateProduct?id=${id}`
+          `${BASE_URL}/Product/UpdateProduct?id=${id}`,
         );
         if (response.ok) {
           const data: ProductByCategroy = await response.json();

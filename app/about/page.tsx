@@ -4,7 +4,7 @@ import { Card, Accordion, Button } from "flowbite-react";
 import Founder from "./images/founder.jpg";
 import Contact from "../contact/page";
 import { FaArrowRight } from "react-icons/fa6";
-import ContactAgentForm from "../contactAgentForm/page";
+import ContactAgentForm from "../contactAgentForm/AgentForm";
 
 function About() {
   return (

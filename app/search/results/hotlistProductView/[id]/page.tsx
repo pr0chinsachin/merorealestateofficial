@@ -27,7 +27,7 @@ import Image from "next/image";
 import BASE_URL from "../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./hostlist.module.css";
-import ContactAgentForm from "../../../../contactAgentForm/page";
+import ContactAgentForm from "../../../../contactAgentForm/AgentForm";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 import Slider from "react-slick";

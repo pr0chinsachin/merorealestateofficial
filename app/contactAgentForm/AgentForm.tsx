@@ -45,14 +45,11 @@ interface ProductAddressData {
 }
 
 interface ContactAgentFormProps {
-  // Called once the lead has been created successfully. Lets a parent
-  // (e.g. a wrapping modal/toggle) know it can close itself too.
   onSubmitSuccess?: () => void;
-  // How long to show the "thank you" confirmation before auto-closing it
-  // and notifying the parent, in ms. Defaults to 3000.
   autoCloseDelayMs?: number;
 }
 
+//regex to extract product id from the url
 const PRODUCT_ID_REGEX =
   /hotlistProductView\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
 
@@ -116,7 +113,6 @@ const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
     fetchServiceData();
   }, []);
 
-  // Clear any pending auto-close timer on unmount.
   useEffect(() => {
     return () => {
       if (autoCloseTimer.current) {
@@ -125,8 +121,6 @@ const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
     };
   }, []);
 
-  // Resolve product id from current path (works on any domain, since it
-  // only looks at the pathname, not the host).
   useEffect(() => {
     const currentPath =
       pathname ||
@@ -224,11 +218,6 @@ const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
       if (response.ok) {
         setFormData(initialFormData); // Clear the form
         setOpenModal(true);
-
-        // Auto-close the confirmation and notify the parent (e.g. the
-        // modal toggle wrapping this form) after a short delay so the
-        // whole form/modal closes on its own instead of requiring a
-        // manual click.
         if (autoCloseTimer.current) {
           clearTimeout(autoCloseTimer.current);
         }

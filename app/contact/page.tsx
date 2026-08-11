@@ -1,5 +1,5 @@
 import React from "react";
-import ContactAgentForm from "../contactAgentForm/page";
+import ContactAgentForm from "../contactAgentForm/AgentForm";
 import {
   HiLocationMarker,
   HiOutlinePhoneOutgoing,

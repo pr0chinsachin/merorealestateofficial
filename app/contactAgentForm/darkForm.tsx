@@ -44,8 +44,6 @@ interface ProductAddressData {
   address?: string;
 }
 
-// Matches .../hotlistproduct/hotlistProductView/{guid} anywhere in the path,
-// regardless of domain, protocol, or trailing segments.
 const PRODUCT_ID_REGEX =
   /hotlistProductView\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
 
