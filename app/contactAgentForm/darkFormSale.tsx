@@ -114,10 +114,6 @@ const DarkFormSale: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Tag this submission's message with its source form before sending.
-    // This is appended only to the outgoing payload -- the visible
-    // textarea (formData.queryMessgae) is left untouched so the person
-    // filling out the form never sees the tag.
     const submissionPayload: CustomerLead = {
       ...formData,
       queryMessgae: `${formData.queryMessgae}\n\n-Sales form`,

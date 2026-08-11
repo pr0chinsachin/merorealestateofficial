@@ -49,6 +49,7 @@ interface ContactAgentFormProps {
   autoCloseDelayMs?: number;
 }
 
+//regex to extract product id from the url
 const PRODUCT_ID_REGEX =
   /hotlistProductView\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
 
