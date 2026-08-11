@@ -29,10 +29,9 @@ import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./hostlist.module.css";
 import ContactAgentForm from "../../../../contactAgentForm/page";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
-import "photoswipe/style.css";
+
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
 
@@ -194,6 +193,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         const response = await fetch(
           `${BASE_URL}/Product/UpdateProduct?id=${id}`,
         );
+
         if (response.ok) {
           const data: HotlistById = await response.json();
           console.log("Fetched product data:", data);
@@ -206,6 +206,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               ? data.newThumbnailImg.replace(/~z/g, "")
               : "",
           });
+
           setIsLoading(false);
           setError(null);
         } else {

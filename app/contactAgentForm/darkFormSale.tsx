@@ -105,7 +105,7 @@ const DarkFormSale: React.FC = () => {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { id, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [id]: value }));
@@ -113,14 +113,24 @@ const DarkFormSale: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form Data:", formData); // Debug log
+
+    // Tag this submission's message with its source form before sending.
+    // This is appended only to the outgoing payload -- the visible
+    // textarea (formData.queryMessgae) is left untouched so the person
+    // filling out the form never sees the tag.
+    const submissionPayload: CustomerLead = {
+      ...formData,
+      queryMessgae: `${formData.queryMessgae}\n\n-Sales form`,
+    };
+
+    console.log("Form Data:", submissionPayload); // Debug log
     try {
       const response = await fetch(`${BASE_URL}/Lead/CreateLead`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionPayload),
       });
       if (response.ok) {
         setOpenModal(true); // Show modal on success

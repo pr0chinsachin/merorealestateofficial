@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Button,
   Textarea,
@@ -39,10 +40,30 @@ interface ServiceData {
   categoryTitle: string;
 }
 
+interface ProductAddressData {
+  address?: string;
+}
+
+// Matches .../hotlistproduct/hotlistProductView/{guid} anywhere in the path,
+// regardless of domain, protocol, or trailing segments.
+const PRODUCT_ID_REGEX =
+  /hotlistProductView\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/;
+
+const extractProductId = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  const match = path.match(PRODUCT_ID_REGEX);
+  return match ? match[1] : null;
+};
+
 const ContactAgentFormDark: React.FC = () => {
+  const pathname = usePathname();
+
   const [agentDetails, setAgentDetails] = useState<AgentDetails[]>([]);
   const [serviceLists, setServiceLists] = useState<ServiceData[]>([]);
-  const [formData, setFormData] = useState<CustomerLead>({
+
+  const [productAddress, setProductAddress] = useState<string | null>(null);
+
+  const initialFormData: CustomerLead = {
     id: "",
     firstName: "",
     middleName: "",
@@ -53,10 +74,12 @@ const ContactAgentFormDark: React.FC = () => {
     property: "",
     category: "",
     agent: "",
-    queryMessgae: "", // Match the Swagger sample's field name
-    status: true, // Default status value
-    deleted: false, // Default deleted value
-  });
+    queryMessgae: "",
+    status: true,
+    deleted: false,
+  };
+
+  const [formData, setFormData] = useState<CustomerLead>(initialFormData);
 
   // for modal
   const [openModal, setOpenModal] = useState(false);
@@ -73,6 +96,42 @@ const ContactAgentFormDark: React.FC = () => {
     fetchAgentData();
     fetchServiceData();
   }, []);
+
+  useEffect(() => {
+    const currentPath =
+      pathname ||
+      (typeof window !== "undefined" ? window.location.pathname : "");
+    const productId = extractProductId(currentPath);
+
+    if (!productId) {
+      setProductAddress(null);
+      return;
+    }
+
+    const fetchProductAddress = async () => {
+      try {
+        const response = await fetch(
+          `${BASE_URL}/Product/UpdateProduct?id=${productId}`,
+        );
+        if (response.ok) {
+          const data: ProductAddressData = await response.json();
+          if (data?.address) {
+            setProductAddress(data.address);
+          } else {
+            setProductAddress(null);
+          }
+        } else {
+          console.error("Failed to fetch product address");
+          setProductAddress(null);
+        }
+      } catch (error) {
+        console.error("Error fetching product address:", error);
+        setProductAddress(null);
+      }
+    };
+
+    fetchProductAddress();
+  }, [pathname]);
 
   const fetchAgentData = async () => {
     try {
@@ -105,7 +164,7 @@ const ContactAgentFormDark: React.FC = () => {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { id, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [id]: value }));
@@ -113,17 +172,28 @@ const ContactAgentFormDark: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form Data:", formData); // Debug log
+
+    const finalAddress = productAddress
+      ? `${formData.address} - [${productAddress}]`
+      : formData.address;
+
+    const payload: CustomerLead = {
+      ...formData,
+      address: finalAddress,
+    };
+
+    console.log("Form Data:", payload); // Debug log
     try {
       const response = await fetch(`${BASE_URL}/Lead/CreateLead`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       if (response.ok) {
-        setOpenModal(true); // Show modal on success
+        setFormData(initialFormData); // Clear the form
+        setOpenModal(true);
       } else {
         console.error("Failed to create customer lead");
       }
@@ -180,6 +250,7 @@ const ContactAgentFormDark: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
+
           <div className="flex flex-col">
             <Label htmlFor="address" value="Address" className="text-white" />
             <TextInput
@@ -190,6 +261,7 @@ const ContactAgentFormDark: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
+
           <div className="flex flex-col">
             <Label htmlFor="email" value="Your Email" className="text-white" />
             <TextInput
@@ -206,7 +278,6 @@ const ContactAgentFormDark: React.FC = () => {
             <Label htmlFor="property" value="Property" className="text-white" />
             <Select
               id="property"
-              required
               value={formData.property}
               onChange={handleInputChange}
             >
@@ -221,7 +292,6 @@ const ContactAgentFormDark: React.FC = () => {
             <Label htmlFor="category" value="Category" className="text-white" />
             <Select
               id="category"
-              required
               value={formData.category}
               onChange={handleInputChange}
             >
@@ -242,7 +312,6 @@ const ContactAgentFormDark: React.FC = () => {
             />
             <Select
               id="agent"
-              required
               value={formData.agent}
               onChange={handleInputChange}
             >
@@ -266,7 +335,6 @@ const ContactAgentFormDark: React.FC = () => {
           <Textarea
             id="queryMessgae" // Match the Swagger sample's field name
             placeholder="Leave a comment..."
-            required
             rows={4}
             value={formData.queryMessgae} // Match the Swagger sample's field name
             onChange={handleInputChange}
