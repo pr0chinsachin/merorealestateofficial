@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { FaPhone } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa6";
 import { MdFacebook, MdLocalPhone, MdPlayCircleFilled } from "react-icons/md";
 
 const ContactInfo = () => {
   return (
-    <div className="text-slate-50" style={{ backgroundColor: "#f27423" }}>
+    <div className="text-slate-50" style={{ backgroundColor: "#0097b2" }}>
       <div className="flex items-center justify-between px-4 py-2">
         {/* Call us */}
         <div className="flex items-center">
@@ -22,14 +23,27 @@ const ContactInfo = () => {
           </span>
         </div>
 
-        {/* Facebook and Play Circle Icons */}
-        <div className="flex items-center">
+        {/* Social Icons */}
+        <div className="flex items-center gap-3">
           <Link
             href="https://www.facebook.com/profile.php?id=100090574720751"
             target="_blank"
           >
             <span className="text-white hover:text-cyan-900">
               <MdFacebook />
+            </span>
+          </Link>
+          <Link
+            href="https://www.instagram.com/merorealestate/"
+            target="_blank"
+          >
+            <span className="text-white hover:text-cyan-900">
+              <FaInstagram />
+            </span>
+          </Link>
+          <Link href="https://www.tiktok.com/@merorealestate" target="_blank">
+            <span className="text-white hover:text-cyan-900">
+              <FaTiktok />
             </span>
           </Link>
           {/* <Link href="https://www.youtube.com/yourpage">

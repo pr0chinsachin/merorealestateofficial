@@ -13,7 +13,10 @@ const Header = () => {
           <main>
             <header className="bg-white shadow">
               <div className="">
-              <ContactInfo/>
+                <div
+                  className="text-slate-50 h-6"
+                  style={{ backgroundColor: "#f27423" }}
+                ></div>
                 <Navbar />
               </div>
             </header>
@@ -22,5 +25,5 @@ const Header = () => {
       </div>
     </>
   );
-}
+};
 export default Header;
