@@ -253,7 +253,7 @@ const ContactAgentForm: React.FC = () => {
           {/* Match the Swagger sample's field name */}
           <Textarea
             id="queryMessgae" // Match the Swagger sample's field name
-            placeholder="Leave a comment..."
+            placeholder="Leave a comment...(Please provide the property address you are interested in)"
             required
             rows={4}
             value={formData.queryMessgae} // Match the Swagger sample's field name

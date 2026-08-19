@@ -29,9 +29,10 @@ import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./hostlist.module.css";
 import ContactAgentForm from "../../../../contactAgentForm/AgentForm";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
-
+import "photoswipe/style.css";
 import Slider from "react-slick";
-
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
 

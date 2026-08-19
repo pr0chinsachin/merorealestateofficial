@@ -8,6 +8,7 @@ import img1 from "./images/docusign1.svg";
 import img2 from "./images/mri.svg";
 import img3 from "./images/rei.svg";
 import img4 from "./images/reisa.svg";
+import ContactInfo from "../contactInfo/contactInfo";
 
 const FooterSection = () => {
   const [cDate, setcDate] = useState(new Date());
@@ -15,6 +16,7 @@ const FooterSection = () => {
   return (
     <div style={{ backgroundColor: "#14222d" }} className="overflow-hidden">
       <hr />
+      <ContactInfo />
       <Footer
         container
         className="text-white rounded-none "
