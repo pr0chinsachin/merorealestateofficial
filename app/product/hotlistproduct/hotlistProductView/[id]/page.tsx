@@ -78,16 +78,14 @@ interface UpdateHotlistById {
   };
 }
 
-// ── Helpers ──────────────────────────────────────────────────────
-// Treats empty/whitespace-only values AND the literal string "na"
-// (any casing) as "not provided".
+//if na shown on data
 const isEmptyOrNA = (value?: string | null) => {
   if (!value) return true;
   const trimmed = value.trim().toLowerCase();
   return trimmed === "" || trimmed === "na";
 };
 
-// ── Read more / read less for HTML description ─────────────────
+// Read more / read less for HTML description
 const DESCRIPTION_COLLAPSED_HEIGHT = 160; // px
 
 const ReadMoreHTML: React.FC<{
@@ -582,36 +580,24 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const ApplicationSection = (
     <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-3">
       <Card className="w-full sm:w-1/2">
-        {productData.propertyStatusValue === "Buy" ? (
-          <a
-            href={
-              productData.details === "0"
-                ? "/Residental Form.pdf"
-                : "/OFFER FORM.pdf"
-            }
-            download="Offer Form"
+        {/* when details has 0 then download resedential form and when details has 1 then download offer form */}
+        <a
+          href={
+            productData.details === "0"
+              ? "/Residental Form.pdf"
+              : "/OFFER FORM.pdf"
+          }
+          download="Offer Form"
+        >
+          <Button className="w-full">Download Offer Form</Button>
+          <br />
+          <div
+            style={{ color: "#0f7490" }}
+            className="grid place-items-center w-full"
           >
-            <Button className="w-full">Download Offer Form</Button>
-            <br />
-            <div
-              style={{ color: "#0f7490" }}
-              className="grid place-items-center w-full"
-            >
-              <IoMdDownload size={50} />
-            </div>
-          </a>
-        ) : (
-          <a href="/Rental Application.pdf" download="Rental Application">
-            <Button className="w-full">Download Rental Form</Button>
-            <br />
-            <div
-              style={{ color: "#0f7490" }}
-              className="grid place-items-center w-full"
-            >
-              <IoMdDownload size={50} />
-            </div>
-          </a>
-        )}
+            <IoMdDownload size={50} />
+          </div>
+        </a>
       </Card>
 
       <Card
@@ -637,6 +623,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             No Link Found
           </Button>
         ) : (
+          // goes to book inspection link
           <a href={productData.details} target="_blank" rel="noreferrer">
             <Button className="w-full">Book an Inspection</Button>
           </a>
