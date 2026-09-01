@@ -9,14 +9,15 @@ const Header = () => {
   return (
     <>
       <div className={Styles.fixedFormContainer}>
-        <div className="min-h-full">
+        <div className="min-h-full sticky">
           <main>
-            <header className="bg-white shadow">
+            <header className=" shadow-2xl">
               <div className="">
-                <div
+                {/* <div
                   className="text-slate-50 h-6"
                   style={{ backgroundColor: "#f27423" }}
-                ></div>
+                ></div> */}
+
                 <Navbar />
               </div>
             </header>

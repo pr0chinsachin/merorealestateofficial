@@ -84,7 +84,7 @@ const ServiceLists: React.FC = () => {
 
   return (
     <div className="py-14" style={{ backgroundColor: "#14222d" }}>
-      <h2 className="mb-7 pt-7 text-3xl md:text-4xl text-center font-bold text-sky-50">
+      <h2 className="mb-3 sm:mb-7 pt-7 text-3xl md:text-4xl text-center font-bold text-sky-50">
         Our Services
       </h2>
       {fetchError ? (
@@ -96,8 +96,8 @@ const ServiceLists: React.FC = () => {
           <Spinner size="xl" />
         </div>
       ) : (
-        <div className="container mx-auto pt-7 pb-7 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="container mx-auto sm:py-14 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
             {serviceLists
               .filter((service) => service.status === true)
               .map((service) => (
@@ -119,18 +119,6 @@ const ServiceLists: React.FC = () => {
                       <h5 className="font-semibold text-lg md:text-xl mb-2 text-black text-center group-hover:text-white">
                         {service.categoryTitle}
                       </h5>
-                      {/* <p>
-                        Total:
-                        <span className="font-bold">
-                          {
-                            products.filter(
-                              (product) =>
-                                product.status === true &&
-                                product.categoryId === service.id
-                            ).length
-                          }
-                        </span>
-                      </p> */}
                     </Card>
                   </div>
                 </Link>

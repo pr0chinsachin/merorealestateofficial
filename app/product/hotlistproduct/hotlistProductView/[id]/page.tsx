@@ -1,11 +1,15 @@
 "use client";
-import React, { useEffect, useState, useRef, ChangeEvent } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+} from "react";
 import {
   Card,
   Badge,
-  Tabs,
   Spinner,
-  Accordion,
   Button,
   Modal,
   FileInput,
@@ -15,23 +19,29 @@ import {
 } from "flowbite-react";
 import {
   HiCalendar,
-  HiUserCircle,
-  HiAdjustments,
-  HiClipboardList,
+  HiOutlineUserCircle,
+  HiOutlineHome,
+  HiOutlineVideoCamera,
+  HiOutlineLocationMarker,
+  HiOutlineDocumentText,
+  HiOutlineChatAlt2,
+  HiChevronDown,
 } from "react-icons/hi";
 import { IoMdDownload } from "react-icons/io";
 import { MdFileUpload } from "react-icons/md";
 import { FaCarAlt, FaBath } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
 import Image from "next/image";
 import BASE_URL from "../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../urlConfig/serverUrl";
 import Style from "./hostlist.module.css";
 import ContactAgentForm from "../../../../contactAgentForm/AgentForm";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
+//@ts-ignore
 import "photoswipe/style.css";
 import Slider from "react-slick";
+//@ts-ignore
 import "slick-carousel/slick/slick.css";
+//@ts-ignore
 import "slick-carousel/slick/slick-theme.css";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
@@ -68,6 +78,100 @@ interface UpdateHotlistById {
   };
 }
 
+// ── Helpers ──────────────────────────────────────────────────────
+// Treats empty/whitespace-only values AND the literal string "na"
+// (any casing) as "not provided".
+const isEmptyOrNA = (value?: string | null) => {
+  if (!value) return true;
+  const trimmed = value.trim().toLowerCase();
+  return trimmed === "" || trimmed === "na";
+};
+
+// ── Read more / read less for HTML description ─────────────────
+const DESCRIPTION_COLLAPSED_HEIGHT = 160; // px
+
+const ReadMoreHTML: React.FC<{
+  html: string;
+  collapsedHeight?: number;
+}> = ({ html, collapsedHeight = DESCRIPTION_COLLAPSED_HEIGHT }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const [fullHeight, setFullHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      setFullHeight(el.scrollHeight);
+      setOverflowing(el.scrollHeight > collapsedHeight + 4);
+    };
+
+    measure();
+
+    // Re-measure if content inside (e.g. images) loads/resizes later.
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [html, collapsedHeight]);
+
+  return (
+    <div className="relative">
+      <div
+        ref={contentRef}
+        style={{
+          maxHeight: expanded ? (fullHeight ?? undefined) : collapsedHeight,
+          overflow: "hidden",
+          transition: "max-height 0.35s ease",
+        }}
+        className="
+          text-gray-300 leading-relaxed
+          [&_p]:min-h-[1em]
+          [&_ul]:list-disc [&_ul]:pl-5
+          [&_ol]:list-decimal [&_ol]:pl-5
+          [&_li]:my-1
+          [&_strong]:font-semibold [&_strong]:text-white
+          [&_em]:italic
+          [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:my-2
+          [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:my-2
+          [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:my-1
+        "
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+
+      {/* fade-out overlay hinting there's more content, only while collapsed */}
+      {!expanded && overflowing && (
+        <div
+          className="pointer-events-none absolute left-0 right-0 h-12"
+          style={{
+            bottom: 0,
+            background:
+              "linear-gradient(to top, #14222d 10%, rgba(20,34,45,0))",
+          }}
+        />
+      )}
+
+      {overflowing && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-expanded={expanded}
+          className="relative z-10 mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#F27423] hover:text-orange-400 transition-colors"
+        >
+          {expanded ? "Show less" : "Read more"}
+          <HiChevronDown
+            size={16}
+            className={`transition-transform duration-300 ${
+              expanded ? "rotate-180" : "rotate-0"
+            }`}
+          />
+        </button>
+      )}
+    </div>
+  );
+};
+
 const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const { id } = params;
   const [productData, setProductData] = useState<HotlistById>({
@@ -95,7 +199,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState(0);
 
   const galleryRef = useRef<HTMLDivElement>(null);
 
@@ -223,15 +327,6 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     fetchData();
   }, [id]);
 
-  // Mobile detection
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    setIsMobile(mediaQuery.matches);
-    const handleResize = () => setIsMobile(mediaQuery.matches);
-    mediaQuery.addListener(handleResize);
-    return () => mediaQuery.removeListener(handleResize);
-  }, []);
-
   // PhotoSwipe — re-init after slick renders (300ms delay)
   useEffect(() => {
     if (isLoading || !productData.thumbnailImgPath) return;
@@ -331,7 +426,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     ],
   };
 
-  // Shared upload modal form JSX (used in both mobile and desktop)
+  // Shared upload modal form JSX
   const UploadModalForm = (
     <>
       <Modal.Header style={{ backgroundColor: "#14222d" }}>
@@ -534,7 +629,23 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     </div>
   );
 
-  //no ptoduct error
+  const RentInquirySection = (
+    <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-3">
+      <Card className="w-full">
+        {isEmptyOrNA(productData.details) ? (
+          <Button className="w-full" disabled>
+            No Link Found
+          </Button>
+        ) : (
+          <a href={productData.details} target="_blank" rel="noreferrer">
+            <Button className="w-full">Book an Inspection</Button>
+          </a>
+        )}
+      </Card>
+    </div>
+  );
+
+  //no product error
   if (productData.deleted) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4 sm:px-0">
@@ -558,8 +669,105 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     );
   }
 
+  const showFormTab =
+    productData.propertyStatusValue === "Rent" ||
+    productData.propertyStatusValue === "Buy";
+
+  const tabs = [
+    {
+      label: "Description",
+      icon: HiOutlineUserCircle,
+      content: productData.description ? (
+        <ReadMoreHTML html={productData.description} />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No description available for this listing.
+        </p>
+      ),
+    },
+    {
+      label: "Floor Plan",
+      icon: HiOutlineHome,
+      content:
+        productData.propertyStatusValue === "Buy" &&
+        productData.images.length > 0 ? (
+          <Image
+            src={`${SERVER_URL}${productData.images[
+              productData.images.length - 1
+            ].filePath.replace(/~/g, "")}`}
+            alt={productData.productName}
+            width={900}
+            height={500}
+            className="cursor-pointer rounded-xl w-full h-auto mx-auto border border-white/10"
+            onLoad={handleImageLoad}
+            priority
+          />
+        ) : (
+          <p className="text-gray-400 text-sm py-6 text-center">
+            No floor plan available for this listing.
+          </p>
+        ),
+    },
+    {
+      label: "Video",
+      icon: HiOutlineVideoCamera,
+      content: !isEmptyOrNA(productData.videoLink) ? (
+        <div
+          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
+          dangerouslySetInnerHTML={{ __html: productData.videoLink }}
+        />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No video available for this listing.
+        </p>
+      ),
+    },
+    {
+      label: "Location",
+      icon: HiOutlineLocationMarker,
+      content: !isEmptyOrNA(productData.mapLink) ? (
+        <div
+          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
+          dangerouslySetInnerHTML={{ __html: productData.mapLink }}
+        />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No location set for this listing.
+        </p>
+      ),
+    },
+    ...(showFormTab
+      ? [
+          {
+            label:
+              productData.propertyStatusValue === "Buy"
+                ? "Offer Form"
+                : "Book an Inspection",
+            icon: HiOutlineDocumentText,
+            content: (
+              <>
+                {productData.propertyStatusValue === "Buy"
+                  ? ApplicationSection
+                  : RentInquirySection}
+                <Modal show={openModal} onClose={() => setOpenModal(false)}>
+                  {UploadModalForm}
+                </Modal>
+              </>
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
       {/* ── Property Header Card ── */}
       <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
         <Card style={{ backgroundColor: "#14222d" }}>
@@ -648,22 +856,26 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             {imageLoading && <Spinner size="xl" />}
 
             <div id="property-gallery" ref={galleryRef} className="w-full">
+              {/* Main image — locked to a 3:2 aspect ratio */}
               <a
                 href={allImages[0]?.src}
-                data-pswp-width={800}
+                data-pswp-width={900}
                 data-pswp-height={600}
                 target="_blank"
                 rel="noreferrer"
+                className="block w-full xl:w-1/2 lg:mx-auto"
               >
-                <Image
-                  src={allImages[0]?.src}
-                  alt={productData.productName}
-                  width={800}
-                  height={600}
-                  className="cursor-pointer rounded-lg w-full xl:w-1/2 lg:mx-auto object-cover"
-                  onLoad={handleImageLoad}
-                  priority
-                />
+                <div className="relative w-full aspect-[3/2] overflow-hidden rounded-lg bg-black/20">
+                  <Image
+                    src={allImages[0]?.src}
+                    alt={productData.productName}
+                    fill
+                    sizes="(min-width: 1280px) 50vw, 100vw"
+                    className="cursor-pointer object-cover"
+                    onLoad={handleImageLoad}
+                    priority
+                  />
+                </div>
               </a>
 
               {allImages.length > 4 ? (
@@ -673,15 +885,16 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                       <div key={index} className="px-1">
                         <a
                           href={item.src}
-                          data-pswp-width={800}
+                          data-pswp-width={900}
                           data-pswp-height={600}
                           target="_blank"
                           rel="noreferrer"
+                          className="block relative w-full aspect-[3/2] overflow-hidden rounded"
                         >
                           <img
                             src={item.src}
                             alt={item.name}
-                            className="cursor-pointer w-full h-[70px] sm:h-[90px] md:h-[120px] object-cover rounded"
+                            className="absolute inset-0 w-full h-full cursor-pointer object-cover"
                           />
                         </a>
                       </div>
@@ -689,20 +902,24 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                   </Slider>
                 </div>
               ) : (
-                <div className="flex  overflow-x-auto gap-1 w-full flex-nowrap justify-center sm:gap-4 mt-4 ">
+                <div className="flex overflow-x-auto gap-1 w-full flex-nowrap justify-center sm:gap-4 mt-4">
                   {allImages.slice(1).map((item, index) => (
-                    <div key={index}>
+                    <div
+                      key={index}
+                      className="relative shrink-0 sm:shrink w-[100px] md:w-[150px] aspect-[3/2] overflow-hidden"
+                    >
                       <a
                         href={item.src}
-                        data-pswp-width={800}
+                        data-pswp-width={900}
                         data-pswp-height={600}
                         target="_blank"
                         rel="noreferrer"
+                        className="block absolute inset-0"
                       >
                         <img
                           src={item.src}
                           alt={item.name}
-                          className="shrink-0 cursor-pointer sm:shrink w-[100px] h-30 md:h-[110px] object-cover"
+                          className="w-full h-full cursor-pointer object-cover"
                         />
                       </a>
                     </div>
@@ -714,186 +931,79 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         </Card>
       </div>
 
-      {/* ── Description / Tabs Card ── */}
+      {/* ── Property Details — unified tab panel (same design on every breakpoint) ── */}
       <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
-        {isMobile ? (
-          /* ─── MOBILE: Accordion ─── */
-          <Accordion aria-label="Full width accordion">
-            <Accordion.Panel>
-              <Accordion.Title>Description</Accordion.Title>
-              <Accordion.Content>
-                <div
-                  dangerouslySetInnerHTML={{ __html: productData.description }}
-                />
-              </Accordion.Content>
-            </Accordion.Panel>
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
+          <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#0f7490] opacity-20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#F27423] opacity-[0.08] blur-3xl" />
 
-            <Accordion.Panel>
-              <Accordion.Title>Floor Plan</Accordion.Title>
-              <Accordion.Content>
-                {productData.propertyStatusValue === "Buy" &&
-                  productData.images.length > 0 && (
-                    <Image
-                      src={`${SERVER_URL}${productData.images[
-                        productData.images.length - 1
-                      ].filePath.replace(/~/g, "")}`}
-                      alt={productData.productName}
-                      width={800}
-                      height={300}
-                      className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                      onLoad={handleImageLoad}
-                      priority
-                    />
-                  )}
-              </Accordion.Content>
-            </Accordion.Panel>
-
-            <Accordion.Panel>
-              <Accordion.Title>Video</Accordion.Title>
-              <Accordion.Content>
-                <div
-                  className="overflow-hidden grid place-items-center"
-                  dangerouslySetInnerHTML={{ __html: productData.videoLink }}
-                />
-              </Accordion.Content>
-            </Accordion.Panel>
-
-            <Accordion.Panel>
-              <Accordion.Title>Location</Accordion.Title>
-              <Accordion.Content>
-                <div
-                  className="overflow-hidden grid place-items-center"
-                  dangerouslySetInnerHTML={{ __html: productData.mapLink }}
-                />
-              </Accordion.Content>
-            </Accordion.Panel>
-
-            {productData.propertyStatusValue === "Rent" ||
-            productData.propertyStatusValue === "Buy" ? (
-              <Accordion.Panel>
-                <Accordion.Title>
-                  {productData.details === "0"
-                    ? "Offer Form"
-                    : "Application Request"}
-                </Accordion.Title>
-                <Accordion.Content>
-                  {ApplicationSection}
-
-                  <Modal show={openModal} onClose={() => setOpenModal(false)}>
-                    {UploadModalForm}
-                  </Modal>
-                </Accordion.Content>
-              </Accordion.Panel>
-            ) : (
-              <></>
-            )}
-
-            <Accordion.Panel>
-              <Accordion.Title>Contact Agent</Accordion.Title>
-              <Accordion.Content>
-                <div className="-m-5">
-                  <ContactAgentForm />
-                </div>
-              </Accordion.Content>
-            </Accordion.Panel>
-          </Accordion>
-        ) : (
-          /* ─── DESKTOP: Tabs ─── */
-          <Card style={{ backgroundColor: "#14222d" }}>
-            <div className="overflow-x-auto text-white">
-              <Tabs aria-label="Full width tabs">
-                <Tabs.Item active title="Description" icon={HiUserCircle}>
-                  <div
-                    className="
-                      [&_p]:min-h-[1em]
-                      [&_ul]:list-disc [&_ul]:pl-5
-                      [&_ol]:list-decimal [&_ol]:pl-5
-                      [&_li]:my-0.5
-                      [&_strong]:font-bold
-                      [&_em]:italic
-                      [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-2
-                      [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-2
-                      [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-1
-                    "
-                    dangerouslySetInnerHTML={{
-                      __html: productData.description,
-                    }}
-                  />
-                </Tabs.Item>
-
-                <Tabs.Item title="Floor Plan" icon={HiClipboardList}>
-                  {productData.propertyStatusValue === "Buy" &&
-                    productData.images.length > 0 && (
-                      <Image
-                        src={`${SERVER_URL}${productData.images[
-                          productData.images.length - 1
-                        ].filePath.replace(/~/g, "")}`}
-                        alt={productData.productName}
-                        width={800}
-                        height={300}
-                        className="cursor-pointer rounded-lg h-screen w-auto mx-auto"
-                        onLoad={handleImageLoad}
-                        priority
-                      />
-                    )}
-                </Tabs.Item>
-
-                <Tabs.Item title="Video" icon={HiClipboardList}>
-                  <div
-                    className="w-full grid place-items-center"
-                    dangerouslySetInnerHTML={{ __html: productData.videoLink }}
-                  />
-                </Tabs.Item>
-
-                <Tabs.Item title="Location" icon={HiClipboardList}>
-                  <div
-                    className="w-full grid place-items-center"
-                    dangerouslySetInnerHTML={{ __html: productData.mapLink }}
-                  />
-                </Tabs.Item>
-
-                {(productData.propertyStatusValue === "Rent" ||
-                  productData.propertyStatusValue === "Buy") && (
-                  <Tabs.Item
-                    title={
-                      productData.details === "0"
-                        ? "Offer Form"
-                        : "Application Request"
-                    }
-                    icon={HiClipboardList}
+          <div className="relative">
+            {/* tab bar — identical markup/colors at every breakpoint */}
+            <div
+              className="flex gap-1 overflow-x-auto px-3 pt-3 sm:px-5 sm:pt-5 [&::-webkit-scrollbar]:hidden"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {tabs.map((tab, i) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === i;
+                return (
+                  <button
+                    key={tab.label}
+                    onClick={() => setActiveTab(i)}
+                    className={`
+                      group flex shrink-0 items-center gap-2 rounded-t-lg px-3 sm:px-4 py-2.5 sm:py-3
+                      text-xs sm:text-sm font-medium whitespace-nowrap
+                      border-b-2 transition-colors duration-150
+                      ${
+                        isActive
+                          ? "border-[#F27423] text-white"
+                          : "border-transparent text-gray-400 hover:text-gray-200"
+                      }
+                    `}
                   >
-                    {ApplicationSection}
-
-                    <Modal
-                      dismissible
-                      show={openModal}
-                      onClose={() => setOpenModal(false)}
-                      size="8xl"
-                      className="p-72"
+                    <span
+                      className={`
+                        flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150
+                        ${
+                          isActive
+                            ? "bg-[#F27423]/15 text-[#F27423]"
+                            : "bg-white/5 text-gray-500 group-hover:text-[#0f7490] group-hover:bg-[#0f7490]/10"
+                        }
+                      `}
                     >
-                      {UploadModalForm}
-                    </Modal>
-                  </Tabs.Item>
-                )}
-              </Tabs>
+                      <Icon size={15} />
+                    </span>
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Contact Agent — hidden on mobile (shown in accordion above) */}
-            <div className="pt-1 px-4 sm:px-0">
-              <div className="block sm:hidden w-full">
-                <ContactAgentForm />
-              </div>
-              <div className="hidden sm:block w-full">
-                <Card
-                  className="max-w-full"
-                  style={{ backgroundColor: "#14222d" }}
-                >
-                  <ContactAgentFormDark />
-                </Card>
-              </div>
+            <div className="h-px bg-white/10" />
+
+            {/* active panel */}
+            <div
+              key={activeTab}
+              className="p-5 sm:p-8 animate-[fadeIn_0.25s_ease-out]"
+            >
+              {tabs[activeTab].content}
             </div>
-          </Card>
-        )}
+          </div>
+        </div>
+
+        {/* ── Contact Agent — same dark card treatment on every breakpoint ── */}
+        <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
+          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-[#0f7490] opacity-[0.12] blur-3xl" />
+          <div className="relative p-5 sm:p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F27423]/15 text-[#F27423]">
+                <HiOutlineChatAlt2 size={15} />
+              </span>
+              <h3 className="text-white font-semibold">Contact Agent</h3>
+            </div>
+            <ContactAgentFormDark />
+          </div>
+        </div>
 
         {/* ── Success confirmation modal ── */}
         <Modal

@@ -21,7 +21,7 @@ const NavbarItem = () => {
   return (
     <Navbar
       fluid
-      className="text-slate-50"
+      className="text-slate-50  "
       style={{ backgroundColor: "#14222d" }}
     >
       <NavbarBrand href="/" className="">
