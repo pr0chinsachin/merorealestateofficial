@@ -8,7 +8,9 @@ import Image from "next/image";
 import carIcon from "../../../public/car.svg";
 import Bathroom from "../../../public/bathtub-bold-bathroom.svg";
 import Bedroom from "../../../public/bed-bedroom-alt.svg";
+//@ts-ignore
 import "slick-carousel/slick/slick.css";
+//@ts-ignore
 import "slick-carousel/slick/slick-theme.css";
 import BASE_URL from "../../urlConfig/urlConfig";
 import SERVER_URL from "../../urlConfig/serverUrl";
@@ -78,7 +80,7 @@ const LatestProductView: React.FC = () => {
   };
 
   const settings = {
-    dots: true,
+    dots: false,
     infinite: latestProducts.length <= 4,
     speed: 500,
     slidesToShow: 4,

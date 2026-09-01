@@ -695,41 +695,13 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
           </p>
         ),
     },
-    {
-      label: "Video",
-      icon: HiOutlineVideoCamera,
-      content: !isEmptyOrNA(productData.videoLink) ? (
-        <div
-          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
-          dangerouslySetInnerHTML={{ __html: productData.videoLink }}
-        />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No video available for this listing.
-        </p>
-      ),
-    },
-    {
-      label: "Location",
-      icon: HiOutlineLocationMarker,
-      content: !isEmptyOrNA(productData.mapLink) ? (
-        <div
-          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
-          dangerouslySetInnerHTML={{ __html: productData.mapLink }}
-        />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No location set for this listing.
-        </p>
-      ),
-    },
     ...(showFormTab
       ? [
           {
             label:
               productData.propertyStatusValue === "Buy"
                 ? "Offer Form"
-                : "Book an Inspection",
+                : "Book Now",
             icon: HiOutlineDocumentText,
             content: (
               <>
@@ -744,6 +716,35 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
           },
         ]
       : []),
+
+    {
+      label: "Location",
+      icon: HiOutlineLocationMarker,
+      content: !isEmptyOrNA(productData.mapLink) ? (
+        <div
+          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
+          dangerouslySetInnerHTML={{ __html: productData.mapLink }}
+        />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No location set for this listing.
+        </p>
+      ),
+    },
+    {
+      label: "Video",
+      icon: HiOutlineVideoCamera,
+      content: !isEmptyOrNA(productData.videoLink) ? (
+        <div
+          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
+          dangerouslySetInnerHTML={{ __html: productData.videoLink }}
+        />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No video available for this listing.
+        </p>
+      ),
+    },
   ];
 
   return (
@@ -921,7 +922,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
       {/* ── Property Details — unified tab panel (same design on every breakpoint) ── */}
       <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
-          <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#0f7490] opacity-20 blur-3xl" />
+          <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#0f7490] opacity-30 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#F27423] opacity-[0.08] blur-3xl" />
 
           <div className="relative">
@@ -980,7 +981,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
 
         {/* ── Contact Agent — same dark card treatment on every breakpoint ── */}
         <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
-          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-[#0f7490] opacity-[0.12] blur-3xl" />
+          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-[#0f7490] opacity-[0.32] blur-3xl" />
           <div className="relative p-5 sm:p-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F27423]/15 text-[#F27423]">

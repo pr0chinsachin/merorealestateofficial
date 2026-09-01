@@ -347,6 +347,17 @@ const ContactAgentFormDark: React.FC = () => {
           </div>
         </div>
 
+        <div className="flex flex-col ">
+          <Label htmlFor="queryMessgae" value="Your Message" />
+          <Textarea
+            id="queryMessgae"
+            placeholder="Leave a comment..."
+            rows={3}
+            value={formData.queryMessgae}
+            onChange={handleInputChange}
+          />
+        </div>
+
         <Button
           style={{ backgroundColor: "#F27423" }}
           type="submit"
