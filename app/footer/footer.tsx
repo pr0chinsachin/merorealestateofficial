@@ -98,7 +98,7 @@ const FooterSection = () => {
 
       {/* Bottom bar — now a full-width sibling, not fighting Footer's padding */}
       <div style={{ backgroundColor: "#f27423" }} className="w-full">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-4 py-3 text-slate-50 sm:flex-row sm:justify-between sm:gap-4">
+        <div className="mx-auto  flex w-full px-10 flex-col items-center  py-3 text-slate-50 sm:flex-row sm:justify-between sm:gap-4">
           {/* Call us */}
           <div className="flex items-center whitespace-nowrap text-xs font-semibold sm:text-sm">
             <MdLocalPhone className="shrink-0" />
@@ -114,7 +114,7 @@ const FooterSection = () => {
           </div>
 
           {/* Dev credit */}
-          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm">
+          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm -ml-60">
             Developed by{" "}
             <Link
               href="https://ism.com.np"
