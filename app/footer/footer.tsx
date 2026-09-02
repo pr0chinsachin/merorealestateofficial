@@ -114,7 +114,7 @@ const FooterSection = () => {
           </div>
 
           {/* Dev credit */}
-          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm -ml-60">
+          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm md:-ml-60">
             Developed by{" "}
             <Link
               href="https://ism.com.np"
