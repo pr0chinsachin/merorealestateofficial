@@ -201,16 +201,21 @@ const ContactAgentFormDark: React.FC = () => {
   };
 
   return (
-    <div className="m-10 ">
-      <h1 className={`text-2xl font-bold mb-5 text-white`}>Contact Agent</h1>
+    <div className="mx-4 my-6 sm:m-10">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-white">
+        Contact Agent
+      </h1>
       <hr />
-      <form className="flex flex-col gap-6 mt-10" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+      <form
+        className="flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-10"
+        onSubmit={handleSubmit}
+      >
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>
             <Label
               htmlFor="firstName"
               value="First Name"
-              className="text-white"
+              className="text-white text-sm mb-1 block"
             />
             <TextInput
               id="firstName"
@@ -220,11 +225,11 @@ const ContactAgentFormDark: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
-          <div className="flex flex-col">
+          <div>
             <Label
               htmlFor="lastName"
               value="Last Name"
-              className="text-white"
+              className="text-white text-sm mb-1 block"
             />
             <TextInput
               id="lastName"
@@ -234,11 +239,12 @@ const ContactAgentFormDark: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
-          <div className="flex flex-col">
+
+          <div>
             <Label
               htmlFor="phonenumber"
               value="Phone Number"
-              className="text-white"
+              className="text-white text-sm mb-1 block"
             />
             <TextInput
               id="phonenumber"
@@ -248,34 +254,15 @@ const ContactAgentFormDark: React.FC = () => {
               onChange={handleInputChange}
             />
           </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="address" value="Address" className="text-white" />
-            <TextInput
-              id="address"
-              type="text"
-              sizing="md"
-              value={formData.address}
-              onChange={handleInputChange}
+          <div>
+            <Label
+              htmlFor="property"
+              value="Property"
+              className="text-white text-sm mb-1 block"
             />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="email" value="Your Email" className="text-white" />
-            <TextInput
-              id="email"
-              type="email"
-              placeholder="name@domain.com"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="property" value="Property" className="text-white" />
             <Select
               id="property"
+              sizing="md"
               value={formData.property}
               onChange={handleInputChange}
             >
@@ -286,10 +273,46 @@ const ContactAgentFormDark: React.FC = () => {
             </Select>
           </div>
 
-          <div className="flex flex-col">
-            <Label htmlFor="category" value="Category" className="text-white" />
+          <div className="col-span-2">
+            <Label
+              htmlFor="address"
+              value="Address"
+              className="text-white text-sm mb-1 block"
+            />
+            <TextInput
+              id="address"
+              type="text"
+              sizing="md"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="col-span-2">
+            <Label
+              htmlFor="email"
+              value="Your Email"
+              className="text-white text-sm mb-1 block"
+            />
+            <TextInput
+              id="email"
+              type="email"
+              placeholder="name@domain.com"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <Label
+              htmlFor="category"
+              value="Category"
+              className="text-white text-sm mb-1 block"
+            />
             <Select
               id="category"
+              sizing="md"
               value={formData.category}
               onChange={handleInputChange}
             >
@@ -302,14 +325,15 @@ const ContactAgentFormDark: React.FC = () => {
             </Select>
           </div>
 
-          <div className="flex flex-col">
+          <div>
             <Label
               htmlFor="agent"
               value="Select Agent"
-              className="text-white"
+              className="text-white text-sm mb-1 block"
             />
             <Select
               id="agent"
+              sizing="md"
               value={formData.agent}
               onChange={handleInputChange}
             >
@@ -323,18 +347,13 @@ const ContactAgentFormDark: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col mt-6">
-          <Label
-            htmlFor="queryMessgae"
-            value="Your Message"
-            className="text-white"
-          />{" "}
-          {/* Match the Swagger sample's field name */}
+        <div className="flex flex-col ">
+          <Label htmlFor="queryMessgae" value="Your Message" />
           <Textarea
-            id="queryMessgae" // Match the Swagger sample's field name
+            id="queryMessgae"
             placeholder="Leave a comment..."
-            rows={4}
-            value={formData.queryMessgae} // Match the Swagger sample's field name
+            rows={3}
+            value={formData.queryMessgae}
             onChange={handleInputChange}
           />
         </div>
@@ -342,45 +361,43 @@ const ContactAgentFormDark: React.FC = () => {
         <Button
           style={{ backgroundColor: "#F27423" }}
           type="submit"
-          className="mt-6 self-center w-full"
+          className="mt-4 sm:mt-6 self-center w-full"
         >
           Submit
         </Button>
       </form>
       {/* popup modal */}
-      <>
-        <Modal
-          dismissible
-          show={openModal}
-          size="7xl"
-          onClose={onCloseModal}
-          popup
-          style={{ zIndex: 100000 }}
-        >
-          <Modal.Header />
-          <Modal.Body>
-            <div className="relative">
-              <h1 className="text-3xl font-bold mb-5">
-                Thank you for your submission!
-              </h1>
-              <hr />
-              <div className="text-lg">
-                Thank you for contacting us! Your message has been received, and
-                we will get back to you as soon as possible. In the meantime,
-                feel free to browse our listings or check out our resources for
-                more information.
-              </div>
-              <Button
-                className="mt-10 float-end"
-                color="failure"
-                onClick={handleResponeClose}
-              >
-                Close
-              </Button>
+      <Modal
+        dismissible
+        show={openModal}
+        size="lg"
+        onClose={onCloseModal}
+        popup
+        style={{ zIndex: 100000 }}
+      >
+        <Modal.Header />
+        <Modal.Body className="px-4 sm:px-6">
+          <div className="relative">
+            <h1 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-5">
+              Thank you for your submission!
+            </h1>
+            <hr />
+            <div className="text-base sm:text-lg mt-3">
+              Thank you for contacting us! Your message has been received, and
+              we will get back to you as soon as possible. In the meantime, feel
+              free to browse our listings or check out our resources for more
+              information.
             </div>
-          </Modal.Body>
-        </Modal>
-      </>
+            <Button
+              className="mt-6 sm:mt-10 float-end"
+              color="failure"
+              onClick={handleResponeClose}
+            >
+              Close
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
       {/* popup modal */}
     </div>
   );

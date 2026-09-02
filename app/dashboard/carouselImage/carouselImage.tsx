@@ -29,9 +29,9 @@ const CarouselImage = () => {
       const response = await fetch(`${BASE_URL}/Caruosel/CaruoselList`);
       if (response.ok) {
         const data: ImageData[] = await response.json();
-        const processedData = data.map(image => ({
+        const processedData = data.map((image) => ({
           ...image,
-          imagePath: image.imagePath ? image.imagePath.replace(/~/g, "") : null
+          imagePath: image.imagePath ? image.imagePath.replace(/~/g, "") : null,
         }));
         setCarouselImageList(processedData);
         setFetchError(false);
@@ -50,7 +50,7 @@ const CarouselImage = () => {
       Failed to fetch carousel images. Please try again later.
     </div>
   ) : (
-    <div className="h-[600px] sm:h-[600px] xl:h-[600px] 2xl:h-[600px] m-1">
+    <div className="h-[250px] sm:h-[600px] xl:h-[600px] 2xl:h-[600px] ">
       <Carousel slide={true}>
         {carouselImageList
           .filter((image) => image.status === true)
@@ -68,7 +68,12 @@ const CarouselImage = () => {
                 </div>
               ) : (
                 <div className="relative w-full h-full">
-                  <Image src={logoImage} alt="Logo" fill className="object-cover" />
+                  <Image
+                    src={logoImage}
+                    alt="Logo"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               )}
               <div className="absolute inset-0 flex flex-col justify-center items-start pl-4">
