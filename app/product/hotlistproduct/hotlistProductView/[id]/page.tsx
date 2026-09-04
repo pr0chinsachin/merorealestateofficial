@@ -26,6 +26,7 @@ import {
   HiOutlineDocumentText,
   HiOutlineChatAlt2,
   HiChevronDown,
+  HiArrowsExpand,
 } from "react-icons/hi";
 import { IoMdDownload } from "react-icons/io";
 import { MdFileUpload } from "react-icons/md";
@@ -46,6 +47,13 @@ import "slick-carousel/slick/slick-theme.css";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
 import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
 
+interface HotlistImage {
+  imageId?: string;
+  name: string;
+  filePath: string;
+  uploadedDate?: string;
+}
+
 interface HotlistById {
   id: string;
   productCode: string;
@@ -65,10 +73,7 @@ interface HotlistById {
   roomCount: number;
   bathRoomCount: number;
   area: number;
-  images: {
-    name: string;
-    filePath: string;
-  }[];
+  images: HotlistImage[];
   deleted: boolean;
 }
 
@@ -83,6 +88,15 @@ const isEmptyOrNA = (value?: string | null) => {
   if (!value) return true;
   const trimmed = value.trim().toLowerCase();
   return trimmed === "" || trimmed === "na";
+};
+
+// Finds an image whose name contains "floorplan" (case-insensitive)
+const findFloorplanImage = (
+  images: HotlistImage[],
+): HotlistImage | undefined => {
+  return images.find((img) =>
+    (img.name || "").toLowerCase().includes("floorplan"),
+  );
 };
 
 // Read more / read less for HTML description
@@ -170,6 +184,45 @@ const ReadMoreHTML: React.FC<{
   );
 };
 
+// Floor plan image with a small "view full screen" icon, locked to 3:2.
+// Clicking either the image or the icon opens a zoomable (pinch/drag) PhotoSwipe view.
+const FloorPlanViewer: React.FC<{
+  src: string;
+  alt: string;
+  onExpand: () => void;
+  onLoad?: () => void;
+}> = ({ src, alt, onExpand, onLoad }) => {
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      <div
+        className="relative w-full aspect-[3/2] overflow-hidden rounded-xl border border-white/10 bg-black/20 cursor-zoom-in"
+        onClick={onExpand}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(min-width: 1280px) 50vw, 100vw"
+          className="object-cover"
+          onLoad={onLoad}
+          priority
+        />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onExpand();
+          }}
+          aria-label="View floor plan full screen with zoom"
+          className="absolute bottom-3 right-3 z-10 flex items-center justify-center rounded-full bg-black/60 hover:bg-black/80 text-white p-2 transition-colors"
+        >
+          <HiArrowsExpand size={18} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const { id } = params;
   const [productData, setProductData] = useState<HotlistById>({
@@ -200,6 +253,19 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const galleryRef = useRef<HTMLDivElement>(null);
+  const floorPlanLightboxRef = useRef<PhotoSwipeLightbox | null>(null);
+
+  // ── Floor plan detection by filename (case-insensitive "floorplan") ──
+  // Computed here (rather than after the loading/error early-returns) so it
+  // can be used as a dependency for the floor plan's zoom lightbox effect.
+  const floorplanImage = findFloorplanImage(productData.images);
+  const floorPlanSrc: string | null = floorplanImage
+    ? `${SERVER_URL}${floorplanImage.filePath.replace(/~/g, "")}`
+    : productData.propertyStatusValue === "Buy" && productData.images.length > 0
+      ? `${SERVER_URL}${productData.images[
+          productData.images.length - 1
+        ].filePath.replace(/~/g, "")}`
+      : null;
 
   // for application request
   const [openModal, setOpenModal] = useState(false);
@@ -354,6 +420,29 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     };
   }, [isLoading, productData]);
 
+  // PhotoSwipe for the floor plan — gives pinch/drag/double-tap zoom in a
+  // dedicated fullscreen viewer, separate from the main gallery instance.
+  useEffect(() => {
+    if (isLoading || !floorPlanSrc) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: "#floorplan-gallery",
+      children: "a[data-pswp-width]",
+      mouseMovePan: true,
+      initialZoomLevel: "fit",
+      secondaryZoomLevel: 2,
+      maxZoomLevel: 4,
+      pswpModule: () => import("photoswipe"),
+    });
+    lightbox.init();
+    floorPlanLightboxRef.current = lightbox;
+
+    return () => {
+      lightbox.destroy();
+      floorPlanLightboxRef.current = null;
+    };
+  }, [isLoading, floorPlanSrc]);
+
   const handleImageLoad = () => setImageLoading(false);
 
   if (isLoading) {
@@ -372,12 +461,22 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     );
   }
 
+  // Hide the detected floorplan image from the main gallery. If no image
+  // matched by name, leave the gallery exactly as before.
+  const galleryImages = floorplanImage
+    ? productData.images.filter((img) =>
+        floorplanImage.imageId
+          ? img.imageId !== floorplanImage.imageId
+          : img.filePath !== floorplanImage.filePath,
+      )
+    : productData.images;
+
   const allImages = [
     {
       src: `${SERVER_URL}${productData.thumbnailImgPath}`,
       name: productData.productName,
     },
-    ...productData.images.map((img) => ({
+    ...galleryImages.map((img) => ({
       src: `${SERVER_URL}${img.filePath.replace(/~/g, "")}`,
       name: img.name,
     })),
@@ -675,25 +774,18 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     {
       label: "Floor Plan",
       icon: HiOutlineHome,
-      content:
-        productData.propertyStatusValue === "Buy" &&
-        productData.images.length > 0 ? (
-          <Image
-            src={`${SERVER_URL}${productData.images[
-              productData.images.length - 1
-            ].filePath.replace(/~/g, "")}`}
-            alt={productData.productName}
-            width={900}
-            height={500}
-            className="cursor-pointer rounded-xl w-full h-auto mx-auto border border-white/10"
-            onLoad={handleImageLoad}
-            priority
-          />
-        ) : (
-          <p className="text-gray-400 text-sm py-6 text-center">
-            No floor plan available for this listing.
-          </p>
-        ),
+      content: floorPlanSrc ? (
+        <FloorPlanViewer
+          src={floorPlanSrc}
+          alt={productData.productName}
+          onExpand={() => floorPlanLightboxRef.current?.loadAndOpen(0)}
+          onLoad={handleImageLoad}
+        />
+      ) : (
+        <p className="text-gray-400 text-sm py-6 text-center">
+          No floor plan available for this listing.
+        </p>
+      ),
     },
     ...(showFormTab
       ? [
@@ -859,7 +951,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                     alt={productData.productName}
                     fill
                     sizes="(min-width: 1280px) 50vw, 100vw"
-                    className="cursor-pointer object-cover"
+                    className="cursor-pointer object-contain"
                     onLoad={handleImageLoad}
                     priority
                   />
@@ -877,12 +969,12 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                           data-pswp-height={600}
                           target="_blank"
                           rel="noreferrer"
-                          className="block relative w-full aspect-[3/2] overflow-hidden rounded"
+                          className="block relative w-full aspect-[3/2] overflow-hidden rounded bg-black/20"
                         >
                           <img
                             src={item.src}
                             alt={item.name}
-                            className="absolute inset-0 w-full h-full cursor-pointer object-cover"
+                            className="absolute inset-0 w-full h-full cursor-pointer object-contain"
                           />
                         </a>
                       </div>
@@ -894,7 +986,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                   {allImages.slice(1).map((item, index) => (
                     <div
                       key={index}
-                      className="relative shrink-0 sm:shrink w-[100px] md:w-[150px] aspect-[3/2] overflow-hidden"
+                      className="relative shrink-0 sm:shrink w-[100px] md:w-[150px] aspect-[3/2] overflow-hidden bg-black/20"
                     >
                       <a
                         href={item.src}
@@ -907,7 +999,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                         <img
                           src={item.src}
                           alt={item.name}
-                          className="w-full h-full cursor-pointer object-cover"
+                          className="w-full h-full cursor-pointer object-contain"
                         />
                       </a>
                     </div>
@@ -1009,6 +1101,24 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             </p>
           </Modal.Body>
         </Modal>
+
+        {/* ── Hidden PhotoSwipe target for the zoomable floor plan viewer ──
+            Not visible on screen; floorPlanLightboxRef.current.loadAndOpen(0)
+            opens this item in a fullscreen, pinch/drag-zoomable viewer. */}
+        {floorPlanSrc && (
+          <div id="floorplan-gallery" className="hidden">
+            <a
+              href={floorPlanSrc}
+              data-pswp-width={1600}
+              data-pswp-height={1067}
+            >
+              <img
+                src={floorPlanSrc}
+                alt={`${productData.productName} floor plan`}
+              />
+            </a>
+          </div>
+        )}
       </div>
     </>
   );
