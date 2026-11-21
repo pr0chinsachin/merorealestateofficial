@@ -1,6 +1,7 @@
 .fixedFormContainer {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background-color: #ffffff; /* Adjust as per your design */
-  }
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: #fff;
+  box-shadow: 0 1px 10px #083a4712;
+}

@@ -1,27 +1,58 @@
-/* 
- @media (min-width: 481px) and (max-width: 767px) {
-   #desktopView {
-     display:none;
-   }
- } */
-@media (min-width: 300px) and (max-width: 767px) {
-  #desktopView {
-    display: none;
-  }
-  #mobileView {
-    display: block;
-  }
+.panel {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding: 1rem clamp(1rem, 2vw, 1.6rem);
+  border: 1px solid #dfecef;
+  border-radius: 1.2rem;
+  background: #fff;
+  box-shadow: 0 10px 30px #083a471a;
+  color: #083a47;
+  font-size: 0.875rem;
 }
-@media (min-width: 768px) {
-  #mobileView {
-    display: none;
-  }
-  #desktopView {
-    display: block;
-  }
+
+.primary, .price, .extra { display: grid; gap: 0.8rem; }
+.primary { align-items: end; }
+.price, .extra { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.primary label, .primary legend { font-weight: 700; }
+.primary fieldset { min-width: 0; }
+.panel :is(select, input) {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #ccdde1;
+  border-radius: 0.55rem;
+  background-color: #f6fafb;
+  color: #083a47;
+  font-size: inherit;
+  font-weight: 400;
 }
-.fixedFormContainer {
-  top: 0;
-  z-index: 1000;
-  background-color: #ffffff; /* Adjust as per your design */
+.panel select:disabled { opacity: 0.65; }
+.primary select, .price { margin-top: 0.35rem; }
+
+.primary button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.65rem;
+  padding-inline: 1.35rem;
+  border-radius: 0.55rem;
+  background: #074b5a;
+  color: white;
+  font-weight: 700;
+}
+.primary button:hover { background: #0d6577; }
+.primary button svg { width: 1rem; }
+.panel details { margin-top: 0.7rem; }
+.panel summary { width: fit-content; cursor: pointer; font-weight: 650; }
+.extra { margin-top: 0.65rem; }
+.panel p { margin-top: 0.65rem; color: #9b3f07; }
+
+@media (min-width: 520px) {
+  .primary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 900px) {
+  .primary { grid-template-columns: 1fr 1fr 1.5fr auto; }
+  .extra { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
