@@ -1,0 +1,36 @@
+.nav {
+  background: white;
+  padding: 0.5rem clamp(1rem, 3vw, 2rem);
+}
+
+.actions { display: flex; align-items: center; gap: 0.35rem; }
+
+.nav .link {
+  color: #083a47;
+  border-color: #e0ecee;
+  font-weight: 650;
+}
+
+.nav .link:hover, .nav .link[aria-current="page"] { color: #9e420a; }
+
+.appointment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 999px;
+  background: #b74b0a;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.appointment:hover { background: #963b06; }
+.appointment svg { width: 1rem; flex: none; }
+
+@media (min-width: 768px) {
+  .actions { order: 2; }
+  .nav .link { padding-block: 0.55rem; border-bottom: 2px solid transparent; }
+  .nav .link[aria-current="page"] { border-color: #e57938; }
+}

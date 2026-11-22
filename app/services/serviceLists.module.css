@@ -1,70 +1,57 @@
-/* Add custom styles for slick slider dots */
-.slick-dots {
-  bottom: 20px; /* Adjust position as needed */
-}
-
-.slick-dots li button {
-  font-size: 0; /* Hide dot label */
-  width: 10px; /* Set dot size */
-  height: 10px; /* Set dot size */
-  border-radius: 50%; /* Make dots circular */
-  background-color: white; /* Set dot color */
-  margin: 0 5px; /* Adjust spacing between dots */
-}
-
-.slick-dots li.slick-active button {
-  background-color: gray; /* Set active dot color */
-}
-
-.slick-list {
-  margin: 0 -8px; /* Adjust as needed */
-}
-
-.card-flex-none {
-  flex: none;
-  padding: 0;
-}
-
-.image-container {
+.services {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
+  color: #083a47;
   text-align: center;
-  border-radius: 10px; /* Adjust the border radius as per your preference */
-  overflow: hidden;
-}
-.image-container img {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  height: auto;
-  transition: transform 0.3s ease; /* Add a smooth transition for the arc effect */
-}
-.image-container img:hover {
-  transform: scale(1.05); /* Increase the scale on hover for a slight arc effect */
 }
 
-
-/* Add custom styles for zoom effect */
-.serviceCard {
-  transition: transform 0.3s ease; /* Smooth transition */
+.services h2 {
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -0.035em;
 }
 
-.serviceCard:hover {
-  transform: scale(0.95); /* Scale up on hover */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  background-color: #fb923c;
+.subtitle { margin: 0.3rem 0 1.8rem; }
+.loading { padding: 2rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--card-gap, clamp(1.125rem, 2.4vw, 2rem));
 }
 
-/* serviceLists.module.css */
-
-.zoomEffect {
-  transition: transform 0.3s ease-in-out;
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: clamp(0.8rem, 2vw, 1.6rem);
+  border: 1px solid #dfeced;
+  border-radius: 1rem;
+  background: #f5fafb;
+  box-shadow: 0 6px 16px #083a470b;
+  transition: box-shadow 150ms ease, border-color 150ms ease;
 }
 
-.zoomEffect:hover {
-  transform: scale(1.05);
+.card:hover { border-color: #65a8b3; box-shadow: 0 8px 22px #083a4720; }
+.card h3 { font-size: 1.125rem; font-weight: 750; }
+.card p { font-size: 0.875rem; }
+.icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  aspect-ratio: 1;
+  margin-bottom: 0.35rem;
+  border-radius: 50%;
+  background: #dceef2;
+  color: #096276;
 }
+.card:nth-child(odd) .icon { background: #fbe8d9; color: #b74b0a; }
+.icon svg { width: 1.55rem; }
+.action { display: flex; align-items: center; gap: 0.35rem; padding-top: 0.45rem; margin-top: auto; font-size: 0.8rem; font-weight: 700; }
+.action svg { width: 0.9rem; }
 
-@media (max-width: 640px) {
-  .zoomEffect {
-    margin-bottom: 20px;
-  }
+@media (min-width: 800px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

@@ -1,133 +1,71 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Card, Spinner } from "flowbite-react";
-import styles from "./serviceLists.module.css";
-import BASE_URL from "../urlConfig/urlConfig";
-import SERVER_URL from "../urlConfig/serverUrl";
+
+import { useEffect, useState } from "react";
+import { ArrowRightIcon, BuildingOffice2Icon, HomeIcon, KeyIcon, TagIcon } from "@heroicons/react/24/outline";
+import { Spinner } from "flowbite-react";
 import Link from "next/link";
-import type { CustomFlowbiteTheme } from "flowbite-react";
+import BASE_URL from "../urlConfig/urlConfig";
+import styles from "./serviceLists.module.css";
 
 interface ServiceData {
   id: string;
-  categoryCode: string;
   categoryTitle: string;
-  thumbnailImagePath: string | null;
-  status: boolean;
-  deleted: boolean;
-}
-
-interface ProductList {
-  id: string;
-  categoryId: string;
   status: boolean;
 }
 
-const customTheme: CustomFlowbiteTheme["card"] = {
-  img: {
-    horizontal: {
-      off: "rounded-t-lg object-cover aspect-[4/3] ",
-    },
-  },
+const services = {
+  buy: { Icon: HomeIcon, description: "Find your next home" },
+  rent: { Icon: KeyIcon, description: "Explore available rentals" },
+  sale: { Icon: TagIcon, description: "Explore your selling options" },
+  "house / land": { Icon: BuildingOffice2Icon, description: "Explore houses and land" },
 };
 
-const ServiceLists: React.FC = () => {
-  const [serviceLists, setServiceLists] = useState<ServiceData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
-  const [products, setProducts] = useState<ProductList[]>([]);
+export default function ServiceLists() {
+  const [serviceList, setServiceList] = useState<ServiceData[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
-    fetchData();
-    fetchProduct();
+    const controller = new AbortController();
+
+    async function loadServices() {
+      try {
+        const response = await fetch(`${BASE_URL}/MenuCategory/CategoryList`, { signal: controller.signal });
+        if (!response.ok) throw new Error("Unable to load services");
+        const data: ServiceData[] = await response.json();
+        setServiceList(data.filter((service) => service.status));
+        setState("ready");
+      } catch {
+        if (!controller.signal.aborted) setState("error");
+      }
+    }
+
+    loadServices();
+    return () => controller.abort();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/MenuCategory/CategoryList`);
-      if (response.ok) {
-        const data: ServiceData[] = await response.json();
-
-        const processedData = data.map((service) => ({
-          ...service,
-          thumbnailImagePath: service.thumbnailImagePath
-            ? service.thumbnailImagePath.replace(/~/g, "")
-            : null,
-        }));
-
-        setServiceLists(processedData);
-        setIsLoading(false);
-      } else {
-        console.error("Failed to fetch data");
-        setIsLoading(false);
-        setFetchError(true);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setIsLoading(false);
-      setFetchError(true);
-    }
-  };
-
-  const fetchProduct = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/Product/ProductList`);
-      if (response.ok) {
-        const data: ProductList[] = await response.json();
-        setProducts(data);
-      } else {
-        console.error("Failed to fetch data");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
   return (
-    <div className="py-14" style={{ backgroundColor: "#14222d" }}>
-      <h2 className="mb-3 sm:mb-7 pt-7 text-3xl md:text-4xl text-center font-bold text-sky-50">
-        Our Services
-      </h2>
-      {fetchError ? (
-        <div className="text-red-500 mt-4 text-center">
-          Failed to fetch services. Please try again later.
-        </div>
-      ) : isLoading ? (
-        <div className="relative w-full h-64 flex justify-center items-center">
-          <Spinner size="xl" />
-        </div>
-      ) : (
-        <div className="container mx-auto sm:py-14 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-            {serviceLists
-              .filter((service) => service.status === true)
-              .map((service) => (
-                <Link
-                  href={`/services/serviceWiseProduct/${encodeURIComponent(
-                    service.categoryTitle,
-                  )}/${service.id}`}
-                  key={service.id}
-                  onClick={() => window.scrollTo({ top: 0 })}
-                >
-                  <div
-                    className={`${styles.zoomEffect} max-w-sm mx-auto group transition-all`}
-                  >
-                    <Card
-                      imgSrc={`${SERVER_URL}${service.thumbnailImagePath}`}
-                      className="h-50 hover:bg-[#f27322] transition ease-in-out duration-500 border-none"
-                      theme={customTheme}
-                    >
-                      <h5 className="font-semibold text-lg md:text-xl mb-2 text-black text-center group-hover:text-white">
-                        {service.categoryTitle}
-                      </h5>
-                    </Card>
-                  </div>
-                </Link>
-              ))}
-          </div>
+    <div className={styles.services}>
+      <h2>Our Services</h2>
+      <p className={styles.subtitle}>Explore our real estate services</p>
+      {state === "error" && <p role="status">Couldn’t load services. Please try again later.</p>}
+      {state === "loading" && <div className={styles.loading}><Spinner aria-label="Loading services" size="lg" /></div>}
+      {state === "ready" && !serviceList.length && <p role="status">No services available.</p>}
+      {state === "ready" && (
+        <div className={styles.grid}>
+          {serviceList.map(({ id, categoryTitle }) => {
+            const service = services[categoryTitle.trim().toLowerCase() as keyof typeof services];
+            const Icon = service?.Icon ?? HomeIcon;
+            return (
+              <Link key={id} className={styles.card} href={`/services/serviceWiseProduct/${encodeURIComponent(categoryTitle)}/${id}`}>
+                <span className={styles.icon}><Icon aria-hidden="true" /></span>
+                <h3>{categoryTitle}</h3>
+                {service && <p>{service.description}</p>}
+                <span className={styles.action}>Learn more <ArrowRightIcon aria-hidden="true" /></span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
   );
-};
-
-export default ServiceLists;
+}

@@ -1,0 +1,46 @@
+.team {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 5rem) 1.25rem;
+  color: white;
+  background: #074b5a;
+  text-align: center;
+}
+.team h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -0.04em; }
+.subtitle { margin: 0.3rem 0 2rem; color: #e0f0f3; }
+
+.grid { display: grid; gap: var(--card-gap, 2rem); }
+.agent { min-width: 0; }
+.portrait {
+  width: clamp(7.5rem, 13vw, 10.5rem);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center 30%;
+  margin: 0 auto 0.85rem;
+  border: 3px solid #edf9fb;
+  border-radius: 50%;
+  background: #dff0f5;
+}
+.agent h3 { font-weight: 750; }
+.agent p { color: #e0f0f3; font-size: 0.85rem; }
+.details {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.85rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #a9cdd4;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.details:hover { background: white; color: #083a47; }
+.details svg { width: 0.9rem; }
+
+@media (min-width: 540px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 800px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

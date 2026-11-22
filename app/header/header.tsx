@@ -1,30 +1,10 @@
-"use client";
-import { Fragment } from "react";
-//import Search from "../search/search";
-import Navbar from "../navbar//navbar";
-import Styles from "./header.module.css";
-import ContactInfo from "../contactInfo/contactInfo";
+import Navbar from "../navbar/navbar";
+import styles from "./header.module.css";
 
-const Header = () => {
+export default function Header() {
   return (
-    <>
-      <div className={Styles.fixedFormContainer}>
-        <div className="min-h-full sticky">
-          <main>
-            <header className=" shadow-2xl">
-              <div className="">
-                {/* <div
-                  className="text-slate-50 h-6"
-                  style={{ backgroundColor: "#f27423" }}
-                ></div> */}
-
-                <Navbar />
-              </div>
-            </header>
-          </main>
-        </div>
-      </div>
-    </>
+    <header className={styles.fixedFormContainer}>
+      <Navbar />
+    </header>
   );
-};
-export default Header;
+}

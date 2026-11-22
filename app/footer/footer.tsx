@@ -41,15 +41,13 @@ const FooterSection = () => {
   const year = new Date().getFullYear();
 
   return (
-    <div style={{ backgroundColor: "#14222d" }} className="overflow-hidden">
-      <hr />
-
+    <div style={{ backgroundColor: "#083a47" }} className="overflow-hidden">
       <Footer
         container
         className="rounded-none text-white"
-        style={{ backgroundColor: "#14222d" }}
+        style={{ backgroundColor: "#083a47" }}
       >
-        <div className="w-full">
+        <div className="mx-auto w-full max-w-7xl">
           {/* Top row: logo / partners / links */}
           <div className="flex w-full flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:text-left">
             <Image
@@ -97,8 +95,8 @@ const FooterSection = () => {
       </Footer>
 
       {/* Bottom bar — now a full-width sibling, not fighting Footer's padding */}
-      <div style={{ backgroundColor: "#f27423" }} className="w-full">
-        <div className="mx-auto  flex w-full px-10 flex-col items-center  py-3 text-slate-50 gap-3 sm:flex-row sm:justify-between sm:gap-4">
+      <div style={{ backgroundColor: "#b74b0a" }} className="w-full">
+        <div className="mx-auto flex w-full max-w-7xl px-6 flex-col items-center  py-3 text-slate-50 gap-3 sm:flex-row sm:justify-between sm:gap-4">
           {/* Call us */}
           <div className="flex items-center whitespace-nowrap text-xs font-semibold sm:text-sm">
             <MdLocalPhone className="shrink-0" />
@@ -114,7 +112,7 @@ const FooterSection = () => {
           </div>
 
           {/* Dev credit */}
-          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm lg:-ml-64">
+          <div className="order-3 text-center text-xs sm:order-2 sm:text-sm">
             Developed by{" "}
             <Link
               href="https://www.swornimgroup.com.np/"
