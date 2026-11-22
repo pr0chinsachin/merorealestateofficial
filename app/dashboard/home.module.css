@@ -115,13 +115,11 @@
 .available {
   scroll-margin-top: 6rem;
   background: linear-gradient(115deg, #0d6170, var(--deep-teal));
-  border-radius: 48% 3% 45% 3% / 4% 2% 4% 2%;
   padding-block: 0.75rem 2rem;
 }
 .completed { padding-block: 4rem; }
 .team {
   background: radial-gradient(ellipse at 25% 0%, #13788b, #074b5a 65%);
-  border-radius: 45% 3% 45% 3% / 4% 2% 4% 2%;
 }
 .team > div { background: transparent; }
 
