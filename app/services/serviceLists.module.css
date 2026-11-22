@@ -1,57 +1,75 @@
+.background {
+  background: linear-gradient(120deg, #e4f3f5, #f4fafb 55%, #e4f3f5);
+}
+
 .services {
   max-width: 80rem;
   margin-inline: auto;
-  padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
+  padding: clamp(2.5rem, 5vw, 4.75rem) clamp(1.25rem, 3vw, 2rem);
   color: #083a47;
   text-align: center;
 }
 
 .services h2 {
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
   font-weight: 800;
   font-size: clamp(1.8rem, 3vw, 2.5rem);
   letter-spacing: -0.035em;
 }
 
-.subtitle { margin: 0.3rem 0 1.8rem; }
-.loading { padding: 2rem; }
+.loading { padding: 1rem; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--card-gap, clamp(1.125rem, 2.4vw, 2rem));
 }
 
 .card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  padding: clamp(0.8rem, 2vw, 1.6rem);
-  border: 1px solid #dfeced;
-  border-radius: 1rem;
-  background: #f5fafb;
-  box-shadow: 0 6px 16px #083a470b;
+  gap: 0.875rem;
+  min-width: 0;
+  min-height: 6.75rem;
+  padding: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.875rem;
+  background: linear-gradient(115deg, #083a47, #0c6172);
+  color: #fff;
+  text-align: left;
   transition: box-shadow 150ms ease, border-color 150ms ease;
 }
 
-.card:hover { border-color: #65a8b3; box-shadow: 0 8px 22px #083a4720; }
+.card:hover {
+  border-color: #f27423;
+  box-shadow: 0 6px 16px #083a4726;
+}
+
+.card:focus-visible {
+  outline: 2px solid #083a47;
+  outline-offset: 3px;
+}
+
 .card h3 { font-size: 1.125rem; font-weight: 750; }
-.card p { font-size: 0.875rem; }
+.card p { margin-top: 0.2rem; color: #d7f0f4; font-size: 0.875rem; }
+
 .icon {
   display: grid;
+  flex: none;
   place-items: center;
-  width: 3rem;
+  width: 3.125rem;
   aspect-ratio: 1;
-  margin-bottom: 0.35rem;
-  border-radius: 50%;
-  background: #dceef2;
-  color: #096276;
+  border-radius: 0.7rem;
+  background: #f27423;
+  color: #092e38;
 }
-.card:nth-child(odd) .icon { background: #fbe8d9; color: #b74b0a; }
-.icon svg { width: 1.55rem; }
-.action { display: flex; align-items: center; gap: 0.35rem; padding-top: 0.45rem; margin-top: auto; font-size: 0.8rem; font-weight: 700; }
-.action svg { width: 0.9rem; }
 
-@media (min-width: 800px) {
+.icon svg { width: 1.55rem; }
+
+@media (min-width: 600px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1040px) {
   .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
