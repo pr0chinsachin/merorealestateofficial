@@ -111,7 +111,6 @@
   padding-inline: 1.25rem;
 }
 
-.services { padding-block: 3rem 4.5rem; }
 .available {
   scroll-margin-top: 6rem;
   background: linear-gradient(115deg, #0d6170, var(--deep-teal));

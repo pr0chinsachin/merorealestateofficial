@@ -46,7 +46,7 @@ export default function Dashboard() {
         <Search />
       </section>
 
-      <section className={styles.services} aria-label="Our services">
+      <section aria-label="Our services">
         <ServiceLists />
       </section>
 
