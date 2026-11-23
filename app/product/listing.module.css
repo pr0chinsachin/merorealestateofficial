@@ -91,6 +91,8 @@
 .cardBody { padding: 0.9rem; }
 .card h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; font-weight: 750; }
 .price { margin-top: 0.2rem; color: #b74b0a; font-size: 1.1rem; font-weight: 800; }
+.priceLabel { display: block; color: #416168; font-size: 0.75rem; font-weight: 600; }
+.highlight { background: #ffe2c8; color: #783506; }
 .amenities { display: flex; flex-wrap: wrap; gap: 0.65rem 1rem; margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid #e4eef0; font-size: 0.8rem; }
 .amenities li { display: flex; align-items: center; gap: 0.35rem; }
 .message { padding-block: 2rem; text-align: center; }

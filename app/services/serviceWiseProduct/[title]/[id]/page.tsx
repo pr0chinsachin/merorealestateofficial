@@ -1,335 +1,149 @@
 "use client";
-import { Card, Spinner, Pagination, Button } from "flowbite-react";
-import React, { useEffect, useState } from "react";
-import { Badge } from "flowbite-react";
-import Image from "next/image";
-import carIcon from "../../../../../public/car.svg";
-import Bathroom from "../../../../../public/bathtub-bold-bathroom.svg";
-import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
-import BASE_URL from "../../../../urlConfig/urlConfig";
-import SERVER_URL from "../../../../urlConfig/serverUrl";
+
+import { useEffect, useState } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Pagination, Spinner } from "flowbite-react";
 import Link from "next/link";
-import type { CustomFlowbiteTheme } from "flowbite-react";
 import DarkFormSale from "@/app/contactAgentForm/darkFormSale";
-import { BiSearchAlt } from "react-icons/bi";
+import PropertyCard, { type Listing } from "@/app/product/propertyCard";
+import BASE_URL from "@/app/urlConfig/urlConfig";
+import styles from "./category.module.css";
 
-interface ServiceProduct {
-  id: string;
-  productCode: string;
-  productName: string;
-  price: number;
-  thumbnailImgPath: string;
-  roomCount: number;
-  bathRoomCount: number;
-  parkingCount: number;
-  area: number;
-  propertyStatusValue: string;
-  status: boolean;
-  details: string;
+interface ServiceProduct extends Listing {
+  address?: string | null;
+  details?: string | null;
+  deleted?: boolean;
 }
 
-interface ServiceProductProps {
-  params: {
-    id: string;
-    title: string;
-  };
+const perPage = 8;
+const buyingOptions = [
+  { label: "All properties", value: "all" },
+  { label: "Houses", value: "0" },
+  { label: "House & land", value: "1" },
+];
+
+export default function ServiceWiseProduct({ params }: { params: { id: string; title: string } }) {
+  let title = params.title;
+  try {
+    title = decodeURIComponent(title);
+  } catch {
+    // A title containing a literal percent sign is already decoded.
+  }
+  return <ServiceCategory key={params.id} id={params.id} title={title} />;
 }
 
-const customTheme: CustomFlowbiteTheme["card"] = {
-  img: {
-    horizontal: {
-      off: "rounded-t-lg object-cover aspect-[4/3]",
-    },
-  },
-};
-
-// ✅ Highlights matched text within a string
-const HighlightText = ({
-  text,
-  highlight,
-}: {
-  text: string;
-  highlight: string;
-}) => {
-  if (!highlight.trim()) return <span>{text}</span>;
-
-  const regex = new RegExp(
-    `(${highlight.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-    "gi",
-  );
-  const parts = text.split(regex);
-
-  return (
-    <span>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark key={i} className="bg-orange-300 text-black rounded px-0.5">
-            {part}
-          </mark>
-        ) : (
-          <span key={i}>{part}</span>
-        ),
-      )}
-    </span>
-  );
-};
-
-const ServiceWiseProduct: React.FC<ServiceProductProps> = ({ params }) => {
-  const { id, title } = params;
-  const [productsByPrice, setProductsByPrice] = useState<ServiceProduct[]>([]);
-  const [fetchError, setFetchError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+function ServiceCategory({ id, title }: { id: string; title: string }) {
+  const category = title.toLowerCase();
+  const sale = category === "sale";
+  const [products, setProducts] = useState<ServiceProduct[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<string>("house");
-  const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 8;
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/Product/ProductListWithCategoryID?id=${id}`,
-      );
-      if (response.ok) {
-        const data: ServiceProduct[] = await response.json();
-        const processedData = data.map((product) => ({
-          ...product,
-          thumbnailImgPath: product.thumbnailImgPath.replace(/~/g, ""),
-        }));
-        setProductsByPrice(processedData);
-        setIsLoading(false);
-      } else {
-        setFetchError(true);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      setFetchError(true);
-      setIsLoading(false);
-    }
-  };
+  const [query, setQuery] = useState("");
+  const [buyingOption, setBuyingOption] = useState("all");
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (sale) return;
+    const controller = new AbortController();
 
-  const handleTabChange = (index: number) => {
-    const tab = index === 0 ? "house" : "house-land";
-    setActiveTab(tab);
-    setCurrentPage(1);
-  };
-
-  const handleClear = () => {
-    setSearchTerm("");
-    setCurrentPage(1);
-  };
-
-  // ✅ Filter by category/status
-  const categoryFilteredProducts = productsByPrice.filter((product) => {
-    if (title === "Buy") {
-      return activeTab === "house"
-        ? product.details === "0"
-        : product.details === "1";
+    async function loadProperties() {
+      try {
+        const params = new URLSearchParams({ id });
+        const response = await fetch(`${BASE_URL}/Product/ProductListWithCategoryID?${params}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Unable to load properties");
+        const data: ServiceProduct[] = await response.json();
+        setProducts(data.filter((property) => property.status && !property.deleted));
+        setState("ready");
+      } catch {
+        if (!controller.signal.aborted) setState("error");
+      }
     }
-    if (title === "Rent") {
-      return (
-        product.status &&
-        (product.propertyStatusValue === "Rent" ||
-          product.propertyStatusValue === "Rented" ||
-          product.propertyStatusValue === "UnderManagement")
-      );
-    }
-    return product.status;
+
+    void loadProperties();
+    return () => controller.abort();
+  }, [id, sale]);
+
+  const term = query.trim().toLowerCase();
+  const filtered = products.filter((property) => {
+    if (category === "buy" && buyingOption !== "all" && property.details !== buyingOption) return false;
+    if (category === "rent" && !["Rent", "Rented", "UnderManagement"].includes(property.propertyStatusValue)) return false;
+    const price = property.price > 0 ? String(property.price) : "contact for price contact agent";
+    const priceTerm = term.replace(/[$,\s]/g, "");
+    return property.productName.toLowerCase().includes(term)
+      || property.address?.toLowerCase().includes(term)
+      || price.includes(term)
+      || (priceTerm !== "" && price.includes(priceTerm));
   });
-
-  // ✅ Further filter by search term (name or price)
-  const filteredProducts = categoryFilteredProducts.filter((product) => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase().trim();
-    const nameMatch = product.productName.toLowerCase().includes(term);
-    const priceStr =
-      product.price === 0 ? "contact for price" : product.price.toString();
-    const priceMatch = priceStr.includes(term);
-    return nameMatch || priceMatch;
-  });
-
-  // ✅ Format price string for display/highlight
-  const formatPrice = (product: ServiceProduct): string => {
-    if (product.price === 0) return "Contact for Price";
-    return `$ ${Intl.NumberFormat("en-US", {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }).format(product.price)}`;
-  };
-
-  // ✅ Product card UI
-  const renderProductCard = (product: ServiceProduct) => (
-    <div key={product.id} className="group">
-      <Link href={`/product/hotlistproduct/hotlistProductView/${product.id}`}>
-        <Card
-          imgSrc={`${SERVER_URL}${product.thumbnailImgPath}`}
-          className="w-full max-w-lg"
-          theme={customTheme}
-        >
-          <h3 className="text-md text-black font-semibold truncate">
-            <HighlightText text={product.productName} highlight={searchTerm} />
-          </h3>
-
-          <div className="flex justify-between">
-            <Badge
-              color={
-                product.propertyStatusValue === "UnderManagement"
-                  ? "dark"
-                  : "success"
-              }
-              className="text-sm"
-            >
-              {product.propertyStatusValue === "UnderManagement"
-                ? "Under Management"
-                : title === "Rent" ||
-                    ["Leased", "Rented"].includes(product.propertyStatusValue)
-                  ? "Rent"
-                  : product.propertyStatusValue}
-            </Badge>
-
-            <div className="text-orange-500 font-bold">
-              {product.propertyStatusValue === "Buy" && product.price !== 0 && (
-                <div className="text-sm text-gray-500">Starting From</div>
-              )}
-              <HighlightText
-                text={formatPrice(product)}
-                highlight={searchTerm}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between">
-            <div className="flex items-center">
-              <Image src={Bedroom} alt="Bedroom Icon" width={20} height={20} />
-              <span className="pl-2">{product.roomCount}</span>
-            </div>
-            <div className="flex items-center">
-              <Image
-                src={Bathroom}
-                alt="Bathroom Icon"
-                width={20}
-                height={20}
-              />
-              <span className="pl-2">{product.bathRoomCount}</span>
-            </div>
-            <div className="flex items-center">
-              <Image src={carIcon} alt="Car Icon" width={20} height={20} />
-              <span className="pl-2">{product.parkingCount}</span>
-            </div>
-          </div>
-        </Card>
-      </Link>
-    </div>
-  );
-
-  // ✅ Pagination logic
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  // ✅ Render section
-  const renderProductsList = () => {
-    if (fetchError) {
-      return (
-        <div className="text-red-500 mt-4 text-center">
-          Failed to fetch data. Please try again later.
-        </div>
-      );
-    }
-
-    if (isLoading) {
-      return (
-        <div className="relative w-full h-96 flex justify-center items-center">
-          <Spinner size="xl" />
-        </div>
-      );
-    }
-
-    return (
-      <>
-        {/* Search Box */}
-        <div className="mb-6 flex flex-col sm:flex-row justify-center sm:justify-end gap-2">
-          <div className="relative w-full sm:w-72">
-            <input
-              type="text"
-              placeholder="Search by Location or price..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none text-black w-full"
-            />
-            {searchTerm && (
-              <button
-                onClick={handleClear}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl leading-none"
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
-          {/* <Button
-            style={{ backgroundColor: "#f27423" }}
-            className="text-white px-4 py-2 rounded-lg focus:outline-none flex items-center gap-1"
-          >
-            <BiSearchAlt className="mr-1" />
-            Search
-          </Button> */}
-        </div>
-        {/* Search result count */}
-        {searchTerm && (
-          <p className="text-gray-400 text-sm mb-4 text-right">
-            {filteredProducts.length} result
-            {filteredProducts.length !== 1 ? "s" : ""} for &ldquo;{searchTerm}
-            &rdquo;
-          </p>
-        )}
-
-        {paginatedProducts.length === 0 ? (
-          <div className="text-center text-gray-500 py-12">
-            {title === "Build"
-              ? "Coming Soon."
-              : `No properties found matching "${searchTerm}".`}
-          </div>
-        ) : (
-          <>
-            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-              {paginatedProducts.map(renderProductCard)}
-            </div>
-            <div className="m-8 flex justify-end pb-8">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          </>
-        )}
-      </>
-    );
+  const pageCount = Math.ceil(filtered.length / perPage);
+  const pageItems = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+  const heading = sale ? "Sell with us" : title;
+  const subtitles: Record<string, string> = {
+    buy: "Explore properties for sale.",
+    rent: "Browse rental properties.",
+    sale: "Request an appraisal for your property.",
+    "house / land": "Explore houses and land.",
   };
 
   return (
-    <div
-      className="px-4 pt-16 md:pt-0 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "#14222d" }}
-    >
-      <div className="max-w-7xl mx-auto md:py-8 h-max">
-        <h2 className="text-3xl md:text-4xl text-center font-bold text-sky-50 md:mt-3 md:mb-16">
-          {title === "Sale" ? "Sale with us" : decodeURIComponent(title)}
-        </h2>
-        <div className="my-10">
-          {title === "Sale" ? <DarkFormSale /> : renderProductsList()}
-        </div>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <Link href="/">Home</Link><span aria-hidden="true">/</span>
+          <Link href="/services">Services</Link><span aria-hidden="true">/</span>
+          <span aria-current="page">{title}</span>
+        </nav>
+
+        <header className={styles.hero}>
+          <h1>{heading}</h1>
+          {subtitles[category] && <p>{subtitles[category]}</p>}
+        </header>
+
+        {sale ? (
+          <div className={styles.appraisal}><DarkFormSale /></div>
+        ) : (
+          <>
+            <div className={styles.toolbar}>
+              {category === "buy" && (
+                <div className={styles.filters} role="group" aria-label="Property type">
+                  {buyingOptions.map(({ label, value }) => (
+                    <button key={value} type="button" aria-pressed={buyingOption === value}
+                      onClick={() => { setBuyingOption(value); setCurrentPage(1); }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className={styles.search}>
+                <MagnifyingGlassIcon aria-hidden="true" />
+                <input type="search" aria-label="Search by location or price" placeholder="Search by location or price"
+                  value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1); }} />
+                {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setCurrentPage(1); }}>×</button>}
+              </div>
+            </div>
+
+            {state === "loading" && <div className={styles.message}><Spinner aria-label="Loading properties" size="lg" /></div>}
+            {state === "error" && <p className={styles.message} role="status">Couldn’t load properties. Please try again later.</p>}
+            {state === "ready" && (
+              <>
+                <p className={styles.count} role="status">{filtered.length} {filtered.length === 1 ? "property" : "properties"}{term ? ` matching “${query.trim()}”` : ""}</p>
+                {pageItems.length ? (
+                  <div className={styles.grid}>
+                    {pageItems.map((listing) => <PropertyCard key={listing.id} listing={listing} searchTerm={query} showStartingPrice />)}
+                  </div>
+                ) : (
+                  <p className={styles.message}>{category === "build" && !term ? "Coming soon." : "No properties found."}</p>
+                )}
+                {pageCount > 1 && (
+                  <div className={styles.pagination}>
+                    <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
-};
-
-export default ServiceWiseProduct;
+}

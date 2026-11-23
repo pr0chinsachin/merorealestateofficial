@@ -29,7 +29,25 @@ const currency = new Intl.NumberFormat("en-AU", {
 
 const statusLabels: Record<string, string> = { Buy: "For sale", Rent: "For rent", UnderManagement: "Under management" };
 
-export default function PropertyCard({ listing }: { listing: Listing }) {
+function highlight(text: string, searchTerm: string) {
+  const term = searchTerm.trim().toLowerCase();
+  if (!term) return text;
+
+  const lower = text.toLowerCase();
+  const parts = [];
+  let start = 0;
+  let match = lower.indexOf(term);
+  while (match !== -1) {
+    parts.push(text.slice(start, match), <mark key={match} className={styles.highlight}>{text.slice(match, match + term.length)}</mark>);
+    start = match + term.length;
+    match = lower.indexOf(term, start);
+  }
+  return [...parts, text.slice(start)];
+}
+
+export default function PropertyCard({
+  listing, searchTerm = "", showStartingPrice = false,
+}: { listing: Listing; searchTerm?: string; showStartingPrice?: boolean }) {
   const amenities = [
     { icon: bed, label: "Bedrooms", count: listing.roomCount },
     { icon: bath, label: "Bathrooms", count: listing.bathRoomCount },
@@ -49,8 +67,13 @@ export default function PropertyCard({ listing }: { listing: Listing }) {
         <span className={styles.badge}>{statusLabels[listing.propertyStatusValue] ?? listing.propertyStatusValue}</span>
       </div>
       <div className={styles.cardBody}>
-        <h3>{listing.productName}</h3>
-        <p className={styles.price}>{listing.price > 0 ? currency.format(listing.price) : "Contact agent"}</p>
+        <h3>{highlight(listing.productName, searchTerm)}</h3>
+        <p className={styles.price}>
+          {showStartingPrice && listing.price > 0 && listing.propertyStatusValue === "Buy" && (
+            <span className={styles.priceLabel}>Starting from</span>
+          )}
+          {highlight(listing.price > 0 ? currency.format(listing.price) : "Contact agent", searchTerm)}
+        </p>
         <ul className={styles.amenities}>
           {amenities.map(({ icon, label, count }) => (
             <li key={label}>
