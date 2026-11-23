@@ -1,373 +1,210 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { Card } from "flowbite-react";
+import { EnvelopeIcon, PhoneIcon, ShareIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import Link from "next/link";
+import fallback from "../../../../public/noavatar.png";
 import BASE_URL from "../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../urlConfig/serverUrl";
-import noavatar from "../../../../public/logo.svg";
+import styles from "./profile.module.css";
 
 interface AgentData {
-  id: string;
-  agentCode: string;
   agentName: string;
-  designation: string;
-  address: string;
-  experience: string;
-  skill: string;
-  email: string;
-  contact: string;
-  description: string;
-  fbLink: string;
-  websiteLink: string;
-  linkedInLink: string;
+  designation?: string | null;
+  address?: string | null;
+  experience?: string | null;
+  skill?: string | null;
+  email?: string | null;
+  contact?: string | null;
+  description?: string | null;
+  fbLink?: string | null;
+  websiteLink?: string | null;
+  linkedInLink?: string | null;
+  agentImgPath?: string | null;
+  createdDate?: string | null;
   status: boolean;
   deleted: boolean;
-  agentImgPath: string | null;
 }
 
-interface UpdateAgentProps {
-  params: {
-    id: string;
-  };
+type ProfileState = { status: "loading" | "unavailable" | "error" } |
+  { status: "ready"; agent: AgentData };
+
+const dateFormat = new Intl.DateTimeFormat("en-AU", {
+  day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
+});
+
+function webLink(value?: string | null) {
+  const url = value?.trim();
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(/^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`);
+    return ["http:", "https:"].includes(parsed.protocol) && parsed.hostname.includes(".")
+      ? parsed.href
+      : null;
+  } catch {
+    return null;
+  }
 }
 
-const AgentViewDetails: React.FC<UpdateAgentProps> = ({ params }) => {
-  const { id } = params;
-  const [agentData, setAgentData] = useState<AgentData>({
-    id: "",
-    agentCode: "",
-    agentName: "",
-    designation: "",
-    address: "",
-    experience: "",
-    skill: "",
-    email: "",
-    contact: "",
-    description: "",
-    fbLink: "",
-    websiteLink: "",
-    linkedInLink: "",
-    status: false,
-    deleted: false,
-    agentImgPath: null,
-  });
-  const [imgError, setImgError] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
+export default function AgentViewDetails({ params }: { params: { id: string } }) {
+  return <Profile key={params.id} id={params.id} />;
+}
+
+function Profile({ id }: { id: string }) {
+  const [state, setState] = useState<ProfileState>({ status: "loading" });
+  const [imageFailed, setImageFailed] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [shareStatus, setShareStatus] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/Agent/UpdateAgents?id=${id}`);
-       
-        if (response.ok) {
-          const data: AgentData = await response.json();
-          console.log(data)
-          setAgentData({
-            ...data,
-            agentImgPath: data.agentImgPath
-              ? data.agentImgPath.replace(/~/g, "")
-              : null,
-          });
-          setFetchError(false);
-        } else {
-          console.error("Failed to fetch data");
-          setFetchError(true);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        setFetchError(true);
-      }
-    };
+    const controller = new AbortController();
 
-    fetchData();
+    async function loadProfile() {
+      try {
+        const query = new URLSearchParams({ id });
+        const response = await fetch(`${BASE_URL}/Agent/UpdateAgents?${query}`, {
+          signal: controller.signal,
+        });
+        if (response.status === 404) {
+          setState({ status: "unavailable" });
+          return;
+        }
+        if (!response.ok) throw new Error("Unable to load agent");
+        const agent: AgentData | null = await response.json();
+        setState(agent?.agentName?.trim() && agent.status && !agent.deleted
+          ? { status: "ready", agent }
+          : { status: "unavailable" });
+      } catch {
+        if (!controller.signal.aborted) setState({ status: "error" });
+      }
+    }
+
+    loadProfile();
+    return () => controller.abort();
   }, [id]);
 
+  const agent = state.status === "ready" ? state.agent : null;
+
+  async function shareProfile() {
+    setShareStatus("");
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${agent?.agentName} | Mero Real Estate`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareStatus("Profile link copied.");
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      setShareStatus("Copy the profile link from your address bar.");
+    }
+  }
+
+  const phone = agent?.contact?.trim();
+  const phoneHref = phone?.replace(/[^\d+]/g, "");
+  const email = agent?.email?.trim();
+  const skills = Array.from(new Set(agent?.skill?.split(/[,;\n]+/).map((skill) => skill.trim()).filter(Boolean)));
+  const created = agent?.createdDate ? new Date(agent.createdDate) : null;
+  const profileDate = created && Number.isFinite(created.getTime()) ? dateFormat.format(created) : null;
+  const links = [
+    { label: "Website", href: webLink(agent?.websiteLink) },
+    { label: "Facebook", href: webLink(agent?.fbLink) },
+    { label: "LinkedIn", href: webLink(agent?.linkedInLink) },
+  ].filter((link): link is { label: string; href: string } => link.href !== null);
+  const portrait = agent?.agentImgPath?.trim().replace(/^~/, "");
+
   return (
-    <div className="container mx-auto my-9 justify-center">
-      <div className="max-auto rounded overflow-hidden ">
-        <div className="flex justify-between mr-4 ml-4 mb-4 mt-4">
-          <Card className="max-auto container ">
-            <h1 className="text-2xl font-bold">Agent Details</h1>
-            <hr />
-            {fetchError ? (
-              <p className="text-red-500">
-                Failed to load agent details. Please try again later.
-              </p>
-            ) : (
-              <>
-                {/* <h1 className="text-2xl text-cyan-600">
-                  <b>Profile image</b>
-                </h1> */}
-                <div className="h-72 w-full bg-slate-700 flex justify-center items-center overflow-hidden">
-                  <span className="font-extrabold text-white text-4xl md:text-9xl  ">
-                    {agentData.agentName}
-                  </span>
-                </div>
-                <div className="items-center mx-auto overflow-hidden rounded-full h-40 md:h-48 w-40 md:w-48 z-20 bg-slate-900 -mt-24 border-8 border-white">
-                  <Image
-                    src={
-                      imgError || !agentData.agentImgPath
-                        ? noavatar
-                        : `${SERVER_URL}${agentData.agentImgPath}`
-                    }
-                    alt="Profile image"
-                    width={192} // Update the width and height to match your container
-                    height={192}
-                    onError={() => setImgError(true)}
-                    className="object-cover rounded-full h-full w-full" // Use h-full and w-full for complete fit
-                  />
-                </div>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
+          <ol>
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/agent">Agents</Link></li>
+            <li aria-current="page">{agent?.agentName || "Agent profile"}</li>
+          </ol>
+        </nav>
 
-                <div className="px-96 hidden">
-                  <div className="px-4 sm:px-0 grid place-items-center">
-                    <h3 className="text-base font-semibold leading-7 text-cyan-600">
-                      Agent Information
-                    </h3>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 text-cyan-600">
-                      Personal details and application.
-                    </p>
-                  </div>
-                  <div className="mt-6 border-t border-gray-100  text-center">
-                    <dl className="divide-y divide-gray-100">
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Full name
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.agentName}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Address
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.address}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Email address
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.email}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Phone Number
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.contact}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                        Designation
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.designation}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Experience
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.experience}
-                        </dd>
-                      </div>
-                      {/* <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Skills
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.skill}
-                        </dd>
-                      </div> */}
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Website Link
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.websiteLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.websiteLink}
-                          </a>
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Facebook Link
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.fbLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.fbLink}
-                          </a>
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          LinkedIn
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.linkedInLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.linkedInLink}
-                          </a>
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          About Yourself
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.description}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
+        {agent ? (
+          <>
+            <div className={styles.hero}>
+              <Image
+                src={portrait && !imageFailed ? `${SERVER_URL}${portrait}` : fallback}
+                alt=""
+                width={148}
+                height={148}
+                priority
+                unoptimized={Boolean(portrait && !imageFailed)}
+                onError={() => setImageFailed(true)}
+                className={styles.portrait}
+              />
+              <div className={styles.identity}>
+                <p className={styles.label}>Agent profile</p>
+                <h1>{agent.agentName}</h1>
+                {agent.designation?.trim() && <p className={styles.role}>{agent.designation}</p>}
+                {(agent.experience?.trim() || profileDate) && (
+                  <ul className={styles.metadata}>
+                    {agent.experience?.trim() && <li>Experience: {agent.experience}</li>}
+                    {profileDate && <li>Profile added {profileDate}</li>}
+                  </ul>
+                )}
+                <div className={styles.actions}>
+                  {phone && phoneHref && (showPhone ? (
+                    <a className={styles.primary} href={`tel:${phoneHref}`}><PhoneIcon aria-hidden="true" />{phone}</a>
+                  ) : (
+                    <button className={styles.primary} type="button" onClick={() => setShowPhone(true)}><PhoneIcon aria-hidden="true" />Show number</button>
+                  ))}
+                  {email && <a href={`mailto:${email}`}><EnvelopeIcon aria-hidden="true" />Email agent</a>}
+                  <button type="button" onClick={shareProfile}><ShareIcon aria-hidden="true" />Share profile</button>
                 </div>
+                {shareStatus && <p className={styles.feedback} role="status">{shareStatus}</p>}
+              </div>
+            </div>
 
-                <div className="md:flex w-full md:px-10 gap-10 mt-10 overflow-hidden">
-                  <Card className="md:w-1/2 h-max">
-                    <dl className="divide-y divide-gray-100">
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Full name
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.agentName}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Address
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.address}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Email address
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.email}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Phone Number
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.contact}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                        Designation
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.designation}
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Experience
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.experience}
-                        </dd>
-                      </div>
-                      {/* <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Skills
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {agentData.skill}
-                        </dd>
-                      </div> */}
-                    </dl>
-                  </Card>
-
-                  {/* second card */}
-                  <Card className="md:w-1/2 mt-10 md:mt-0 h-max">
-                    <dl className="divide-y divide-gray-100">
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Website Link
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.websiteLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.websiteLink}
-                          </a>
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          Facebook Link
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.fbLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.fbLink}
-                          </a>
-                        </dd>
-                      </div>
-                      <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                        <dt className="text-sm font-medium leading-6 text-gray-900">
-                          LinkedIn
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-cyan-700 sm:col-span-2 sm:mt-0">
-                          <a
-                            href={agentData.linkedInLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {agentData.linkedInLink}
-                          </a>
-                        </dd>
-                      </div>
-                    </dl>
-                  </Card>
-                </div>
-                <Card className="mt-10 md:mx-10 h-max">
-                  <dl className="divide-y divide-gray-100">
-                    <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                      <dt className="text-sm font-medium leading-6 text-gray-900">
-                        About Yourself
-                      </dt>
-                      <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                        {agentData.description}
-                      </dd>
-                    </div>
-                  </dl>
-                </Card>
-              </>
+            {agent.description?.trim() && (
+              <section className={styles.section}>
+                <h2 className={styles.label}>About</h2>
+                <p className={styles.description}>{agent.description}</p>
+              </section>
             )}
-          </Card>
-        </div>
+
+            {(skills.length > 0 || agent.address?.trim() || email || links.length > 0) && (
+              <div className={`${styles.section} ${styles.details}`}>
+                {skills.length > 0 && (
+                  <section>
+                    <h2 className={styles.label}>Skills</h2>
+                    <ul className={styles.skills}>{skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
+                  </section>
+                )}
+                {(agent.address?.trim() || email || links.length > 0) && (
+                  <section>
+                    <h2 className={styles.label}>Contact and links</h2>
+                    {agent.address?.trim() && <p className={styles.address}>{agent.address}</p>}
+                    {email && <p className={styles.email}><a href={`mailto:${email}`}>{email}</a></p>}
+                    {links.length > 0 && (
+                      <ul className={styles.links}>
+                        {links.map(({ label, href }) => <li key={label}><a href={href} target="_blank" rel="noopener noreferrer">{label}</a></li>)}
+                      </ul>
+                    )}
+                  </section>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={styles.empty}>
+            <h1>Agent profile</h1>
+            <p role="status">
+              {state.status === "loading" ? "Loading agent profile…" :
+                state.status === "unavailable" ? "This agent profile is unavailable." :
+                  "Couldn’t load the agent profile. Please try again later."}
+            </p>
+            {state.status !== "loading" && <Link href="/agent">Back to agents</Link>}
+          </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default AgentViewDetails;
+}
