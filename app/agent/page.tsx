@@ -60,34 +60,36 @@ const Agent = () => {
   };
 
   return (
-    <div className={styles.team}>
-      <h2>Meet Our Team</h2>
-      <p className={styles.subtitle}>Our real estate professionals</p>
-      {error ? (
-        <p role="status">{error}</p>
-      ) : isLoading ? (
-        <Spinner size="lg" aria-label="Loading agents" />
-      ) : (
-        <div className={styles.grid}>
-          {agentDetails.map((agent) => (
-            <article key={agent.id} className={styles.agent}>
-              <Image
-                src={agent.agentImgPath ? `${SERVER_URL}${agent.agentImgPath}` : logo}
-                className={styles.portrait}
-                alt=""
-                width={180}
-                height={180}
-                unoptimized={Boolean(agent.agentImgPath)}
-              />
-              <h3>{agent.agentName}</h3>
-              <p>{agent.designation}</p>
-              <Link href={`/agent/agentViewDetails/${agent.id}`} className={styles.details}>
-                View details <ArrowRightIcon aria-hidden="true" />
-              </Link>
-            </article>
-          ))}
-        </div>
-      )}
+    <div className={styles.background}>
+      <div className={styles.team}>
+        <h2>Meet Our Team</h2>
+        <p className={styles.subtitle}>Our real estate professionals</p>
+        {error ? (
+          <p role="status">{error}</p>
+        ) : isLoading ? (
+          <Spinner size="lg" aria-label="Loading agents" />
+        ) : (
+          <div className={styles.grid}>
+            {agentDetails.map((agent) => (
+              <article key={agent.id} className={styles.agent}>
+                <Image
+                  src={agent.agentImgPath ? `${SERVER_URL}${agent.agentImgPath}` : logo}
+                  className={styles.portrait}
+                  alt=""
+                  width={180}
+                  height={180}
+                  unoptimized={Boolean(agent.agentImgPath)}
+                />
+                <h3>{agent.agentName}</h3>
+                <p>{agent.designation}</p>
+                <Link href={`/agent/agentViewDetails/${agent.id}`} className={styles.details}>
+                  View details <ArrowRightIcon aria-hidden="true" />
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

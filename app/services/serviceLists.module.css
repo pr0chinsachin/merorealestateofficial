@@ -1,4 +1,5 @@
 .background {
+  flex: 1;
   background: linear-gradient(120deg, #e4f3f5, #f4fafb 55%, #e4f3f5);
 }
 
