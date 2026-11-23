@@ -1,0 +1,45 @@
+.page {
+  --ink: #083a47;
+  --muted: #416168;
+  --accent: #a74710;
+  --line: #cde1e4;
+  flex: 1;
+  background: linear-gradient(125deg, #e9f5f6, #f7fbfc 72%);
+  color: var(--ink);
+}
+
+.container {
+  max-width: 76rem;
+  margin-inline: auto;
+  padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 4rem;
+}
+
+.breadcrumb { display: flex; gap: 0.5rem; font-size: 0.85rem; }
+.breadcrumb a, .office a { color: var(--accent); }
+.breadcrumb a:hover, .office a:hover { text-decoration: underline; }
+
+.hero { padding-block: clamp(1.5rem, 4vw, 2.75rem); }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.05em; font-weight: 800; }
+.hero p { max-width: 58ch; margin-top: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+.layout { display: grid; align-items: start; gap: 1.35rem; }
+.office, .enquiry {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 8px 24px #083a4710;
+}
+.office h2, .enquiry h2 { margin-bottom: 0.65rem; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.025em; }
+.office address { display: grid; gap: 0.55rem; font-style: normal; font-size: 0.9rem; }
+.office address p { display: flex; align-items: center; gap: 0.55rem; overflow-wrap: anywhere; }
+.office svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.map { display: block; width: 100%; aspect-ratio: 16 / 10; margin-top: 1.1rem; border: 1px solid var(--line); border-radius: 0.65rem; }
+.directions { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.8rem; font-size: 0.875rem; font-weight: 700; }
+.enquiry > p { color: var(--muted); font-size: 0.875rem; line-height: 1.55; }
+.enquiry form label { color: var(--ink); }
+
+@media (min-width: 800px) {
+  .layout { grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.85fr); gap: 2rem; }
+}
