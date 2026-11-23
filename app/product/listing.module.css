@@ -87,9 +87,9 @@
   font-size: 0.75rem;
   font-weight: 650;
 }
-.forSale { background: #795800; }
+.forSale { background: #facc15; color: #3b2a00; }
 .sold { background: #175438; }
-.forRent { background: #741f3c; }
+.forRent { background: #704426; }
 .leased { background: #173966; }
 
 .cardBody { padding: 0.9rem; }
