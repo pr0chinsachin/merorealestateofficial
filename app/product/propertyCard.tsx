@@ -27,7 +27,14 @@ const currency = new Intl.NumberFormat("en-AU", {
   maximumFractionDigits: 2,
 });
 
-const statusLabels: Record<string, string> = { Buy: "For sale", Rent: "For rent", UnderManagement: "Under management" };
+const badgeStyles = new Map([
+  ["Buy", { label: "For sale", color: styles.forSale }],
+  ["Sold", { label: "Sold", color: styles.sold }],
+  ["Rent", { label: "For rent", color: styles.forRent }],
+  ["Leased", { label: "Leased", color: styles.leased }],
+  ["UnderManagement", { label: "Under management" }],
+  ["OnLease", { label: "On lease" }],
+]);
 
 function highlight(text: string, searchTerm: string) {
   const term = searchTerm.trim().toLowerCase();
@@ -48,6 +55,7 @@ function highlight(text: string, searchTerm: string) {
 export default function PropertyCard({
   listing, searchTerm = "", showStartingPrice = false,
 }: { listing: Listing; searchTerm?: string; showStartingPrice?: boolean }) {
+  const badge = badgeStyles.get(listing.propertyStatusValue);
   const amenities = [
     { icon: bed, label: "Bedrooms", count: listing.roomCount },
     { icon: bath, label: "Bathrooms", count: listing.bathRoomCount },
@@ -64,7 +72,9 @@ export default function PropertyCard({
           sizes="(min-width: 1024px) 25vw, (min-width: 600px) 50vw, 100vw"
           className={listing.thumbnailImgPath ? "object-cover" : "object-contain p-8"}
         />
-        <span className={styles.badge}>{statusLabels[listing.propertyStatusValue] ?? listing.propertyStatusValue}</span>
+        <span className={badge?.color ? `${styles.badge} ${badge.color}` : styles.badge}>
+          {badge?.label ?? listing.propertyStatusValue}
+        </span>
       </div>
       <div className={styles.cardBody}>
         <h3>{highlight(listing.productName, searchTerm)}</h3>

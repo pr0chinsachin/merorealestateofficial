@@ -88,6 +88,11 @@
   font-size: 0.75rem;
   font-weight: 650;
 }
+.forSale { background: #795800; }
+.sold { background: #175438; }
+.forRent { background: #741f3c; }
+.leased { background: #173966; }
+
 .cardBody { padding: 0.9rem; }
 .card h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; font-weight: 750; }
 .price { margin-top: 0.2rem; color: #b74b0a; font-size: 1.1rem; font-weight: 800; }
