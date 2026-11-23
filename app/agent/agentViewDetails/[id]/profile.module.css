@@ -81,13 +81,13 @@
   border: 1px solid #a9c9ce;
   border-radius: 0.55rem;
   background: #fff;
-  color: var(--teal);
+  color: var(--mero-orange-on-light);
   font-size: 0.875rem;
   font-weight: 700;
 }
 .actions :is(a, button):hover { background: #edf7f8; }
-.actions .primary { background: #074b5a; color: #fff; border-color: #074b5a; }
-.actions .primary:hover { background: #0c6172; }
+.actions .primary { background: var(--mero-button-surface); color: var(--mero-orange); border-color: var(--mero-button-surface); }
+.actions .primary:hover { background: var(--mero-button-hover); }
 .actions svg { width: 1.05rem; height: 1.05rem; flex: none; }
 .feedback { margin-top: 0.6rem; font-size: 0.85rem; }
 

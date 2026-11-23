@@ -212,7 +212,7 @@ function Result() {
           )}
 
           <div className="mt-8 flex justify-end">
-            <Pagination
+            <Pagination className="brand-pagination"
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={onPageChange}

@@ -256,7 +256,7 @@ const DarkFormSale: React.FC = () => {
         </div>
 
         {submitError && <p role="alert" className="text-sm text-red-700">Couldn’t send your request. Please try again.</p>}
-        <Button style={{ backgroundColor: "#a74710" }} type="submit" disabled={submitting} className="w-full">
+        <Button type="submit" disabled={submitting} className="brand-button w-full">
           {submitting ? "Sending…" : "Send appraisal request"}
         </Button>
       </form>
@@ -284,8 +284,7 @@ const DarkFormSale: React.FC = () => {
                 more information.
               </div>
               <Button
-                className="mt-10 float-end"
-                color="failure"
+                className="brand-button mt-10 float-end"
                 onClick={handleResponeClose}
               >
                 Close

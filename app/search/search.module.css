@@ -37,11 +37,11 @@
   min-height: 2.65rem;
   padding-inline: 1.35rem;
   border-radius: 0.55rem;
-  background: #074b5a;
-  color: white;
+  background: var(--mero-button-surface);
+  color: var(--mero-orange);
   font-weight: 700;
 }
-.primary button:hover { background: #0d6577; }
+.primary button:hover { background: var(--mero-button-hover); }
 .primary button svg { width: 1rem; }
 .panel details { margin-top: 0.7rem; }
 .panel summary { width: fit-content; cursor: pointer; font-weight: 650; }
