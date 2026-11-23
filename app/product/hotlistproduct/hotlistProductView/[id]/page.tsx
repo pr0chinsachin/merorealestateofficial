@@ -18,34 +18,21 @@ import {
   Label,
 } from "flowbite-react";
 import {
-  HiCalendar,
-  HiOutlineUserCircle,
-  HiOutlineHome,
-  HiOutlineVideoCamera,
   HiOutlineLocationMarker,
-  HiOutlineDocumentText,
-  HiOutlineChatAlt2,
   HiChevronDown,
+  HiOutlinePhotograph,
+  HiOutlineShare,
   HiArrowsExpand,
 } from "react-icons/hi";
-import { IoMdDownload } from "react-icons/io";
-import { MdFileUpload } from "react-icons/md";
-import { FaCarAlt, FaBath } from "react-icons/fa";
 import Image from "next/image";
+import Link from "next/link";
+import styles from "./property.module.css";
 import BASE_URL from "../../../../urlConfig/urlConfig";
 import SERVER_URL from "../../../../urlConfig/serverUrl";
-import Style from "./hostlist.module.css";
-import ContactAgentForm from "../../../../contactAgentForm/AgentForm";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 //@ts-ignore
 import "photoswipe/style.css";
-import Slider from "react-slick";
-//@ts-ignore
-import "slick-carousel/slick/slick.css";
-//@ts-ignore
-import "slick-carousel/slick/slick-theme.css";
 import ContactAgentFormDark from "@/app/contactAgentForm/darkForm";
-import Bedroom from "../../../../../public/bed-bedroom-alt.svg";
 
 interface HotlistImage {
   imageId?: string;
@@ -87,8 +74,19 @@ interface UpdateHotlistById {
 const isEmptyOrNA = (value?: string | null) => {
   if (!value) return true;
   const trimmed = value.trim().toLowerCase();
-  return trimmed === "" || trimmed === "na";
+  return ["", "na", "n/a", "-", "null", "not available"].includes(trimmed);
 };
+
+function mediaUrl(value?: string | null) {
+  try {
+    const src = value?.trim();
+    const iframeSrc = src?.match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+    const url = new URL((iframeSrc ?? src ?? "").replace(/&amp;/g, "&"));
+    return ["http:", "https:"].includes(url.protocol) ? { url: url.href, embedded: Boolean(iframeSrc) } : null;
+  } catch {
+    return null;
+  }
+}
 
 // Finds an image whose name contains "floorplan" (case-insensitive)
 const findFloorplanImage = (
@@ -138,16 +136,16 @@ const ReadMoreHTML: React.FC<{
           transition: "max-height 0.35s ease",
         }}
         className="
-          text-gray-300 leading-relaxed
+          text-[#183f48] leading-relaxed
           [&_p]:min-h-[1em]
           [&_ul]:list-disc [&_ul]:pl-5
           [&_ol]:list-decimal [&_ol]:pl-5
           [&_li]:my-1
-          [&_strong]:font-semibold [&_strong]:text-white
+          [&_strong]:font-semibold [&_strong]:text-[#083a47]
           [&_em]:italic
-          [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:my-2
-          [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:my-2
-          [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:my-1
+          [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[#083a47] [&_h1]:my-2
+          [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-[#083a47] [&_h2]:my-2
+          [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[#083a47] [&_h3]:my-1
         "
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -159,7 +157,7 @@ const ReadMoreHTML: React.FC<{
           style={{
             bottom: 0,
             background:
-              "linear-gradient(to top, #14222d 10%, rgba(20,34,45,0))",
+              "linear-gradient(to top, #f3f9fa 10%, transparent)",
           }}
         />
       )}
@@ -169,7 +167,7 @@ const ReadMoreHTML: React.FC<{
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
           aria-expanded={expanded}
-          className="relative z-10 mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#F27423] hover:text-orange-400 transition-colors"
+          className="relative z-10 mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#a74710] hover:underline transition-colors"
         >
           {expanded ? "Show less" : "Read more"}
           <HiChevronDown
@@ -205,6 +203,7 @@ const FloorPlanViewer: React.FC<{
           sizes="(min-width: 1280px) 50vw, 100vw"
           className="object-cover"
           onLoad={onLoad}
+          unoptimized
           priority
         />
         <button
@@ -249,10 +248,10 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState(0);
+  const [shareStatus, setShareStatus] = useState("");
+  const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
+  const galleryLightboxRef = useRef<PhotoSwipeLightbox | null>(null);
 
-  const galleryRef = useRef<HTMLDivElement>(null);
   const floorPlanLightboxRef = useRef<PhotoSwipeLightbox | null>(null);
 
   // ── Floor plan detection by filename (case-insensitive "floorplan") ──
@@ -355,70 +354,76 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     }
   };
 
-  // Fetch product data
   useEffect(() => {
-    const fetchData = async () => {
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
+    setCategoryNames({});
+
+    async function loadCategoryNames(
+      endpoint: string,
+      categoryId: string,
+      label: "categoryTitle" | "subCategoryTitle",
+    ) {
+      if (!categoryId) return;
       try {
-        const response = await fetch(
-          `${BASE_URL}/Product/UpdateProduct?id=${id}`,
-        );
-
-        if (response.ok) {
-          const data: HotlistById = await response.json();
-          console.log("Fetched product data:", data);
-          setProductData({
-            ...data,
-            thumbnailImgPath: data.thumbnailImgPath
-              ? data.thumbnailImgPath.replace(/~/g, "")
-              : "",
-            newThumbnailImg: data.newThumbnailImg
-              ? data.newThumbnailImg.replace(/~z/g, "")
-              : "",
-          });
-
-          setIsLoading(false);
-          setError(null);
-        } else {
-          setError("Failed to fetch data");
-          setIsLoading(false);
+        const response = await fetch(`${BASE_URL}/${endpoint}`, { signal: controller.signal });
+        if (!response.ok) return;
+        const rows: ({ id: string } & Partial<Record<typeof label, string>>)[] = await response.json();
+        const name = rows.find((row) => String(row.id) === String(categoryId))?.[label];
+        if (name && !controller.signal.aborted) {
+          setCategoryNames((previous) => ({ ...previous, [label]: name }));
         }
-      } catch (error) {
-        console.error("Error:", error);
-        setError("Error: Unable to fetch data from server");
+      } catch {
+        // The property can still be shown when category labels are unavailable.
+      }
+    }
+
+    async function loadProperty() {
+      try {
+        const response = await fetch(`${BASE_URL}/Product/UpdateProduct?${new URLSearchParams({ id })}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Unable to load property");
+        const data: HotlistById | null = await response.json();
+        if (!data?.productName) throw new Error("Property unavailable");
+        setProductData({
+          ...data,
+          thumbnailImgPath: data.thumbnailImgPath?.replace(/~/g, "") ?? "",
+          images: (data.images ?? []).filter((image) => image.filePath),
+        });
+        setIsLoading(false);
+        if (!data.deleted) {
+          void loadCategoryNames("MenuCategory/CategoryList", data.categoryId, "categoryTitle");
+          void loadCategoryNames("MenuSubCategory/SubCategoryList", data.subCategoryId, "subCategoryTitle");
+        }
+      } catch {
+        if (controller.signal.aborted) return;
+        setError("Couldn’t load this property. Please try again later.");
         setIsLoading(false);
       }
-    };
-    fetchData();
+    }
+
+    void loadProperty();
+    return () => controller.abort();
   }, [id]);
 
-  // PhotoSwipe — re-init after slick renders (300ms delay)
   useEffect(() => {
-    if (isLoading || !productData.thumbnailImgPath) return;
-
-    const timer = setTimeout(() => {
-      const lightbox = new PhotoSwipeLightbox({
-        gallery: "#property-gallery",
-        children: "a[data-pswp-width]",
-        mouseMovePan: true,
-        initialZoomLevel: "fit",
-        secondaryZoomLevel: 1.5,
-        maxZoomLevel: 1,
-        pswpModule: () => import("photoswipe"),
-      });
-      lightbox.init();
-
-      // store destroy on the timer cleanup
-      (window as any)._pswpLightbox = lightbox;
-    }, 300);
+    if (isLoading || productData.deleted || error) return;
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: "#property-gallery",
+      children: "a[data-pswp-width]",
+      showHideAnimationType: "none",
+      pswpModule: () => import("photoswipe"),
+    });
+    lightbox.init();
+    galleryLightboxRef.current = lightbox;
 
     return () => {
-      clearTimeout(timer);
-      if ((window as any)._pswpLightbox) {
-        (window as any)._pswpLightbox.destroy();
-        (window as any)._pswpLightbox = null;
-      }
+      lightbox.destroy();
+      galleryLightboxRef.current = null;
     };
-  }, [isLoading, productData]);
+  }, [isLoading, productData, error]);
 
   // PhotoSwipe for the floor plan — gives pinch/drag/double-tap zoom in a
   // dedicated fullscreen viewer, separate from the main gallery instance.
@@ -428,6 +433,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     const lightbox = new PhotoSwipeLightbox({
       gallery: "#floorplan-gallery",
       children: "a[data-pswp-width]",
+      showHideAnimationType: "none",
       mouseMovePan: true,
       initialZoomLevel: "fit",
       secondaryZoomLevel: 2,
@@ -442,8 +448,6 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
       floorPlanLightboxRef.current = null;
     };
   }, [isLoading, floorPlanSrc]);
-
-  const handleImageLoad = () => setImageLoading(false);
 
   if (isLoading) {
     return (
@@ -471,57 +475,14 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
       )
     : productData.images;
 
-  const allImages = [
-    {
-      src: `${SERVER_URL}${productData.thumbnailImgPath}`,
-      name: productData.productName,
-    },
-    ...galleryImages.map((img) => ({
-      src: `${SERVER_URL}${img.filePath.replace(/~/g, "")}`,
-      name: img.name,
+  const images = [
+    ...(productData.thumbnailImgPath ? [{ src: `${SERVER_URL}${productData.thumbnailImgPath}`, name: productData.productName }] : []),
+    ...galleryImages.map((image) => ({
+      src: `${SERVER_URL}${image.filePath.replace(/~/g, "")}`,
+      name: image.name,
     })),
   ];
-
-  const thumbnailSliderSettings = {
-    dots: false,
-    infinite: false,
-    speed: 400,
-    slidesToShow: Math.min(allImages.length - 1, 5),
-    slidesToScroll: 1,
-    swipeToSlide: true,
-    focusOnSelect: false,
-    arrows: allImages.length - 1 > 5,
-    responsive: [
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 6,
-          arrows: true,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 6,
-          arrows: true,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 5,
-          arrows: true,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 4,
-          arrows: true,
-        },
-      },
-    ],
-  };
+  const allImages = images.filter((image, index) => images.findIndex((item) => item.src === image.src) === index);
 
   // Shared upload modal form JSX
   const UploadModalForm = (
@@ -538,11 +499,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         <div className="flex flex-col gap-6 mt-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="firstName" className="text-white">
+              <Label htmlFor="upload-firstName" className="text-white">
                 First Name
               </Label>
               <TextInput
-                id="firstName"
+                id="upload-firstName"
                 name="firstName"
                 type="text"
                 className="text-black p-2"
@@ -551,11 +512,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               />
             </div>
             <div>
-              <Label htmlFor="middleName" className="text-white">
+              <Label htmlFor="upload-middleName" className="text-white">
                 Middle Name
               </Label>
               <TextInput
-                id="middleName"
+                id="upload-middleName"
                 name="middleName"
                 type="text"
                 className="text-black p-2"
@@ -564,11 +525,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               />
             </div>
             <div>
-              <Label htmlFor="lastName" className="text-white">
+              <Label htmlFor="upload-lastName" className="text-white">
                 Last Name
               </Label>
               <TextInput
-                id="lastName"
+                id="upload-lastName"
                 name="lastName"
                 type="text"
                 className="text-black p-2"
@@ -577,11 +538,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               />
             </div>
             <div>
-              <Label htmlFor="phoneNumber" className="text-white">
+              <Label htmlFor="upload-phoneNumber" className="text-white">
                 Phone Number
               </Label>
               <TextInput
-                id="phoneNumber"
+                id="upload-phoneNumber"
                 name="phoneNumber"
                 type="text"
                 className="text-black p-2"
@@ -590,11 +551,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-white">
+              <Label htmlFor="upload-address" className="text-white">
                 Address
               </Label>
               <TextInput
-                id="address"
+                id="upload-address"
                 name="address"
                 type="text"
                 className="text-black p-2"
@@ -603,11 +564,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
               />
             </div>
             <div>
-              <Label htmlFor="email" className="text-white">
+              <Label htmlFor="upload-email" className="text-white">
                 Your Email
               </Label>
               <TextInput
-                id="email"
+                id="upload-email"
                 name="email"
                 type="email"
                 placeholder="name@domain.com"
@@ -620,11 +581,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
           </div>
 
           <div className="flex flex-col">
-            <Label htmlFor="description" className="text-white">
+            <Label htmlFor="upload-description" className="text-white">
               Your Message
             </Label>
             <Textarea
-              id="description"
+              id="upload-description"
               name="description"
               rows={4}
               className="w-full text-black p-2 rounded"
@@ -634,11 +595,11 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
           </div>
 
           <div className="flex flex-col">
-            <Label htmlFor="applicationFormFile" className="text-white">
+            <Label htmlFor="upload-applicationFormFile" className="text-white">
               Application Request
             </Label>
             <FileInput
-              id="applicationFormFile"
+              id="upload-applicationFormFile"
               name="applicationFormFile"
               multiple
               onChange={handleFileChange}
@@ -675,61 +636,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     </>
   );
 
-  // Shared download + upload card section
-  const ApplicationSection = (
-    <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-3">
-      <Card className="w-full sm:w-1/2">
-        {/* when details has 0 then download resedential form and when details has 1 then download offer form */}
-        <a
-          href={
-            productData.details === "0"
-              ? "/Residental Form.pdf"
-              : "/OFFER FORM.pdf"
-          }
-          download="Offer Form"
-        >
-          <Button className="w-full">Download Offer Form</Button>
-          <br />
-          <div
-            style={{ color: "#0f7490" }}
-            className="grid place-items-center w-full"
-          >
-            <IoMdDownload size={50} />
-          </div>
-        </a>
-      </Card>
-
-      <Card
-        className="w-full sm:w-1/2 cursor-pointer"
-        onClick={() => setOpenModal(true)}
-      >
-        <Button>Upload Form</Button>
-        <div
-          style={{ color: "#0f7490" }}
-          className="grid place-items-center w-full"
-        >
-          <MdFileUpload size={50} />
-        </div>
-      </Card>
-    </div>
-  );
-
-  const RentInquirySection = (
-    <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-3">
-      <Card className="w-full">
-        {isEmptyOrNA(productData.details) ? (
-          <Button className="w-full" disabled>
-            No Link Found
-          </Button>
-        ) : (
-          // goes to book inspection link
-          <a href={productData.details} target="_blank" rel="noreferrer">
-            <Button className="w-full">Book an Inspection</Button>
-          </a>
-        )}
-      </Card>
-    </div>
-  );
+  const inspection = mediaUrl(productData.details);
 
   //no product error
   if (productData.deleted) {
@@ -755,372 +662,190 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
     );
   }
 
-  const showFormTab =
-    productData.propertyStatusValue === "Rent" ||
-    productData.propertyStatusValue === "Buy";
+  async function shareProperty() {
+    setShareStatus("");
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: productData.productName, url: window.location.href });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShareStatus("Property link copied.");
+      }
+    } catch (error) {
+      if (!(error instanceof Error && error.name === "AbortError")) {
+        setShareStatus("Copy the property link from your address bar.");
+      }
+    }
+  }
 
-  const tabs = [
-    {
-      label: "Description",
-      icon: HiOutlineUserCircle,
-      content: productData.description ? (
-        <ReadMoreHTML html={productData.description} />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No description available for this listing.
-        </p>
-      ),
-    },
-    {
-      label: "Floor Plan",
-      icon: HiOutlineHome,
-      content: floorPlanSrc ? (
-        <FloorPlanViewer
-          src={floorPlanSrc}
-          alt={productData.productName}
-          onExpand={() => floorPlanLightboxRef.current?.loadAndOpen(0)}
-          onLoad={handleImageLoad}
-        />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No floor plan available for this listing.
-        </p>
-      ),
-    },
-    ...(showFormTab
-      ? [
-          {
-            label:
-              productData.propertyStatusValue === "Buy"
-                ? "Offer Form"
-                : "Book Now",
-            icon: HiOutlineDocumentText,
-            content: (
-              <>
-                {productData.propertyStatusValue === "Buy"
-                  ? ApplicationSection
-                  : RentInquirySection}
-                <Modal show={openModal} onClose={() => setOpenModal(false)}>
-                  {UploadModalForm}
-                </Modal>
-              </>
-            ),
-          },
-        ]
-      : []),
-
-    {
-      label: "Location",
-      icon: HiOutlineLocationMarker,
-      content: !isEmptyOrNA(productData.mapLink) ? (
-        <div
-          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
-          dangerouslySetInnerHTML={{ __html: productData.mapLink }}
-        />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No location set for this listing.
-        </p>
-      ),
-    },
-    {
-      label: "Video",
-      icon: HiOutlineVideoCamera,
-      content: !isEmptyOrNA(productData.videoLink) ? (
-        <div
-          className="w-full grid place-items-center rounded-xl overflow-hidden border border-white/10 [&_iframe]:w-full [&_iframe]:aspect-video"
-          dangerouslySetInnerHTML={{ __html: productData.videoLink }}
-        />
-      ) : (
-        <p className="text-gray-400 text-sm py-6 text-center">
-          No video available for this listing.
-        </p>
-      ),
-    },
-  ];
+  const { productName, productCode, address, price, roomCount, bathRoomCount, parkingCount, area, propertyStatusValue: status } = productData;
+  const statusLabel = ({ Buy: "For sale", Rent: "For rent", UnderManagement: "Under management" } as Record<string, string>)[status] ?? status;
+  const showPrice = Number.isFinite(price) && price > 0;
+  const displayPrice = showPrice ? new Intl.NumberFormat("en-AU", {
+    style: "currency", currency: "AUD", minimumFractionDigits: 0,
+  }).format(price) : "Contact agent";
+  const priceLabel = showPrice && status === "Buy" ? "Starting from" : "Price";
+  const facts = [
+    { label: "Status", value: statusLabel },
+    { label: "Property type", value: categoryNames.subCategoryTitle },
+    { label: "Category", value: categoryNames.categoryTitle },
+    { label: "Property ID", value: productCode },
+    { label: "Bedrooms", value: roomCount > 0 ? roomCount : null },
+    { label: "Bathrooms", value: bathRoomCount > 0 ? bathRoomCount : null },
+    { label: "Car spaces", value: parkingCount > 0 ? parkingCount : null },
+    { label: "Area", value: area > 0 ? `${area} m²` : null },
+    { label: "Address", value: address },
+  ].filter(({ value }) => typeof value === "number" || !isEmptyOrNA(value));
 
   return (
-    <>
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
+          <Link href="/">Home</Link><span aria-hidden="true">/</span>
+          <Link href="/#available-properties">Properties</Link><span aria-hidden="true">/</span>
+          <span aria-current="page">{productName}</span>
+        </nav>
 
-      {/* ── Property Header Card ── */}
-      <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
-        <Card style={{ backgroundColor: "#14222d" }}>
-          <div className="flex flex-wrap gap-2">
-            <Badge color="warning" size="md">
-              {productData.propertyStatusValue}
-            </Badge>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white">
-            <div>
-              <h1 className="text-xl sm:text-2xl">{productData.productName}</h1>
-              <span className="text-xs sm:text-sm text-white-700 dark:text-white-400">
-                {productData.address}
-              </span>
-            </div>
-
-            {(() => {
-              const isBuyable =
-                productData.price !== 0 &&
-                productData.propertyStatusValue === "Buy";
-              const hasNoPrice = productData.price === 0;
-
-              const displayPrice = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2,
-              }).format(productData.price);
-
-              return (
-                <div
-                  className={`flex justify-end ${isBuyable ? "flex-col items-end" : ""}`}
-                >
-                  {isBuyable && <h2>Starting From</h2>}
-
-                  <h1 className="text-xl sm:text-2xl text-orange-500 hover:text-red-500 font-bold">
-                    {hasNoPrice ? "Contact Agent for Price" : displayPrice}
-                  </h1>
-                </div>
-              );
-            })()}
-          </div>
-
-          <hr />
-
-          <div className="grid grid-cols-1 sm:flex justify-between gap-4">
-            {productData.roomCount >= 1 && (
-              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
-                <Image
-                  src={Bedroom}
-                  alt="Bedroom Icon"
-                  width={20}
-                  height={20}
-                  className="invert"
-                />
-                &nbsp;
-                <span>{productData.roomCount} Room</span>
-              </span>
-            )}
-            {productData.bathRoomCount >= 1 && (
-              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
-                <FaBath /> &nbsp;
-                <span>{productData.bathRoomCount} Bathroom</span>
-              </span>
-            )}
-            {productData.area >= 1 && (
-              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
-                <HiCalendar /> &nbsp;
-                <span>{productData.area} m.sq</span>
-              </span>
-            )}
-            {productData.parkingCount >= 1 && (
-              <span className="inline-flex items-center text-l text-white sm:text-sm font-bold">
-                <FaCarAlt /> &nbsp;
-                <span>{productData.parkingCount} Parking Space</span>
-              </span>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* ── Image Gallery Card ── */}
-      <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
-        <Card style={{ backgroundColor: "#14222d" }}>
-          <div className="flex flex-col items-center w-full">
-            {imageLoading && <Spinner size="xl" />}
-
-            <div id="property-gallery" ref={galleryRef} className="w-full">
-              {/* Main image — locked to a 3:2 aspect ratio */}
-              <a
-                href={allImages[0]?.src}
-                data-pswp-width={900}
-                data-pswp-height={600}
-                target="_blank"
-                rel="noreferrer"
-                className="block w-full xl:w-1/2 lg:mx-auto"
-              >
-                <div className="relative w-full aspect-[3/2] overflow-hidden rounded-lg bg-black/20">
-                  <Image
-                    src={allImages[0]?.src}
-                    alt={productData.productName}
-                    fill
-                    sizes="(min-width: 1280px) 50vw, 100vw"
-                    className="cursor-pointer object-contain"
-                    onLoad={handleImageLoad}
-                    priority
-                  />
-                </div>
-              </a>
-
-              {allImages.length > 4 ? (
-                <div className="mt-4 w-full lg:w-1/2 lg:mx-auto">
-                  <Slider {...thumbnailSliderSettings}>
-                    {allImages.slice(1).map((item, index) => (
-                      <div key={index} className="px-1">
-                        <a
-                          href={item.src}
-                          data-pswp-width={900}
-                          data-pswp-height={600}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block relative w-full aspect-[3/2] overflow-hidden rounded bg-black/20"
-                        >
-                          <img
-                            src={item.src}
-                            alt={item.name}
-                            className="absolute inset-0 w-full h-full cursor-pointer object-contain"
-                          />
-                        </a>
-                      </div>
-                    ))}
-                  </Slider>
-                </div>
-              ) : (
-                <div className="flex overflow-x-auto gap-1 w-full flex-nowrap justify-center sm:gap-4 mt-4">
-                  {allImages.slice(1).map((item, index) => (
-                    <div
-                      key={index}
-                      className="relative shrink-0 sm:shrink w-[100px] md:w-[150px] aspect-[3/2] overflow-hidden bg-black/20"
+        <div className={styles.layout}>
+          <article className={styles.content}>
+            {allImages.length > 0 && (
+              <div className={styles.galleryWrap}>
+                <div id="property-gallery" className={styles.gallery} data-count={Math.min(allImages.length, 5)}>
+                  {allImages.map((image, index) => (
+                    <a
+                      key={image.src}
+                      href={image.src}
+                      data-pswp-width={900}
+                      data-pswp-height={600}
+                      aria-label={`Open property photo ${index + 1}`}
+                      hidden={index > 4}
                     >
-                      <a
-                        href={item.src}
-                        data-pswp-width={900}
-                        data-pswp-height={600}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block absolute inset-0"
-                      >
-                        <img
-                          src={item.src}
-                          alt={item.name}
-                          className="w-full h-full cursor-pointer object-contain"
+                      {index < 5 && (
+                        <Image
+                          src={image.src}
+                          alt={index === 0 ? productName : `${productName}, photo ${index + 1}`}
+                          fill
+                          sizes={index === 0 ? "(min-width: 960px) 40vw, 100vw" : "(min-width: 960px) 12vw, 28vw"}
+                          unoptimized
+                          priority={index === 0}
+                          onLoad={(event) => {
+                            const image = event.currentTarget;
+                            const anchor = image.closest("a");
+                            anchor?.setAttribute("data-pswp-width", String(image.naturalWidth));
+                            anchor?.setAttribute("data-pswp-height", String(image.naturalHeight));
+                          }}
                         />
-                      </a>
-                    </div>
+                      )}
+                    </a>
                   ))}
                 </div>
-              )}
+                <button type="button" className={styles.galleryButton} onClick={() => galleryLightboxRef.current?.loadAndOpen(0)}>
+                  <HiOutlinePhotograph aria-hidden="true" />
+                  View {allImages.length === 1 ? "photo" : `all ${allImages.length} photos`}
+                </button>
+              </div>
+            )}
+
+            <header className={styles.heading}>
+              {statusLabel && <span className={styles.badge}>{statusLabel}</span>}
+              <h1>{productName}</h1>
+              {!isEmptyOrNA(address) && <p className={styles.address}><HiOutlineLocationMarker aria-hidden="true" />{address}</p>}
+              <p className={styles.mobilePrice}><span>{priceLabel}</span> {displayPrice}</p>
+              <a href="#property-enquiry" className={styles.mobileEnquiry}>Enquire about this property</a>
+            </header>
+
+            {facts.length > 0 && (
+              <section className={styles.section}>
+                <h2>Key facts</h2>
+                <dl className={styles.facts}>
+                  {facts.map(({ label, value }) => (
+                    <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
+            {!isEmptyOrNA(productData.description) && (
+              <section className={styles.section}>
+                <h2>About this property</h2>
+                <ReadMoreHTML html={productData.description} />
+              </section>
+            )}
+
+            {floorPlanSrc && (
+              <section className={styles.section}>
+                <h2>Floor plan</h2>
+                <FloorPlanViewer src={floorPlanSrc} alt={`${productName} floor plan`} onExpand={() => floorPlanLightboxRef.current?.loadAndOpen(0)} />
+                <div id="floorplan-gallery" hidden>
+                  <a href={floorPlanSrc} data-pswp-width={1600} data-pswp-height={1067}>Open floor plan</a>
+                </div>
+              </section>
+            )}
+
+            {status === "Buy" && (
+              <section className={styles.section}>
+                <h2>Offer form</h2>
+                <div className={styles.propertyActions}>
+                  <a href={productData.details === "0" ? "/Residental Form.pdf" : "/OFFER FORM.pdf"} download>
+                    Download offer form
+                  </a>
+                  <button type="button" onClick={() => setOpenModal(true)}>Upload form</button>
+                </div>
+              </section>
+            )}
+            {status === "Rent" && inspection && (
+              <section className={styles.section}>
+                <h2>Inspection</h2>
+                <div className={styles.propertyActions}>
+                  <a href={inspection.url} target="_blank" rel="noreferrer">Book an inspection</a>
+                </div>
+              </section>
+            )}
+
+            {[
+              { label: "Location", embed: productData.mapLink },
+              { label: "Video", embed: productData.videoLink },
+            ].map(({ label, embed }) => {
+              const media = mediaUrl(embed);
+              if (!media) return null;
+              return (
+                <section key={label} className={styles.section}>
+                  <h2>{label}</h2>
+                  {media.embedded ? (
+                    <iframe className={styles.embed} src={media.url} title={label} loading="lazy" allowFullScreen />
+                  ) : (
+                    <a className={styles.textLink} href={media.url} target="_blank" rel="noreferrer">View {label.toLowerCase()}</a>
+                  )}
+                </section>
+              );
+            })}
+          </article>
+
+          <aside className={styles.sidebar} aria-label="Price and enquiry">
+            <div className={styles.price}>
+              <p>{priceLabel}</p>
+              <strong>{displayPrice}</strong>
             </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* ── Property Details — unified tab panel (same design on every breakpoint) ── */}
-      <div className="container mx-auto mt-10 mb-10 px-4 sm:px-0">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
-          <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#0f7490] opacity-30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#F27423] opacity-[0.08] blur-3xl" />
-
-          <div className="relative">
-            {/* tab bar — identical markup/colors at every breakpoint */}
-            <div
-              className="flex gap-1 overflow-x-auto px-3 pt-3 sm:px-5 sm:pt-5 [&::-webkit-scrollbar]:hidden"
-              style={{ scrollbarWidth: "none" }}
-            >
-              {tabs.map((tab, i) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === i;
-                return (
-                  <button
-                    key={tab.label}
-                    onClick={() => setActiveTab(i)}
-                    className={`
-                      group flex shrink-0 items-center gap-2 rounded-t-lg px-3 sm:px-4 py-2.5 sm:py-3
-                      text-xs sm:text-sm font-medium whitespace-nowrap
-                      border-b-2 transition-colors duration-150
-                      ${
-                        isActive
-                          ? "border-[#F27423] text-white"
-                          : "border-transparent text-gray-400 hover:text-gray-200"
-                      }
-                    `}
-                  >
-                    <span
-                      className={`
-                        flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150
-                        ${
-                          isActive
-                            ? "bg-[#F27423]/15 text-[#F27423]"
-                            : "bg-white/5 text-gray-500 group-hover:text-[#0f7490] group-hover:bg-[#0f7490]/10"
-                        }
-                      `}
-                    >
-                      <Icon size={15} />
-                    </span>
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="h-px bg-white/10" />
-
-            {/* active panel */}
-            <div
-              key={activeTab}
-              className="p-5 sm:p-8 animate-[fadeIn_0.25s_ease-out]"
-            >
-              {tabs[activeTab].content}
-            </div>
-          </div>
+            <section className={styles.enquiry} id="property-enquiry">
+              <h2>Enquire about this property</h2>
+              <ContactAgentFormDark listingAddress={address ?? ""} />
+            </section>
+            <button className={styles.share} type="button" onClick={shareProperty}>
+              <HiOutlineShare aria-hidden="true" /> Share property
+            </button>
+            {shareStatus && <p className={styles.shareStatus} role="status">{shareStatus}</p>}
+          </aside>
         </div>
 
-        {/* ── Contact Agent — same dark card treatment on every breakpoint ── */}
-        <div className="mt-6 relative overflow-hidden rounded-2xl border border-white/10 bg-[#14222d] shadow-2xl">
-          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-[#0f7490] opacity-[0.32] blur-3xl" />
-          <div className="relative p-5 sm:p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F27423]/15 text-[#F27423]">
-                <HiOutlineChatAlt2 size={15} />
-              </span>
-              <h3 className="text-white font-semibold">Contact Agent</h3>
-            </div>
-            <ContactAgentFormDark />
-          </div>
-        </div>
-
-        {/* ── Success confirmation modal ── */}
-        <Modal
-          show={openModalSubmittion}
-          onClose={() => setOpenModalSubmittion(false)}
-          className="pt-96 lg:pt-0"
-          size="7xl"
-        >
-          <Modal.Header style={{ backgroundColor: "#14222d" }}>
-            <div className="text-white">Form Submitted Successfully</div>
-          </Modal.Header>
-          <Modal.Body style={{ backgroundColor: "#14222d" }}>
-            <p className="text-white">
-              Thank you for the Application Submit. Will reach you within 24 hr.
-            </p>
-          </Modal.Body>
+        <Modal show={openModal} onClose={() => setOpenModal(false)}>
+          {UploadModalForm}
         </Modal>
-
-        {/* ── Hidden PhotoSwipe target for the zoomable floor plan viewer ──
-            Not visible on screen; floorPlanLightboxRef.current.loadAndOpen(0)
-            opens this item in a fullscreen, pinch/drag-zoomable viewer. */}
-        {floorPlanSrc && (
-          <div id="floorplan-gallery" className="hidden">
-            <a
-              href={floorPlanSrc}
-              data-pswp-width={1600}
-              data-pswp-height={1067}
-            >
-              <img
-                src={floorPlanSrc}
-                alt={`${productData.productName} floor plan`}
-              />
-            </a>
-          </div>
-        )}
+        <Modal show={openModalSubmittion} onClose={() => setOpenModalSubmittion(false)}>
+          <Modal.Header>Form submitted successfully</Modal.Header>
+          <Modal.Body>Thank you for submitting your application.</Modal.Body>
+        </Modal>
       </div>
-    </>
+    </div>
   );
 };
 
