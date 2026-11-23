@@ -19,18 +19,18 @@
   gap: 0.4rem;
   padding: 0.65rem 0.8rem;
   border-radius: 999px;
-  background: #b74b0a;
-  color: #fff;
+  background: var(--mero-logo-orange);
+  color: #102d32;
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.appointment:hover { background: #963b06; }
+.appointment:hover { background: #f58b42; }
 .appointment svg { width: 1rem; flex: none; }
 
 @media (min-width: 768px) {
   .actions { order: 2; }
   .nav .link { padding-block: 0.55rem; border-bottom: 2px solid transparent; }
-  .nav .link[aria-current="page"] { border-color: #e57938; }
+  .nav .link[aria-current="page"] { border-color: var(--mero-logo-orange); }
 }
