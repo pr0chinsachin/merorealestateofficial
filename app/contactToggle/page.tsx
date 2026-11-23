@@ -21,7 +21,7 @@ function ContactToggle() {
     <>
       <Button
         id="noBorder"
-        style={{ backgroundColor: "#F27423" }}
+        style={{ backgroundColor: "var(--mero-contact-orange)" }}
         className="fixed right-5 bottom-5 md:right-10 md:bottom-10 rounded-full shadow-lg"
         onClick={() => setOpenModal(true)}
       >
