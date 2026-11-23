@@ -137,7 +137,7 @@ export default function Listings({ available = false }: { available?: boolean })
             </div>
             {filtered.length > pageSize && (
               <div className={styles.pagination}>
-                <Pagination className="brand-pagination" currentPage={page} totalPages={Math.ceil(filtered.length / pageSize)} onPageChange={setPage} />
+                <Pagination currentPage={page} totalPages={Math.ceil(filtered.length / pageSize)} onPageChange={setPage} />
               </div>
             )}
           </>

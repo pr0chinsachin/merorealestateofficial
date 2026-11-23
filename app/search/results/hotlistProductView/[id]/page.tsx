@@ -453,7 +453,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 >
                   {file.name}
                   <button
-                    className="brand-button ml-2 rounded px-2"
+                    className="text-red-500 ml-2"
                     onClick={() => handleRemoveFile(index)}
                   >
                     Remove
@@ -465,7 +465,8 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         </div>
 
         <Button
-          className="brand-button px-4 py-2 rounded mt-4 w-full"
+          className="text-white px-4 py-2 rounded mt-4 w-full"
+          style={{ backgroundColor: "#F27423" }}
           onClick={handleConfirm}
           disabled={formData.applicationFormFile.length === 0}
         >
@@ -488,7 +489,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             }
             download="Offer Form"
           >
-            <Button className="brand-button w-full">Download Offer Form</Button>
+            <Button className="w-full">Download Offer Form</Button>
             <br />
             <div
               style={{ color: "#0f7490" }}
@@ -499,7 +500,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
           </a>
         ) : (
           <a href="/Rental Application.pdf" download="Rental Application">
-            <Button className="brand-button w-full">Download Rental Form</Button>
+            <Button className="w-full">Download Rental Form</Button>
             <br />
             <div
               style={{ color: "#0f7490" }}
@@ -515,7 +516,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         className="w-full sm:w-1/2 cursor-pointer"
         onClick={() => setOpenModal(true)}
       >
-        <Button className="brand-button">Upload Form</Button>
+        <Button>Upload Form</Button>
         <div
           style={{ color: "#0f7490" }}
           className="grid place-items-center w-full"

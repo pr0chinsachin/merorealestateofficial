@@ -167,7 +167,7 @@ const ReadMoreHTML: React.FC<{
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
           aria-expanded={expanded}
-          className="relative z-10 mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--mero-orange-on-light)] hover:underline transition-colors"
+          className="relative z-10 mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#a74710] hover:underline transition-colors"
         >
           {expanded ? "Show less" : "Read more"}
           <HiChevronDown
@@ -613,7 +613,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
                 >
                   {file.name}
                   <button
-                    className="brand-button ml-2 rounded px-2"
+                    className="text-red-500 ml-2"
                     onClick={() => handleRemoveFile(index)}
                   >
                     Remove
@@ -625,7 +625,8 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
         </div>
 
         <Button
-          className="brand-button px-4 py-2 rounded mt-4 w-full"
+          className="text-white px-4 py-2 rounded mt-4 w-full"
+          style={{ backgroundColor: "#F27423" }}
           onClick={handleConfirm}
           disabled={formData.applicationFormFile.length === 0}
         >
@@ -652,7 +653,7 @@ const HotlistByIdView: React.FC<UpdateHotlistById> = ({ params }) => {
             <p className="text-sm text-gray-400">
               This listing has been removed or is no longer active.
             </p>
-            <Button className="brand-button" onClick={() => window.history.back()}>
+            <Button color="gray" onClick={() => window.history.back()}>
               ← Go Back
             </Button>
           </div>

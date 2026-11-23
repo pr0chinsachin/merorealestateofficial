@@ -601,11 +601,11 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
               <Accordion.Panel>
                 <Accordion.Title>Application Request</Accordion.Title>
                 <Accordion.Content>
-                  <Button className="brand-button" onClick={handleDownload}>Download Form</Button>
+                  <Button onClick={handleDownload}>Download Form</Button>
 
                   <br />
                   <div>
-                    <Button className="brand-button" onClick={() => setOpenModal(true)}>
+                    <Button onClick={() => setOpenModal(true)}>
                       Upload Form
                     </Button>
 
@@ -759,7 +759,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                                   >
                                     {file.name}
                                     <button
-                                      className="brand-button ml-2 rounded px-2"
+                                      className="text-red-500 ml-2"
                                       onClick={() => handleRemoveFile(index)}
                                     >
                                       Remove
@@ -772,7 +772,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                         </form>
 
                         <Button
-                          className="brand-button px-4 py-2 rounded mt-4"
+                          className="bg-green-600 text-white px-4 py-2 rounded mt-4"
                           onClick={handleConfirm}
                           disabled={formData.applicationFormFile.length === 0}
                         >
@@ -851,11 +851,11 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                 {productData.propertyStatusValue === "Rent" ||
                 productData.propertyStatusValue === "Buy" ? (
                   <Tabs.Item title="Application Request" icon={HiClipboardList}>
-                    <Button className="brand-button" onClick={handleDownload}>Download Form</Button>
+                    <Button onClick={handleDownload}>Download Form</Button>
 
                     <br />
                     <div>
-                      <Button className="brand-button" onClick={() => setOpenModal(true)}>
+                      <Button onClick={() => setOpenModal(true)}>
                         Upload Form
                       </Button>
 
@@ -1021,7 +1021,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                                     >
                                       {file.name}
                                       <button
-                                        className="brand-button ml-2 rounded px-2"
+                                        className="text-red-500 ml-2"
                                         onClick={() => handleRemoveFile(index)}
                                       >
                                         Remove
@@ -1034,7 +1034,7 @@ const ProductByIdView: React.FC<UpdateProductById> = ({ params }) => {
                           </form>
 
                           <Button
-                            className="brand-button px-4 py-2 rounded mt-4"
+                            className="bg-green-600 text-white px-4 py-2 rounded mt-4"
                             onClick={handleConfirm}
                             disabled={formData.applicationFormFile.length === 0}
                           >
