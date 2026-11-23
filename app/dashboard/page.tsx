@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ArrowRightIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import founder from "../../public/founder.jpg";
+import founder from "./founder-portrait.webp";
 import CarouselImage from "./carouselImage/carouselImage";
 import Agent from "../agent/page";
 import ServiceLists from "../services/servicelists";

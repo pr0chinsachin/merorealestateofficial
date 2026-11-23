@@ -1,7 +1,6 @@
 .home {
   --teal: #074b5a;
   --deep-teal: #083a47;
-  --orange: #b74b0a;
   --card-gap: clamp(1.125rem, 2.4vw, 2rem);
   color: var(--deep-teal);
   background: #fff;
@@ -37,7 +36,7 @@
 
 .portrait img {
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center top;
 }
 
 .showcase {
@@ -85,7 +84,7 @@
   text-wrap: balance;
 }
 
-.intro h1 em { display: block; color: var(--orange); font-style: normal; }
+.intro h1 em { display: block; color: var(--mero-logo-orange); font-style: normal; }
 .tagline { font-weight: 650; }
 .benefits { display: grid; gap: 0.45rem; margin-block: 1.15rem 1.4rem; }
 .benefits li, .cta { display: flex; align-items: center; gap: 0.55rem; }
@@ -96,12 +95,12 @@
   width: fit-content;
   border-radius: 999px;
   padding: 0.78rem 1.1rem;
-  background: var(--orange);
-  color: white;
+  background: var(--mero-logo-orange);
+  color: #102d32;
   font-weight: 700;
   font-size: 0.875rem;
 }
-.cta:hover { background: #963b06; }
+.cta:hover { background: #f58b42; }
 
 .search {
   z-index: 2;
