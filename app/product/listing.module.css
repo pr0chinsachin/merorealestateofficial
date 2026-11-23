@@ -78,9 +78,8 @@
 .card:focus-visible { outline: 2px solid #f5a66e; outline-offset: 0; }
 .cardMedia { position: relative; aspect-ratio: 16 / 10; background: #e2f0f3; }
 .badge {
-  position: absolute;
-  top: 0.65rem;
-  left: 0.65rem;
+  margin-inline-start: auto;
+  white-space: nowrap;
   border-radius: 999px;
   padding: 0.3rem 0.6rem;
   background: #074b5a;
@@ -95,7 +94,8 @@
 
 .cardBody { padding: 0.9rem; }
 .card h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; font-weight: 750; }
-.price { margin-top: 0.2rem; color: #b74b0a; font-size: 1.1rem; font-weight: 800; }
+.priceRow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.6rem; margin-top: 0.2rem; }
+.price { color: #b74b0a; font-size: 1.1rem; font-weight: 800; }
 .priceLabel { display: block; color: #416168; font-size: 0.75rem; font-weight: 600; }
 .highlight { background: #ffe2c8; color: #783506; }
 .amenities { display: flex; flex-wrap: wrap; gap: 0.65rem 1rem; margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px solid #e4eef0; font-size: 0.8rem; }
