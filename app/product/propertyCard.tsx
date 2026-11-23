@@ -72,18 +72,20 @@ export default function PropertyCard({
           sizes="(min-width: 1024px) 25vw, (min-width: 600px) 50vw, 100vw"
           className={listing.thumbnailImgPath ? "object-cover" : "object-contain p-8"}
         />
-        <span className={badge?.color ? `${styles.badge} ${badge.color}` : styles.badge}>
-          {badge?.label ?? listing.propertyStatusValue}
-        </span>
       </div>
       <div className={styles.cardBody}>
         <h3>{highlight(listing.productName, searchTerm)}</h3>
-        <p className={styles.price}>
-          {showStartingPrice && listing.price > 0 && listing.propertyStatusValue === "Buy" && (
-            <span className={styles.priceLabel}>Starting from</span>
-          )}
-          {highlight(listing.price > 0 ? currency.format(listing.price) : "Contact agent", searchTerm)}
-        </p>
+        <div className={styles.priceRow}>
+          <p className={styles.price}>
+            {showStartingPrice && listing.price > 0 && listing.propertyStatusValue === "Buy" && (
+              <span className={styles.priceLabel}>Starting from</span>
+            )}
+            {highlight(listing.price > 0 ? currency.format(listing.price) : "Contact agent", searchTerm)}
+          </p>
+          <span className={badge?.color ? `${styles.badge} ${badge.color}` : styles.badge}>
+            {badge?.label ?? listing.propertyStatusValue}
+          </span>
+        </div>
         <ul className={styles.amenities}>
           {amenities.map(({ icon, label, count }) => (
             <li key={label}>
