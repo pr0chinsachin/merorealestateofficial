@@ -53,7 +53,7 @@ const extractProductId = (path: string | null | undefined): string | null => {
   return match ? match[1] : null;
 };
 
-const ContactAgentFormDark: React.FC = () => {
+const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAddress }) => {
   const pathname = usePathname();
 
   const [agentDetails, setAgentDetails] = useState<AgentDetails[]>([]);
@@ -81,6 +81,8 @@ const ContactAgentFormDark: React.FC = () => {
 
   // for modal
   const [openModal, setOpenModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const onCloseModal = () => {
     setOpenModal(false);
@@ -96,6 +98,7 @@ const ContactAgentFormDark: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (listingAddress !== undefined) return;
     const currentPath =
       pathname ||
       (typeof window !== "undefined" ? window.location.pathname : "");
@@ -129,7 +132,7 @@ const ContactAgentFormDark: React.FC = () => {
     };
 
     fetchProductAddress();
-  }, [pathname]);
+  }, [pathname, listingAddress]);
 
   const fetchAgentData = async () => {
     try {
@@ -171,8 +174,13 @@ const ContactAgentFormDark: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const finalAddress = productAddress
-      ? `${formData.address} - [${productAddress}]`
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitError(false);
+
+    const enquiryAddress = listingAddress ?? productAddress;
+    const finalAddress = enquiryAddress
+      ? [formData.address.trim(), `[${enquiryAddress}]`].filter(Boolean).join(" - ")
       : formData.address;
 
     const payload: CustomerLead = {
@@ -180,7 +188,6 @@ const ContactAgentFormDark: React.FC = () => {
       address: finalAddress,
     };
 
-    console.log("Form Data:", payload); // Debug log
     try {
       const response = await fetch(`${BASE_URL}/Lead/CreateLead`, {
         method: "POST",
@@ -193,24 +200,26 @@ const ContactAgentFormDark: React.FC = () => {
         setFormData(initialFormData); // Clear the form
         setOpenModal(true);
       } else {
-        console.error("Failed to create customer lead");
+        setSubmitError(true);
       }
-    } catch (error) {
-      console.error("Error creating customer lead:", error);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-4 my-6 sm:m-10">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-white">
+    <div className={listingAddress === undefined ? "mx-4 my-6 sm:m-10" : undefined}>
+      {listingAddress === undefined && <><h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-white">
         Contact Agent
       </h1>
-      <hr />
+      <hr /></>}
       <form
-        className="flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-10"
+        className={listingAddress === undefined ? "flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-10" : "flex flex-col gap-3 mt-4"}
         onSubmit={handleSubmit}
       >
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className={`grid grid-cols-2 gap-3 ${listingAddress === undefined ? "sm:gap-4" : "min-w-0"}`}>
           <div>
             <Label
               htmlFor="firstName"
@@ -358,12 +367,14 @@ const ContactAgentFormDark: React.FC = () => {
           />
         </div>
 
+        {submitError && <p role="alert" className="text-sm text-red-600">Couldn’t send your enquiry. Please try again.</p>}
         <Button
-          style={{ backgroundColor: "#F27423" }}
+          style={{ backgroundColor: listingAddress === undefined ? "#F27423" : "#a74710" }}
           type="submit"
-          className="mt-4 sm:mt-6 self-center w-full"
+          disabled={submitting}
+          className={listingAddress === undefined ? "mt-4 sm:mt-6 self-center w-full" : "w-full"}
         >
-          Submit
+          {submitting ? "Sending…" : listingAddress === undefined ? "Submit" : "Send enquiry"}
         </Button>
       </form>
       {/* popup modal */}
