@@ -32,10 +32,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #b74b0a;
-  color: white;
+  background: var(--mero-contact-orange);
+  color: #102d32;
 }
-.more:hover { background: #963b06; }
+.more:hover { background: #f58b42; }
 .more svg { width: 1rem; }
 .toolbar { margin: 1.3rem 0 1.65rem; }
 .tabs { display: flex; gap: 0.25rem; padding: 0.25rem; border: 1px solid #9cc1c9; border-radius: 999px; }

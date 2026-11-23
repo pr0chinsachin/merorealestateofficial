@@ -42,7 +42,7 @@
 }
 
 .card:hover {
-  border-color: #f27423;
+  border-color: var(--mero-contact-orange);
   box-shadow: 0 6px 16px #083a4726;
 }
 
@@ -61,7 +61,7 @@
   width: 3.125rem;
   aspect-ratio: 1;
   border-radius: 0.7rem;
-  background: #f27423;
+  background: var(--mero-contact-orange);
   color: #092e38;
 }
 
