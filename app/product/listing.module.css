@@ -32,15 +32,16 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #b74b0a;
-  color: white;
+  background: var(--mero-button-surface);
+  color: var(--mero-orange);
 }
-.more:hover { background: #963b06; }
+.more:hover { background: var(--mero-button-hover); }
 .more svg { width: 1rem; }
 .toolbar { margin: 1.3rem 0 1.65rem; }
 .tabs { display: flex; gap: 0.25rem; padding: 0.25rem; border: 1px solid #9cc1c9; border-radius: 999px; }
-.completed .tabs button[aria-pressed="true"] { background: #074b5a; color: white; }
-.available .tabs button[aria-pressed="true"] { background: #fff; color: #083a47; }
+.completed .tabs button[aria-pressed="true"] { background: var(--mero-button-surface); color: var(--mero-orange); }
+.available .tabs button { color: var(--mero-orange); background: var(--mero-button-surface); }
+.available .tabs button[aria-pressed="true"] { background: #fff; color: var(--mero-orange-on-light); }
 .tabs button[aria-pressed="false"]:hover { box-shadow: inset 0 0 0 1px #9cc1c9; }
 .search {
   max-width: 100%;

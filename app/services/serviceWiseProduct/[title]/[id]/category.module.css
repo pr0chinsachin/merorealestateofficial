@@ -17,7 +17,7 @@
 .filters { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .filters button { padding: 0.5rem 0.8rem; border: 1px solid #a9c9ce; border-radius: 999px; background: white; font-size: 0.85rem; font-weight: 650; }
 .filters button:hover { border-color: #0c6172; }
-.filters button[aria-pressed="true"] { background: #074b5a; border-color: #074b5a; color: white; }
+.filters button[aria-pressed="true"] { background: var(--mero-button-surface); border-color: var(--mero-button-surface); color: var(--mero-orange); }
 .search { position: relative; width: min(100%, 19rem); margin-left: auto; }
 .search svg { position: absolute; top: 50%; left: 0.65rem; width: 1rem; transform: translateY(-50%); pointer-events: none; }
 .search input { width: 100%; padding: 0.6rem 2.1rem 0.6rem 2rem; border: 1px solid #a9c9ce; border-radius: 0.6rem; background: white; font-size: 0.875rem; }

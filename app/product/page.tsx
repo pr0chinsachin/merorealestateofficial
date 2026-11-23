@@ -89,9 +89,8 @@ const ProductByPrice: React.FC = () => {
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none"
           />
           <Button
-            style={{ backgroundColor: "#f27423" }}
             onClick={() => setSearchTerm("")}
-            className="bg-gray-300 text-white px-4 py-2 rounded-lg focus:outline-none"
+            className="brand-button px-4 py-2 rounded-lg focus:outline-none"
           >
             <BiSearchAlt className="mr-1" />
             Search
@@ -218,7 +217,7 @@ const ProductByPrice: React.FC = () => {
           </div>
         )}
         <div className="mt-8 flex justify-end">
-          <Pagination
+          <Pagination className="brand-pagination"
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={onPageChange}

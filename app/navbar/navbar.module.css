@@ -19,14 +19,14 @@
   gap: 0.4rem;
   padding: 0.65rem 0.8rem;
   border-radius: 999px;
-  background: #b74b0a;
-  color: #fff;
+  background: var(--mero-button-surface);
+  color: var(--mero-orange);
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.appointment:hover { background: #963b06; }
+.appointment:hover { background: var(--mero-button-hover); }
 .appointment svg { width: 1rem; flex: none; }
 
 @media (min-width: 768px) {

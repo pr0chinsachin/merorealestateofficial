@@ -26,9 +26,9 @@
 .intro { max-width: 55ch; margin-top: 0.9rem; color: var(--muted); line-height: 1.65; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.25rem; }
 .actions a { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.5rem 0.85rem; border: 1px solid transparent; border-radius: 0.55rem; font-size: 0.875rem; font-weight: 700; }
-.primary { background: var(--accent); color: #fff; }
-.primary:hover { background: #843608; }
-.actions .secondary { border-color: #9fc2c9; background: #fff; }
+.primary { background: var(--mero-button-surface); color: var(--mero-orange); }
+.primary:hover { background: var(--mero-button-hover); }
+.actions .secondary { border-color: #9fc2c9; background: #fff; color: var(--mero-orange-on-light); }
 .secondary:hover { border-color: var(--ink); }
 
 .founder { width: fit-content; max-width: 100%; margin-inline: auto; text-align: center; }

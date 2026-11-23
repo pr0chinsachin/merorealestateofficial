@@ -36,7 +36,7 @@
 .office address p { display: flex; align-items: center; gap: 0.55rem; overflow-wrap: anywhere; }
 .office svg { width: 1.05rem; height: 1.05rem; flex: none; }
 .map { display: block; width: 100%; aspect-ratio: 16 / 10; margin-top: 1.1rem; border: 1px solid var(--line); border-radius: 0.65rem; }
-.directions { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.8rem; font-size: 0.875rem; font-weight: 700; }
+.directions { color: var(--mero-orange-on-light); display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.8rem; font-size: 0.875rem; font-weight: 700; }
 .enquiry > p { color: var(--muted); font-size: 0.875rem; line-height: 1.55; }
 .enquiry form label { color: var(--ink); }
 

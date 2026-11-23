@@ -136,7 +136,7 @@ function ServiceCategory({ id, title }: { id: string; title: string }) {
                 )}
                 {pageCount > 1 && (
                   <div className={styles.pagination}>
-                    <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
+                    <Pagination className="brand-pagination" currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
                   </div>
                 )}
               </>
