@@ -1,0 +1,44 @@
+.page { flex: 1; background: #f3f9fa; color: #083a47; }
+.container { max-width: 80rem; margin-inline: auto; padding: 1.5rem clamp(1rem, 3vw, 2rem) 4rem; }
+.breadcrumb { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.2rem; font-size: 0.85rem; }
+.breadcrumb a { color: #a74710; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+.hero {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 1rem;
+  background: linear-gradient(115deg, #083a47, #0c6172);
+  color: white;
+}
+.hero h1 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.15; letter-spacing: -0.04em; font-weight: 800; }
+.hero p { margin-top: 0.5rem; color: #d7f0f4; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; margin: 1.5rem 0 0.75rem; }
+.filters { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.filters button { padding: 0.5rem 0.8rem; border: 1px solid #a9c9ce; border-radius: 999px; background: white; font-size: 0.85rem; font-weight: 650; }
+.filters button:hover { border-color: #0c6172; }
+.filters button[aria-pressed="true"] { background: #074b5a; border-color: #074b5a; color: white; }
+.search { position: relative; width: min(100%, 19rem); margin-left: auto; }
+.search svg { position: absolute; top: 50%; left: 0.65rem; width: 1rem; transform: translateY(-50%); pointer-events: none; }
+.search input { width: 100%; padding: 0.6rem 2.1rem 0.6rem 2rem; border: 1px solid #a9c9ce; border-radius: 0.6rem; background: white; font-size: 0.875rem; }
+.search input::-webkit-search-cancel-button { appearance: none; }
+.search button { position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%); padding: 0 0.35rem; font-size: 1.35rem; }
+
+.count { color: #416168; margin-bottom: 0.85rem; font-size: 0.875rem; }
+.grid { display: grid; gap: clamp(1.125rem, 2.4vw, 2rem); }
+.message, .appraisal { border: 1px solid #cde1e4; border-radius: 0.8rem; background: #fff; }
+.message { padding: 2rem 1rem; text-align: center; }
+.appraisal { max-width: 52rem; margin: 1.5rem auto 0; padding: clamp(1.1rem, 4vw, 2.25rem); }
+.pagination { display: flex; justify-content: center; margin-top: 1.5rem; }
+
+@media (max-width: 599px) {
+  .search { width: 100%; }
+}
+
+@media (min-width: 600px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

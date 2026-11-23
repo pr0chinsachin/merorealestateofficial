@@ -33,15 +33,8 @@ interface AgentDetails {
   agentName: string;
 }
 
-interface ServiceData {
-  id: number;
-  categoryCode: string;
-  categoryTitle: string;
-}
-
 const DarkFormSale: React.FC = () => {
   const [agentDetails, setAgentDetails] = useState<AgentDetails[]>([]);
-  const [serviceLists, setServiceLists] = useState<ServiceData[]>([]);
   const [formData, setFormData] = useState<CustomerLead>({
     id: "",
     firstName: "",
@@ -60,6 +53,8 @@ const DarkFormSale: React.FC = () => {
 
   // for modal
   const [openModal, setOpenModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const onCloseModal = () => {
     setOpenModal(false);
@@ -71,7 +66,6 @@ const DarkFormSale: React.FC = () => {
 
   useEffect(() => {
     fetchAgentData();
-    fetchServiceData();
   }, []);
 
   const fetchAgentData = async () => {
@@ -88,20 +82,6 @@ const DarkFormSale: React.FC = () => {
     }
   };
 
-  const fetchServiceData = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/MenuCategory/CategoryList`);
-      if (response.ok) {
-        const data: ServiceData[] = await response.json();
-        setServiceLists(data);
-      } else {
-        console.error("Failed to fetch service data");
-      }
-    } catch (error) {
-      console.error("Error fetching service data:", error);
-    }
-  };
-
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -113,13 +93,15 @@ const DarkFormSale: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitError(false);
 
     const submissionPayload: CustomerLead = {
       ...formData,
       queryMessgae: `${formData.queryMessgae}\n\n-Sales form`,
     };
 
-    console.log("Form Data:", submissionPayload); // Debug log
     try {
       const response = await fetch(`${BASE_URL}/Lead/CreateLead`, {
         method: "POST",
@@ -131,26 +113,25 @@ const DarkFormSale: React.FC = () => {
       if (response.ok) {
         setOpenModal(true); // Show modal on success
       } else {
-        console.error("Failed to create customer lead");
+        setSubmitError(true);
       }
-    } catch (error) {
-      console.error("Error creating customer lead:", error);
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="m-10 pb-10">
-      <h1 className={`text-2xl font-bold mb-5 text-white`}>
-        Request Appraisel
-      </h1>
-      <hr />
-      <form className="flex flex-col gap-6 mt-10" onSubmit={handleSubmit}>
+    <div>
+      <h2 className="text-xl font-bold">Request an appraisal</h2>
+      <form className="mt-4 flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
           <div>
             <Label
               htmlFor="firstName"
               value="First Name"
-              className="text-white"
+              className="mb-1 block text-[#083a47]"
             />
             <TextInput
               id="firstName"
@@ -164,7 +145,7 @@ const DarkFormSale: React.FC = () => {
             <Label
               htmlFor="lastName"
               value="Last Name"
-              className="text-white"
+              className="mb-1 block text-[#083a47]"
             />
             <TextInput
               id="lastName"
@@ -178,11 +159,11 @@ const DarkFormSale: React.FC = () => {
             <Label
               htmlFor="phonenumber"
               value="Phone Number"
-              className="text-white"
+              className="mb-1 block text-[#083a47]"
             />
             <TextInput
               id="phonenumber"
-              type="text"
+              type="tel"
               sizing="md"
               value={formData.phonenumber}
               onChange={handleInputChange}
@@ -192,7 +173,7 @@ const DarkFormSale: React.FC = () => {
             <Label
               htmlFor="address"
               value="Property Address"
-              className="text-white"
+              className="mb-1 block text-[#083a47]"
             />
             <TextInput
               id="address"
@@ -203,7 +184,7 @@ const DarkFormSale: React.FC = () => {
             />
           </div>
           <div className="flex flex-col">
-            <Label htmlFor="email" value="Your Email" className="text-white" />
+            <Label htmlFor="email" value="Your Email" className="mb-1 block text-[#083a47]" />
             <TextInput
               id="email"
               type="email"
@@ -215,7 +196,7 @@ const DarkFormSale: React.FC = () => {
           </div>
 
           <div className="flex flex-col">
-            <Label htmlFor="property" value="Property" className="text-white" />
+            <Label htmlFor="property" value="Property" className="mb-1 block text-[#083a47]" />
             <Select
               id="property"
               required
@@ -230,33 +211,16 @@ const DarkFormSale: React.FC = () => {
               <option value="apartment">Duplex</option>
               <option value="land">Villa</option>
               <option value="land">Mansion</option>
-              <option value="land">Painthouse</option>
+              <option value="land">Penthouse</option>
               <option value="land">Others</option>
             </Select>
           </div>
-
-          {/* <div className="flex flex-col">
-            <Label htmlFor="category" value="Category" className="text-white" />
-            <Select
-              id="category"
-              required
-              value={formData.category}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Category</option>
-              {serviceLists.map((service) => (
-                <option key={service.id} value={service.categoryTitle}>
-                  {service.categoryTitle}
-                </option>
-              ))}
-            </Select>
-          </div> */}
 
           <div className="flex flex-col">
             <Label
               htmlFor="agent"
               value="Select Agent"
-              className="text-white"
+              className="mb-1 block text-[#083a47]"
             />
             <Select
               id="agent"
@@ -274,11 +238,11 @@ const DarkFormSale: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col mt-6">
+        <div className="flex flex-col">
           <Label
             htmlFor="queryMessgae"
             value="Your Message"
-            className="text-white"
+            className="mb-1 block text-[#083a47]"
           />{" "}
           {/* Match the Swagger sample's field name */}
           <Textarea
@@ -291,12 +255,9 @@ const DarkFormSale: React.FC = () => {
           />
         </div>
 
-        <Button
-          style={{ backgroundColor: "#F27423" }}
-          type="submit"
-          className="mt-6 self-center w-full"
-        >
-          Submit
+        {submitError && <p role="alert" className="text-sm text-red-700">Couldn’t send your request. Please try again.</p>}
+        <Button style={{ backgroundColor: "#a74710" }} type="submit" disabled={submitting} className="w-full">
+          {submitting ? "Sending…" : "Send appraisal request"}
         </Button>
       </form>
       {/* popup modal */}
@@ -312,9 +273,9 @@ const DarkFormSale: React.FC = () => {
           <Modal.Header />
           <Modal.Body>
             <div className="relative">
-              <h1 className="text-3xl font-bold mb-5">
+              <h2 className="text-2xl font-bold mb-5">
                 Thank you for your submission!
-              </h1>
+              </h2>
               <hr />
               <div className="text-lg">
                 Thank you for contacting us! Your message has been received, and
