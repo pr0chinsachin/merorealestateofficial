@@ -1,9 +1,13 @@
+.background {
+  flex: 1;
+  background: #074b5a;
+}
+
 .team {
   max-width: 80rem;
   margin: 0 auto;
   padding: clamp(2.5rem, 6vw, 5rem) 1.25rem;
   color: white;
-  background: #074b5a;
   text-align: center;
 }
 .team h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -0.04em; }
