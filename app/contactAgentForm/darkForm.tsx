@@ -53,7 +53,8 @@ const extractProductId = (path: string | null | undefined): string | null => {
   return match ? match[1] : null;
 };
 
-const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAddress }) => {
+const ContactAgentFormDark: React.FC<{ listingAddress?: string; callback?: boolean }> = ({ listingAddress, callback = false }) => {
+  const compact = listingAddress !== undefined || callback;
   const pathname = usePathname();
 
   const [agentDetails, setAgentDetails] = useState<AgentDetails[]>([]);
@@ -98,7 +99,7 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
   }, []);
 
   useEffect(() => {
-    if (listingAddress !== undefined) return;
+    if (compact) return;
     const currentPath =
       pathname ||
       (typeof window !== "undefined" ? window.location.pathname : "");
@@ -132,7 +133,7 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
     };
 
     fetchProductAddress();
-  }, [pathname, listingAddress]);
+  }, [pathname, compact]);
 
   const fetchAgentData = async () => {
     try {
@@ -186,6 +187,7 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
     const payload: CustomerLead = {
       ...formData,
       address: finalAddress,
+      queryMessgae: callback ? ["Callback requested via About Us", formData.queryMessgae.trim()].filter(Boolean).join("\n\n") : formData.queryMessgae,
     };
 
     try {
@@ -210,16 +212,16 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
   };
 
   return (
-    <div className={listingAddress === undefined ? "mx-4 my-6 sm:m-10" : undefined}>
-      {listingAddress === undefined && <><h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-white">
+    <div className={!compact ? "mx-4 my-6 sm:m-10" : undefined}>
+      {!compact && <><h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-white">
         Contact Agent
       </h1>
       <hr /></>}
       <form
-        className={listingAddress === undefined ? "flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-10" : "flex flex-col gap-3 mt-4"}
+        className={!compact ? "flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-10" : "flex flex-col gap-3 mt-4"}
         onSubmit={handleSubmit}
       >
-        <div className={`grid grid-cols-2 gap-3 ${listingAddress === undefined ? "sm:gap-4" : "min-w-0"}`}>
+        <div className={`grid grid-cols-2 gap-3 ${!compact ? "sm:gap-4" : "min-w-0"}`}>
           <div>
             <Label
               htmlFor="firstName"
@@ -252,12 +254,13 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
           <div>
             <Label
               htmlFor="phonenumber"
-              value="Phone Number"
+              value={callback ? "Phone Number (required)" : "Phone Number"}
               className="text-white text-sm mb-1 block"
             />
             <TextInput
               id="phonenumber"
-              type="text"
+              type={callback ? "tel" : "text"}
+              required={callback}
               sizing="md"
               value={formData.phonenumber}
               onChange={handleInputChange}
@@ -369,12 +372,12 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string }> = ({ listingAd
 
         {submitError && <p role="alert" className="text-sm text-red-600">Couldn’t send your enquiry. Please try again.</p>}
         <Button
-          style={{ backgroundColor: listingAddress === undefined ? "#F27423" : "#a74710" }}
+          style={{ backgroundColor: !compact ? "#F27423" : "#a74710" }}
           type="submit"
           disabled={submitting}
-          className={listingAddress === undefined ? "mt-4 sm:mt-6 self-center w-full" : "w-full"}
+          className={!compact ? "mt-4 sm:mt-6 self-center w-full" : "w-full"}
         >
-          {submitting ? "Sending…" : listingAddress === undefined ? "Submit" : "Send enquiry"}
+          {submitting ? "Sending…" : !compact ? "Submit" : callback ? "Send callback request" : "Send enquiry"}
         </Button>
       </form>
       {/* popup modal */}
