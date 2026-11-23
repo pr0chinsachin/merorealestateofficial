@@ -1,152 +1,116 @@
-"use client";
+import { ArrowRightIcon, CheckIcon, ClockIcon, EnvelopeIcon, MapPinIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { Card, Accordion, Button } from "flowbite-react";
-import Founder from "./images/founder.jpg";
-import Contact from "../contact/page";
-import { FaArrowRight } from "react-icons/fa6";
-import ContactAgentForm from "../contactAgentForm/AgentForm";
+import Link from "next/link";
+import ContactAgentForm from "../contactAgentForm/darkForm";
+import founder from "./images/founder.jpg";
+import styles from "./about.module.css";
 
-function About() {
+const services = [
+  "Buying a home or investment property",
+  "Finding a rental",
+  "Selling your property and requesting an appraisal",
+  "Exploring house and land options",
+  "Managing an investment property",
+  "Getting advice on the South Australian market",
+];
+
+const steps = [
+  { title: "Tell us what you need", detail: "Share your property goals, preferred location, and any questions with our team." },
+  { title: "Explore your options", detail: "We’ll discuss suitable listings or services based on what you’re looking for." },
+  { title: "Plan the next step", detail: "Depending on your goal, we can help you arrange an inspection, request an appraisal, or discuss property management." },
+];
+
+export default function About() {
   return (
-    <div className="bg-slate-700 ">
-      <div className="  text-center relative text-white font-bold text-5xl py-28 bg-[url('./about/images/hero.jpg')] bg-no-repeat bg-cover bg-left hidden sm:block ">
-        <div className="absolute inset-0 bg-black bg-opacity-60 z-0"></div>
-        <span className="absolute inset-0 flex items-center justify-center z-10 text-white">
-          About Us
-        </span>
-      </div>
-      <Card
-        className="grid place-items-center border-none rounded-none"
-        style={{ backgroundColor: "#14222d", color: "#fff" }}
-      >
-        <div className="sm:flex sm:gap-14 2xl:px-72  sm:my-20 my-10 ">
-          <div className="sm:w-1/2">
-            <div className="font-semibold" style={{ color: "#0f868e" }}>
-              About Company
-            </div>
-            <h1 className="font-bold text-3xl">Mero Real Estate</h1>
-            <div className="text-justify text-md leading-loose font-light">
-              Mero Real Estate South Australia is a reputable and highly
-              regarded real estate agency dedicated to serving clients
-              throughout the stunning region. With a strong focus on the local
-              market, our experienced team of professionals offer personalized
-              guidance and support to ensure successful real estate
-              transactions. South Australia boasts a diverse range of
-              properties, from charming coastal retreats to suburban family
-              homes and bustling commercial spaces. At Mero Real Estate South
-              Australia, we have an extensive portfolio of listings that cater
-              to various lifestyles and investment needs. Our agents have
-              in-depth knowledge of the region's neighborhoods, market trends,
-              and property values, allowing us to provide accurate and
-              insightful information to our clients.
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <Link href="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">About Us</span>
+        </nav>
+
+        <header className={styles.hero}>
+          <div>
+            <p className={styles.eyebrow}>About Mero Real Estate</p>
+            <h1>Real estate guidance for South Australia</h1>
+            <p className={styles.intro}>
+              We help buyers, sellers, renters, and investors make informed property decisions.
+              Our team brings local market knowledge and advice tailored to your goals.
+            </p>
+            <div className={styles.actions}>
+              <a href="#request-callback" className={styles.primary}>Request a callback <ArrowRightIcon aria-hidden="true" /></a>
+              <Link href="/services" className={styles.secondary}>Explore our services</Link>
             </div>
           </div>
-          <div className="sm:w-1/2">
-            <div className="text-justify text-md leading-loose font-light">
-              We believe that building strong relationships based on trust and
-              integrity is the foundation of our success. We take the time to
-              listen to our client’s unique needs and goals, tailoring our
-              services to meet their specific requirements. Whether you’re a
-              first-time buyer, an experienced investor, or a seller looking to
-              maximize your property’s value, we are here to guide you through
-              every step of the process.​
-            </div>
+          <figure className={styles.founder}>
+            <Image src={founder} alt="" width={240} height={240} priority className={styles.portrait} />
+            <figcaption>
+              <strong>Pushpa Maharjan</strong>
+              <span>Founder</span>
+              <a href="mailto:pushpa.maharjan@merorealestate.com.au">Email Pushpa</a>
+            </figcaption>
+          </figure>
+        </header>
 
-            <div>
-              <div className="flex items-center gap-10 mt-10 ">
-                <div className="bg-[url('./about/images/founder.jpg')] bg-no-repeat bg-cover overflow-hidden h-20 w-20 rounded-full"></div>
+        <div className={styles.layout}>
+          <div className={styles.content}>
+            <section>
+              <h2>What we can help with</h2>
+              <ul className={styles.services}>
+                {services.map((service) => (
+                  <li key={service}><CheckIcon aria-hidden="true" />{service}</li>
+                ))}
+              </ul>
+            </section>
 
-                <div>
-                  <div className="font-bold">Pushpa Maharjan</div>
-                  <div>FOUNDER</div>
-                </div>
+            <section>
+              <h2>How we work</h2>
+              <ol className={styles.steps}>
+                {steps.map(({ title, detail }, index) => (
+                  <li key={title}>
+                    <span aria-hidden="true">{index + 1}</span>
+                    <div><h3>{title}</h3><p>{detail}</p></div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <section>
+              <h2>Common questions</h2>
+              <div className={styles.questions}>
+                <details>
+                  <summary>Where does Mero Real Estate operate?</summary>
+                  <p>We work with clients in South Australia. Our office is in Ridgehaven.</p>
+                </details>
+                <details>
+                  <summary>Where can I see available properties?</summary>
+                  <p>Browse our available properties from the <Link href="/#available-properties">Buy and Rent section</Link>, or choose a category on the <Link href="/services">Services page</Link>.</p>
+                </details>
+                <details>
+                  <summary>How do I request an appraisal?</summary>
+                  <p>Choose Sale on the <Link href="/services">Services page</Link> to send an appraisal request with your property details.</p>
+                </details>
               </div>
-              <div className="mt-6 font-bold">Need help? Contact me</div>
-              <div>
-                +61 415 765 234 or pushpa.maharjan@merorealestate.com.au
-              </div>
+            </section>
 
-              <Button
-                style={{ backgroundColor: "#f27423" }}
-                type="submit"
-                className="mt-6 self-center w-max "
-              >
-                Read More &nbsp;
-                <FaArrowRight />
-              </Button>
-            </div>
+            <section className={styles.office}>
+              <h2>Our Ridgehaven office</h2>
+              <address>
+                <p><MapPinIcon aria-hidden="true" />29 Jennifer Avenue, Ridgehaven SA 5097</p>
+                <p><PhoneIcon aria-hidden="true" /><a href="tel:+61415765234">+61 415 765 234</a></p>
+                <p><EnvelopeIcon aria-hidden="true" /><a href="mailto:info@merorealestate.com.au">info@merorealestate.com.au</a></p>
+                <p><ClockIcon aria-hidden="true" />Monday–Friday, 9:00 am–5:00 pm</p>
+              </address>
+              <Link href="/contact">View our location</Link>
+            </section>
           </div>
+
+          <aside className={styles.callback} id="request-callback" aria-labelledby="callback-heading">
+            <h2 id="callback-heading">Request a callback</h2>
+            <p>Tell us how we can help and leave a phone number so our team can call you.</p>
+            <ContactAgentForm callback />
+          </aside>
         </div>
-      </Card>
-
-      {/* explore section */}
-      <Card
-        className="flex justify-center  text-white 2xl:px-40 py-20 border-none rounded-none"
-        style={{ backgroundColor: "#14222d" }}
-      >
-        <span className="font-bold text-3xl text-center">Explore More</span>
-
-        {exploreData.map((data, index) => (
-          <Accordion
-            key={index}
-            className="bg-slate-50 w-full"
-            flush
-            collapseAll
-          >
-            <Accordion.Panel>
-              <Accordion.Title
-                className="font-bold"
-                style={{ color: "#0f868e" }}
-              >
-                {data.title}
-              </Accordion.Title>
-              <Accordion.Content>
-                <p className="mb-2 text-black">{data.content}</p>
-              </Accordion.Content>
-            </Accordion.Panel>
-          </Accordion>
-        ))}
-      </Card>
-
-      {/* location section */}
-      <Card className="2xl:px-40 bg-white rounded-none">
-        <Contact />
-      </Card>
+      </div>
     </div>
   );
 }
-
-export default About;
-
-const exploreData = [
-  {
-    title: "Expertise and Local Knowledge",
-    content:
-      "At Mero Real Estate, we pride ourselves on our extensive expertise and local knowledge. Our team of seasoned professionals possesses an in-depth understanding of Australia’s dynamic real estate market, ensuring you receive the most accurate and up-to-date advice. Whether you’re a first-time homebuyer, an experienced investor, or seeking a luxury property, we have the expertise to meet your unique requirements.",
-  },
-  {
-    title: "Wide Range of Properties",
-    content:
-      "Discover an extensive portfolio of properties that capture the essence of Australia’s diverse landscapes and architectural styles. From breathtaking beachfront villas along the pristine coastlines to elegant urban penthouses in bustling city centers, Mero Real Estate showcases an array of options that cater to your preferences and aspirations. Explore our collection and find the property that resonates with your vision of the perfect home.",
-  },
-  {
-    title: "Personalized Service",
-    content:
-      "At Mero Real Estate, we understand that buying or selling a property is a deeply personal endeavor. Our dedicated team goes above and beyond to provide personalized service, tailoring every interaction to your specific needs. We listen attentively to your requirements, offering expert advice, conducting thorough market research, and guiding you through the entire process, ensuring a seamless and stress-free experience from start to finish.",
-  },
-  {
-    title: "Exclusive Opportunities",
-    content:
-      "As a trusted real estate partner, Mero Real Estate has access to an exclusive network of properties and off-market opportunities. We connect you with hidden gems and exclusive listings that are not publicly available, allowing you to gain a competitive edge in the market. Our aim is to provide you with unique opportunities that align with your vision and surpass your expectations.",
-  },
-  {
-    title: "Integrity and Transparency",
-    content:
-      "At the core of Mero Real Estate’s values lie integrity and transparency. We uphold the highest ethical standards in all our dealings, maintaining open and honest communication throughout the buying or selling process. Our commitment to transparency ensures that you have all the necessary information to make informed decisions, fostering trust and building long-lasting relationships.",
-  },
-  {
-    title: "Unlock the door to your dream home with Mero Real Estate",
-    content:
-      "Contact us today to embark on a remarkable journey towards finding the perfect property that reflects your unique lifestyle and aspirations. Experience the difference of working with a dedicated team committed to delivering exceptional service and helping you make your real estate dreams come true.",
-  },
-];

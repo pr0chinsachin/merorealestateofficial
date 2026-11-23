@@ -1,0 +1,80 @@
+.page {
+  --ink: #083a47;
+  --muted: #416168;
+  --accent: #a74710;
+  --line: #cde1e4;
+  flex: 1;
+  background: linear-gradient(125deg, #e9f5f6, #f7fbfc 72%);
+  color: var(--ink);
+}
+
+.container { max-width: 76rem; margin-inline: auto; padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 4rem; }
+.breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.breadcrumb a, .questions a, .office a, .founder a { color: var(--accent); }
+.breadcrumb a:hover, .office a:hover, .founder a:hover { text-decoration: underline; }
+.questions a { text-decoration: underline; }
+
+.hero {
+  display: grid;
+  align-items: center;
+  gap: clamp(1.7rem, 5vw, 4rem);
+  padding-block: clamp(1.75rem, 5vw, 3.5rem);
+}
+
+.eyebrow { width: fit-content; padding: 0.35rem 0.7rem; border-radius: 999px; background: #dceef1; font-size: 0.75rem; font-weight: 750; }
+.hero h1 { max-width: 17ch; margin-top: 0.7rem; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.05em; font-weight: 800; text-wrap: balance; }
+.intro { max-width: 55ch; margin-top: 0.9rem; color: var(--muted); line-height: 1.65; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.25rem; }
+.actions a { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.5rem 0.85rem; border: 1px solid transparent; border-radius: 0.55rem; font-size: 0.875rem; font-weight: 700; }
+.primary { background: var(--accent); color: #fff; }
+.primary:hover { background: #843608; }
+.actions .secondary { border-color: #9fc2c9; background: #fff; }
+.secondary:hover { border-color: var(--ink); }
+
+.founder { width: fit-content; max-width: 100%; margin-inline: auto; text-align: center; }
+.portrait {
+  width: clamp(9rem, 22vw, 14rem);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center 28%;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 24px #083a4722;
+}
+.founder figcaption { display: grid; gap: 0.15rem; margin-top: 0.75rem; }
+.founder span, .founder a { font-size: 0.875rem; }
+.founder span { color: var(--muted); }
+
+.layout { display: grid; align-items: start; gap: 1.75rem; }
+.content { min-width: 0; display: grid; gap: 1.75rem; }
+.content h2, .callback h2 { margin-bottom: 0.65rem; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.025em; }
+.services { display: grid; gap: 0.6rem; }
+.services li { display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 0.6rem; background: #fff; font-size: 0.875rem; }
+.services svg, .office svg, .actions svg { width: 1rem; height: 1rem; flex: none; }
+.services svg { margin-top: 0.15rem; color: #0c6172; }
+
+.steps { display: grid; gap: 0.95rem; }
+.steps li { display: flex; align-items: flex-start; gap: 0.65rem; }
+.steps li > span { display: grid; place-items: center; flex: none; width: 1.65rem; aspect-ratio: 1; border-radius: 50%; background: #074b5a; color: #fff; font-size: 0.8rem; font-weight: 750; }
+.steps h3 { font-weight: 750; }
+.steps p, .questions p, .callback > p { color: var(--muted); font-size: 0.875rem; line-height: 1.55; }
+
+.questions { display: grid; gap: 0.45rem; }
+.questions details, .callback, .office { border: 1px solid var(--line); border-radius: 0.75rem; background: #fff; }
+.questions summary { padding: 0.7rem 0.85rem; cursor: pointer; font-size: 0.9rem; font-weight: 650; }
+.questions p { padding: 0 0.85rem 0.8rem; }
+.office, .callback { padding: clamp(1rem, 3vw, 1.45rem); }
+.office address { display: grid; gap: 0.45rem; margin-bottom: 0.75rem; font-style: normal; font-size: 0.875rem; }
+.office p { display: flex; align-items: center; gap: 0.45rem; overflow-wrap: anywhere; }
+
+.callback { grid-row: 1; min-width: 0; scroll-margin-top: 6rem; box-shadow: 0 8px 24px #083a4710; }
+.callback form label { color: var(--ink); }
+
+@media (min-width: 540px) {
+  .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 850px) {
+  .hero, .layout { grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.64fr); gap: 2rem; }
+  .callback { grid-row: auto; }
+}
