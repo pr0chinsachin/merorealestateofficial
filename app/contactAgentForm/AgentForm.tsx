@@ -351,8 +351,9 @@ const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
         </div>
 
         <Button
+          style={{ backgroundColor: "#F27423" }}
           type="submit"
-          className="brand-button mt-6 self-center w-full"
+          className="mt-6 self-center w-full"
         >
           Submit
         </Button>
@@ -380,7 +381,8 @@ const ContactAgentForm: React.FC<ContactAgentFormProps> = ({
               information.
             </div>
             <Button
-              className="brand-button mt-10 float-end"
+              className="mt-10 float-end"
+              color="failure"
               onClick={handleResponeClose}
             >
               Close

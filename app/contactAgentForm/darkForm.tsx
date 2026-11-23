@@ -372,9 +372,10 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string; callback?: boole
 
         {submitError && <p role="alert" className="text-sm text-red-600">Couldn’t send your enquiry. Please try again.</p>}
         <Button
+          style={{ backgroundColor: !compact ? "#F27423" : "#a74710" }}
           type="submit"
           disabled={submitting}
-          className={!compact ? "brand-button mt-4 sm:mt-6 self-center w-full" : "brand-button w-full"}
+          className={!compact ? "mt-4 sm:mt-6 self-center w-full" : "w-full"}
         >
           {submitting ? "Sending…" : !compact ? "Submit" : callback ? "Send callback request" : "Send enquiry"}
         </Button>
@@ -402,7 +403,8 @@ const ContactAgentFormDark: React.FC<{ listingAddress?: string; callback?: boole
               information.
             </div>
             <Button
-              className="brand-button mt-6 sm:mt-10 float-end"
+              className="mt-6 sm:mt-10 float-end"
+              color="failure"
               onClick={handleResponeClose}
             >
               Close
