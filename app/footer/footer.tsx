@@ -95,8 +95,8 @@ const FooterSection = () => {
       </Footer>
 
       {/* Bottom bar — now a full-width sibling, not fighting Footer's padding */}
-      <div style={{ backgroundColor: "#b74b0a" }} className="w-full">
-        <div className="mx-auto flex w-full max-w-7xl px-6 flex-col items-center  py-3 text-slate-50 gap-3 sm:flex-row sm:justify-between sm:gap-4">
+      <div style={{ backgroundColor: "var(--mero-logo-orange)" }} className="w-full">
+        <div className="mx-auto flex w-full max-w-7xl px-6 flex-col items-center  py-3 text-[#102d32] gap-3 sm:flex-row sm:justify-between sm:gap-4">
           {/* Call us */}
           <div className="flex items-center whitespace-nowrap text-xs font-semibold sm:text-sm">
             <MdLocalPhone className="shrink-0" />
@@ -104,7 +104,7 @@ const FooterSection = () => {
               Call us @
               <a
                 href="tel:+61415765234"
-                className="ml-2 text-white hover:text-cyan-900"
+                className="ml-2 hover:text-cyan-950"
               >
                 +61 415 765 234
               </a>
@@ -117,7 +117,7 @@ const FooterSection = () => {
             <Link
               href="https://www.swornimgroup.com.np/"
               target="_blank"
-              className="underline hover:text-cyan-900"
+              className="underline hover:text-cyan-950"
             >
               Swornim Group Pvt. Ltd.
             </Link>{" "}
@@ -128,7 +128,7 @@ const FooterSection = () => {
           <div className="order-2 flex items-center gap-3 text-lg sm:order-3">
             {socials.map(({ href, label, Icon }) => (
               <Link key={label} href={href} target="_blank" aria-label={label}>
-                <span className="text-white hover:text-cyan-900">
+                <span className="hover:text-cyan-950">
                   <Icon />
                 </span>
               </Link>
