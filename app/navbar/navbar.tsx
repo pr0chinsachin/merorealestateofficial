@@ -22,7 +22,7 @@ export default function NavbarItem() {
   return (
     <Navbar className={styles.nav}>
       <NavbarBrand as={Link} href="/">
-        <Image src={Logo} alt="Mero Real Estate" width={75} height={54} priority />
+        <Image src={Logo} alt="Mero Real Estate" width={75} height={54} priority unoptimized />
       </NavbarBrand>
       <div className={styles.actions}>
         <Link href="/contactAgentForm" className={styles.appointment}>
