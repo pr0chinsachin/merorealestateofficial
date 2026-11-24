@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BASE_URL from "../urlConfig/urlConfig";
+import { emptyFilters, parseFilters } from "./filters";
 import styles from "./search.module.css";
 
 interface Category {
@@ -19,18 +20,6 @@ interface Subcategory {
   status: boolean;
 }
 
-const initialFilters = {
-  CategoryId: "",
-  SubCategoryId: "",
-  MinPrice: "",
-  MaxPrice: "",
-  RoomCount: "",
-  BathRoomCount: "",
-  ParkingCount: "",
-  MinArea: "",
-  MaxArea: "",
-};
-
 const moreFilters = [
   ["RoomCount", "Bedrooms"],
   ["BathRoomCount", "Bathrooms"],
@@ -42,28 +31,17 @@ const moreFilters = [
 export default function Search() {
   const router = useRouter();
   const query = useSearchParams().get("filters");
-  const [filters, setFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState(emptyFilters);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [hasError, setHasError] = useState(false);
   const details = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
-    try {
-      const parsed = query ? JSON.parse(query) : {};
-      const restored = { ...initialFilters };
-      for (const key of Object.keys(restored) as (keyof typeof restored)[]) {
-        const value = parsed?.[key];
-        if (typeof value === "string" || typeof value === "number") {
-          restored[key] = String(value);
-        }
-      }
-      setFilters(restored);
-      if (details.current && moreFilters.some(([key]) => restored[key] !== "")) {
-        details.current.open = true;
-      }
-    } catch {
-      setFilters(initialFilters);
+    const restored = parseFilters(query);
+    setFilters(restored);
+    if (details.current && moreFilters.some(([key]) => restored[key] !== "")) {
+      details.current.open = true;
     }
   }, [query]);
 
@@ -87,6 +65,10 @@ export default function Search() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (Object.values(filters).every((value) => value.trim() === "")) {
+      router.push("/search/results");
+      return;
+    }
     const params = new URLSearchParams({ filters: JSON.stringify(filters) });
     router.push(`/search/results?${params}`);
   }
