@@ -11,7 +11,7 @@
   font-weight: 650;
 }
 
-.nav .link:hover, .nav .link[aria-current="page"] { color: #9e420a; }
+.nav .link:hover, .nav .link[aria-current="page"] { color: var(--mero-logo-orange); }
 
 .appointment {
   display: inline-flex;
