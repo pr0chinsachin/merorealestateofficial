@@ -48,7 +48,7 @@ export default function CarouselImage() {
   }, []);
 
   if (!slides.length) {
-    return <Image src={fallback} alt="" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />;
+    return <Image src={fallback} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />;
   }
 
   const images = slides.map((slide) => (

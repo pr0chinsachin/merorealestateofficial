@@ -19,6 +19,7 @@ export default function Dashboard() {
               src={founder}
               alt="Pushpa Maharjan, Principal Director"
               fill
+              unoptimized
               priority
               sizes="(min-width: 1024px) 28vw, 40vw"
             />
