@@ -53,6 +53,6 @@
 .profile:hover .namePanel { border-color: #78aeb8; }
 .agent h3 { font-weight: 800; }
 .agent p { color: #416168; font-size: 0.85rem; }
-.details { display: inline-flex; gap: 0.4rem; align-items: center; margin-top: 0.5rem; color: #a74710; font-size: 0.8rem; font-weight: 700; }
+.details { display: inline-flex; gap: 0.4rem; align-items: center; margin-top: 0.5rem; color: var(--mero-logo-orange); font-size: 0.8rem; font-weight: 700; }
 .profile:hover .details { text-decoration: underline; }
 .details svg { width: 0.9rem; }
