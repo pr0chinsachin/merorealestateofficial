@@ -2,7 +2,7 @@ import { ArrowRightIcon, CheckIcon, ClockIcon, EnvelopeIcon, MapPinIcon, PhoneIc
 import Image from "next/image";
 import Link from "next/link";
 import ContactAgentForm from "../contactAgentForm/darkForm";
-import founder from "./images/founder.jpg";
+import founder from "../dashboard/founder-portrait.webp";
 import styles from "./about.module.css";
 
 const services = [
@@ -42,7 +42,7 @@ export default function About() {
             </div>
           </div>
           <figure className={styles.founder}>
-            <Image src={founder} alt="" width={240} height={240} priority className={styles.portrait} />
+            <Image src={founder} alt="" width={240} height={240} priority unoptimized className={styles.portrait} />
             <figcaption>
               <strong>Pushpa Maharjan</strong>
               <span>Founder</span>
