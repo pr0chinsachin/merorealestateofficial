@@ -87,10 +87,10 @@
   font-size: 0.75rem;
   font-weight: 650;
 }
-.forSale { background: #facc15; color: #3b2a00; }
-.sold { background: #175438; }
-.forRent { background: #704426; }
-.leased { background: #173966; }
+.forSale { background: #ee711d; color: #201004; }
+.sold { background: #056b70; }
+.forRent { background: #bc6419; color: #201004; }
+.leased { background: #057b81; }
 
 .cardBody { padding: 0.9rem; }
 .card h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; font-weight: 750; }
